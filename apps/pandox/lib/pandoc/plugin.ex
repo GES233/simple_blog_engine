@@ -1,0 +1,3 @@
+defmodule Pandox.Plugin do
+  # ...
+end
