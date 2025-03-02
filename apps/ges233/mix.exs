@@ -30,7 +30,9 @@ defmodule GES233.MixProject do
       # {:makeup_erlang, ">= 0.0.0"},
       {:phoenix_html, "~> 3.3.4"},
       {:plug, "~> 1.16"},
-      {:bandit, "~> 1.0"}
+      {:bandit, "~> 1.0"},
+      {:yaml_elixir, "~> 2.11"},
+      {:pandox, in_umbrella: true}
     ]
   end
 end

@@ -43,31 +43,26 @@ defmodule GES233.Blog.Post do
          content_meta = %{} <- get_post_meta(content) do
       infos =
         file_meta
-        # |> opt
-        # 将时间转变为 DateTime 格式
         |> Map.merge(%{
           title: content_meta[:title],
           categories: content_meta[:categories],
           tags: content_meta[:tags],
           series: content_meta[:series]
         })
-        # title: 首个一级标题
-        # categories: 条目（所属的树状结构）
-        # tags: 标签
-        # series: 系列
-        |> Map.merge(%{content: get_post_content(content)})
         |> overwrite_create_date(content_meta)
 
-      # 引入 extra
-      # 后面可能会单独用一个函数来处理
       infos =
         infos
+        # 引入 extra
+        # 后面可能会单独用一个函数来处理
         |> Map.merge(extra_func.(content_meta))
+        # 引入内容
+        |> Map.merge(%{content: get_post_content(content)})
 
       {:ok, struct!(__MODULE__, infos)}
     else
-      {:error, err} -> {:error, err}
-      err -> {:error, err}
+      {:error, err} -> {:error, err, path}
+      err -> {:error, err, path}
     end
   end
 
@@ -107,22 +102,33 @@ defmodule GES233.Blog.Post do
   当前形式是：
 
       ---
-      %{blabla}
+      %{blabla: blabla}
       ---
 
   也就是 Elixir 的 Nap。
 
-  后期可能也会兼容 YAML （原来博客的格式）。
+  也兼容 YAML （原来博客的格式）。
   """
-  def get_post_meta(content, format \\ :map)
+  def get_post_meta(content) do
+    meta =
+      content
+      |> :binary.split(["\n---\n", "\r\n---\r\n"])
+      |> hd()
+      |> :binary.split(["---\n", "---\r\n"])
+      |> tl()
+      |> hd()
 
-  def get_post_meta(content, :map) do
-    content
-    |> :binary.split(["\n---\n", "\r\n---\r\n"])
-    |> hd()
-    |> :binary.split(["---\n", "---\r\n"])
-    |> tl()
-    |> hd()
+    format =
+      cond do
+        String.starts_with?(meta, "%{") -> :map
+        true -> :yaml
+      end
+
+    get_meta_from_map(meta, format)
+  end
+
+  defp get_meta_from_map(meta, :map) do
+    meta
     |> Code.eval_string()
     |> case do
       {%{} = meta, _binding} -> meta
@@ -130,14 +136,11 @@ defmodule GES233.Blog.Post do
     end
   end
 
-  def get_post_meta(content, :yaml) do
-    content
-    |> :binary.split(["\n---\n", "\r\n---\r\n"])
-    |> hd()
-    |> :binary.split(["---\n", "---\r\n"])
-    |> tl()
-    |> hd()
-    # ...
+  defp get_meta_from_map(meta, :yaml) do
+    meta
+    |> YamlElixir.read_from_string!(atoms: true)
+    |> Enum.map(fn {k, v} -> {String.to_atom(k), v} end)
+    |> Enum.into(%{})
   end
 
   @doc """
