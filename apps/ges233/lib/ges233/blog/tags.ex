@@ -4,7 +4,7 @@ defmodule GES233.Blog.Tags do
 
   def fetch_all_tags_from_posts([%{tags: _} | _] = posts) do
     posts
-    |> Enum.reduce([], & [&1.tags | &2])
+    |> Enum.reduce([], &[&1.tags | &2])
     |> Enum.uniq()
   end
 
@@ -20,6 +20,7 @@ defmodule GES233.Blog.Tags do
 
     for tag <- tags do
       {tag, get_all_posts_with_tags(posts, tag)}
-    end |> Enum.into(%{})
+    end
+    |> Enum.into(%{})
   end
 end

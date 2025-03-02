@@ -6,7 +6,7 @@ defmodule GES233.Blog do
   defmodule Parser do
     def parse(_path, contents) do
       with %{} = meta <- Post.get_post_meta(contents),
-      content <- Post.get_post_content(contents) do
+           content <- Post.get_post_content(contents) do
         {:ok, meta, content}
       else
         err -> {:error, err}
@@ -20,5 +20,6 @@ defmodule GES233.Blog do
     as: :posts,
     highlighters: [:makeup_elixir],
     parser_module: Parser
-    # html_converter: GES233.Blog.Renderer
+
+  # html_converter: GES233.Blog.Renderer
 end

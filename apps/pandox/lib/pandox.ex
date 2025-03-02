@@ -18,17 +18,22 @@ defmodule Pandox do
     # 把它丢过来
     args
   end
+
   def get_args_from_meta(_), do: []
 
+  @doc """
+  ...
+  """
   def render(_data, _opts \\ []) do
+    # pandoc -<input-markdown> -o -<output-html> --<other-options>
     pandoc = get_pandoc()
 
     # [TODO) 从配置中添加额外的指令
     # Application.get_env(:pandox, :render_args)
 
-    args = ["-h"] ++ get_args_from_meta(%{}) |> Enum.join(" ")
+    args = (["-h"] ++ get_args_from_meta(%{})) |> Enum.join(" ")
 
-    {stdout, status} = System.cmd(pandoc, [args], stderr_to_stdout: :true)
+    {stdout, status} = System.cmd(pandoc, [args], stderr_to_stdout: true)
 
     case status do
       0 -> stdout |> IO.inspect(label: :ok)
