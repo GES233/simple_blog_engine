@@ -53,6 +53,8 @@ defmodule GES233.Blog.Post do
         # 更新时间格式
         |> then(fn d -> %{d | create_at: convert_date(d[:create_at])} end)
         |> then(fn d -> %{d | update_at: convert_date(d[:update_at])} end)
+        # Cleaning tags
+        |> then(fn d -> %{d | tags: :lists.flatten(d.tags)} end)
 
       infos =
         infos
@@ -60,6 +62,7 @@ defmodule GES233.Blog.Post do
         # 后面可能会单独用一个函数来处理
         |> Map.merge(extra_func.(content_meta))
         # 引入内容
+        # 如果内容过大的话可能会编程 {:ref, ref_id}
         |> Map.merge(%{content: get_post_content(content)})
 
       {:ok, struct!(__MODULE__, infos)}

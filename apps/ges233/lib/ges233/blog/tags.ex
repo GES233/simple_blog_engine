@@ -2,13 +2,20 @@ defmodule GES233.Blog.Tags do
   # 标签
   alias GES233.Blog.Post
 
-  def fetch_all_tags_from_posts([%{tags: _} | _] = posts) do
+  def get_tags_frq_from_posts(posts) do
     posts
     |> Enum.reduce([], &[&1.tags | &2])
-    |> Enum.uniq()
+    |> List.flatten()
+    |> Enum.frequencies()
   end
 
-  def get_all_posts_with_tags([%Post{} | _] = posts, tag) do
+  def fetch_all_tags_from_posts([%{tags: _} | _] = posts) do
+    posts
+    |> get_tags_frq_from_posts()
+    |> Map.keys()
+  end
+
+  def get_all_posts_from_tags([%Post{} | _] = posts, tag) do
     cond do
       tag not in fetch_all_tags_from_posts(posts) -> []
       true -> Enum.filter(posts, fn post -> tag in post.tags end)
@@ -19,7 +26,7 @@ defmodule GES233.Blog.Tags do
     tags = fetch_all_tags_from_posts(posts)
 
     for tag <- tags do
-      {tag, get_all_posts_with_tags(posts, tag)}
+      {tag, posts |> get_all_posts_from_tags(tag) |> Enum.map(&(&1.id))}
     end
     |> Enum.into(%{})
   end
