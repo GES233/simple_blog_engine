@@ -50,6 +50,9 @@ defmodule GES233.Blog.Post do
           series: content_meta[:series]
         })
         |> overwrite_create_date(content_meta)
+        # 更新时间格式
+        |> then(fn d -> %{d | create_at: convert_date(d[:create_at])} end)
+        |> then(fn d -> %{d | update_at: convert_date(d[:update_at])} end)
 
       infos =
         infos
@@ -67,15 +70,22 @@ defmodule GES233.Blog.Post do
   end
 
   defp overwrite_create_date(meta, content_meta) do
-    Map.put(meta, :create_at, content_meta[:create_at] || content_meta[:date] || meta[:create_at])
+    maybe_create_from_file = content_meta[:create_at] || content_meta[:date]
+
+    Map.put(meta, :create_at, maybe_create_from_file || meta[:create_at])
   end
 
-  # TODO: convert to %DateTime{}
-  # defp format_datetime_into_elixir(meta) do
-  #   # ...
-  # end
+  defp convert_date(%DateTime{} = datetime), do: datetime
 
-  defp parse_post_file(path) do
+  defp convert_date(datetime) when is_tuple(datetime) do
+    NaiveDateTime.from_erl!(datetime)
+  end
+
+  defp convert_date(datetime) when is_binary(datetime) do
+    NaiveDateTime.from_iso8601!(datetime)
+  end
+
+  defp parse_post_file(path) when is_binary(path) do
     case File.exists?(path) do
       true ->
         # 读取文件相关信息

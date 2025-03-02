@@ -19,7 +19,6 @@ defmodule GES233.Blog do
     from: @default_rootpath <> "/**/*.md",
     as: :posts,
     highlighters: [:makeup_elixir],
-    parser_module: Parser
-
-  # html_converter: GES233.Blog.Renderer
+    parser_module: Parser,
+    html_converter: GES233.Blog.Renderer
 end
