@@ -28,4 +28,12 @@ defmodule GES233.Blog do
     |> Enum.filter(fn {k, _v} -> k == :ok end)
     |> Enum.map(fn {_, v} -> v end)
   end
+
+  # 整体流程：
+  # 将文件系统上的内容变为 [%Post{}]
+  # 确定内容组织的形式（~sigil_p like）
+  #   用 Regex 替代
+  # -> 确定内容组织的形式（tags, categories, serires, date）
+  # -> 渲染博客内容的页面
+  # => 渲染索引页面
 end

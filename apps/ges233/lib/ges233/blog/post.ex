@@ -23,6 +23,17 @@ defmodule GES233.Blog.Post do
 
   alias GES233.Blog.Post
 
+  @type t :: %__MODULE__{
+    id: atom() | String.t(),
+    title: String.t(),
+    create_at: NaiveDateTime.t(),
+    update_at: NaiveDateTime.t(),
+    categories: [[String.t()]],
+    tags: [String.t()],
+    series: String.t() | nil,
+    content: String.t(),
+    extra: %{}
+  }
   defstruct [
     :id,
     :title,

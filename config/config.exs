@@ -17,6 +17,9 @@ import Config
 #       metadata: [:user_id]
 #
 
+config :ges233,
+  blog_root: "D:/Blog/source/_posts"
+
 config :pandox,
   execute_path: "pandoc",
   render_args: []
