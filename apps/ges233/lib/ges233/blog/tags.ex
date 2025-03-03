@@ -9,6 +9,7 @@ defmodule GES233.Blog.Tags do
     |> Enum.frequencies()
   end
 
+  def fetch_all_tags_from_posts([]), do: []
   def fetch_all_tags_from_posts([%{tags: _} | _] = posts) do
     posts
     |> get_tags_frq_from_posts()
