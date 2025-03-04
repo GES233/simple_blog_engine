@@ -23,4 +23,5 @@ config :ges233,
 
 config :pandox,
   execute_path: "pandoc",
-  render_args: []
+  render_args: [],
+  crossref_yaml: Path.relative_to_cwd("../apps/pandox/priv/pandoc_cressref.yaml")

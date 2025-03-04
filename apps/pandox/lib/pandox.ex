@@ -22,13 +22,19 @@ defmodule Pandox do
     --mathjax
     -f markdown+smart+emoji
     -t html
+  )
+
+  @pandoc_crossref_flags ~w(
     --filter=pandoc-crossref
     --citeproc
   )
+  # TODO: add-csl
+  # TODO: add-metadats
+  # -M crossrefYaml=Path
 
   def render_markdown_to_html(content, metadata_to_pandoc) do
     # 生成临时文件
-    input_file = Path.join(System.tmp_dir!(), "input_#{System.unique_integer()}.md") |> IO.inspect()
+    input_file = Path.join(System.tmp_dir!(), "input_#{System.unique_integer()}.md")
     output_file = Path.join(System.tmp_dir!(), "output_#{System.unique_integer()}.html")
 
     # 写入内容（包含元数据）
@@ -47,7 +53,7 @@ defmodule Pandox do
   end
 
   defp args(input, output) do
-    @pandoc_flags ++ [input, "-o", output]
+    @pandoc_flags ++ @pandoc_crossref_flags ++ [input, "-o", output]
   end
 
   defp build_front_matter(metadata) do

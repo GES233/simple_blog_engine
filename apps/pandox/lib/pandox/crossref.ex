@@ -1,3 +1,0 @@
-defmodule Pandox.Crossref do
-  # ...
-end
