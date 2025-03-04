@@ -10,6 +10,7 @@ defmodule GES233.Blog.Tags do
   end
 
   def fetch_all_tags_from_posts([]), do: []
+
   def fetch_all_tags_from_posts([%{tags: _} | _] = posts) do
     posts
     |> get_tags_frq_from_posts()
@@ -27,7 +28,7 @@ defmodule GES233.Blog.Tags do
     tags = fetch_all_tags_from_posts(posts)
 
     for tag <- tags do
-      {tag, posts |> get_all_posts_from_tags(tag) |> Enum.map(&(&1.id))}
+      {tag, posts |> get_all_posts_from_tags(tag) |> Enum.map(& &1.id)}
     end
     |> Enum.into(%{})
   end

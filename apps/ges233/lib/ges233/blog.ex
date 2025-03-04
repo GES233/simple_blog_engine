@@ -7,7 +7,11 @@ defmodule GES233.Blog do
   # -> 渲染博客内容的页面
   # => 渲染索引页面
 
-  @default_rootpath Application.compile_env(:ges233, :blog_root, File.cwd!() |> Path.join("priv/_posts"))
+  @default_rootpath Application.compile_env(
+                      :ges233,
+                      :blog_root,
+                      File.cwd!() |> Path.join("priv/_posts")
+                    )
 
   # Without nimble_publisher
   @spec get_posts_from_root(binary()) :: [GES233.Blog.Post.t(), ...]

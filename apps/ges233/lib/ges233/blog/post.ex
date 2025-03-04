@@ -24,18 +24,18 @@ defmodule GES233.Blog.Post do
   alias GES233.Blog.Post
 
   @type t :: %__MODULE__{
-    id: atom() | String.t(),
-    title: String.t(),
-    create_at: NaiveDateTime.t(),
-    update_at: NaiveDateTime.t(),
-    categories: [[String.t()]],
-    tags: [String.t()],
-    series: String.t() | nil,
-    content: String.t(),
-    body: String.t(),
-    progress: :final | {:in_progress, number()},
-    extra: %{}
-  }
+          id: atom() | String.t(),
+          title: String.t(),
+          create_at: NaiveDateTime.t(),
+          update_at: NaiveDateTime.t(),
+          categories: [[String.t()]],
+          tags: [String.t()],
+          series: String.t() | nil,
+          content: String.t(),
+          body: String.t(),
+          progress: :final | {:in_progress, number()},
+          extra: %{}
+        }
   defstruct [
     :id,
     :title,
@@ -64,27 +64,27 @@ defmodule GES233.Blog.Post do
   def path_to_struct(path, extra_func \\ fn _meta_and_content -> %{} end) do
     with {:ok, file_meta, content} <- parse_post_file(path),
          content_meta = %{} <- get_post_meta(content) do
-        file_meta
-        |> Map.merge(%{
-          title: content_meta[:title],
-          categories: content_meta[:categories],
-          tags: content_meta[:tags],
-          series: content_meta[:series]
-        })
-        |> overwrite_create_date(content_meta)
-        # 更新时间格式
-        |> then(fn d -> %{d | create_at: convert_date(d[:create_at])} end)
-        |> then(fn d -> %{d | update_at: convert_date(d[:update_at])} end)
-        # Cleaning tags
-        |> then(fn d -> %{d | tags: :lists.flatten(d.tags)} end)
-        # TODO: 解析进度相关
-        # TODO: 引入 extra
-        # 后面可能会单独用一个函数来处理
-        |> Map.merge(extra_func.(content_meta))
-        # 引入内容相关
-        # 如果内容过大的话可能会变成 {:ref, id}
-        |> Map.merge(%{content: get_post_content(content)})
-        |> then(&struct!(__MODULE__, &1))
+      file_meta
+      |> Map.merge(%{
+        title: content_meta[:title],
+        categories: content_meta[:categories],
+        tags: content_meta[:tags],
+        series: content_meta[:series]
+      })
+      |> overwrite_create_date(content_meta)
+      # 更新时间格式
+      |> then(fn d -> %{d | create_at: convert_date(d[:create_at])} end)
+      |> then(fn d -> %{d | update_at: convert_date(d[:update_at])} end)
+      # Cleaning tags
+      |> then(fn d -> %{d | tags: :lists.flatten(d.tags)} end)
+      # TODO: 解析进度相关
+      # TODO: 引入 extra
+      # 后面可能会单独用一个函数来处理
+      |> Map.merge(extra_func.(content_meta))
+      # 引入内容相关
+      # 如果内容过大的话可能会变成 {:ref, id}
+      |> Map.merge(%{content: get_post_content(content)})
+      |> then(&struct!(__MODULE__, &1))
     else
       {:error, err} -> {:error, err, path}
       err -> {:error, err, path}
@@ -92,7 +92,8 @@ defmodule GES233.Blog.Post do
   end
 
   def add_html_without_nimble(post) do
-    html_body = GES233.Blog.Renderer.convert_mardown(post.content, Map.get(post.extra, :pandoc, %{}), [])
+    html_body =
+      GES233.Blog.Renderer.convert_mardown(post.content, Map.get(post.extra, :pandoc, %{}), [])
 
     %{post | body: html_body}
   end

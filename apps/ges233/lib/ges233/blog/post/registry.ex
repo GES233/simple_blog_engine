@@ -8,6 +8,7 @@ defmodule GES233.Blog.Post.ContentRepo do
 
   为了方便管理作为单独的进程。
   """
+
   # https://hexdocs.pm/elixir/main/erlang-term-storage.html
 
   use GenServer

@@ -11,6 +11,7 @@ defmodule GES233.Blog.Renderer do
     |> link_replace()
     # 先过一遍 Pandox
     |> Pandox.render_markdown_to_html(meta)
+
     # 再过一遍 PhoenixHTML
   end
 

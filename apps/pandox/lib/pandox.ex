@@ -32,6 +32,7 @@ defmodule Pandox do
     -f markdown+smart+emoji
     -t html
   )
+
   # --filter=pandoc-crossref --citeproc --bibliography=references.bib
 
   def render_markdown_to_html(content, metadata_to_pandoc) do
@@ -43,9 +44,10 @@ defmodule Pandox do
     File.write!(input_file, build_front_matter(metadata_to_pandoc) <> "\n" <> content)
 
     # 调用 Pandoc
-    res = get_pandoc()
-    |> System.cmd(args(input_file, output_file), stderr_to_stdout: true)
-    |> handle_result(output_file)
+    res =
+      get_pandoc()
+      |> System.cmd(args(input_file, output_file), stderr_to_stdout: true)
+      |> handle_result(output_file)
 
     File.rm(input_file)
     File.rm(output_file)
@@ -60,9 +62,10 @@ defmodule Pandox do
   defp build_front_matter(%{}), do: ""
 
   defp build_front_matter(metadata) do
-    res = metadata
-    |> Enum.map(fn {k, v} -> "#{inspect(k)}: #{inspect(v)}" end)
-    |> Enum.join("\n")
+    res =
+      metadata
+      |> Enum.map(fn {k, v} -> "#{inspect(k)}: #{inspect(v)}" end)
+      |> Enum.join("\n")
 
     """
     ---

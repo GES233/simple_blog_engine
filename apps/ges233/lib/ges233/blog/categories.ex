@@ -1,10 +1,10 @@
 defmodule GES233.Blog.CategoryItem do
   @type t :: %__MODULE__{
-    name: atom(),
-    relative_depth: non_neg_integer(),
-    child: t(),
-    posts: [atom()]
-  }
+          name: atom(),
+          relative_depth: non_neg_integer(),
+          child: t(),
+          posts: [atom()]
+        }
   defstruct [:name, :relative_depth, :child, :posts]
   # 因为属别与帖子是多对多的关系，所以这里的帖子只保留 id
 
