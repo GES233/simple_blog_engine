@@ -24,4 +24,12 @@ config :ges233,
 config :pandox,
   execute_path: "pandoc",
   render_args: [],
-  crossref_yaml: Path.relative_to_cwd("../apps/pandox/priv/pandoc_cressref.yaml")
+  crossref_yaml: Path.absname("apps/pandox/priv/pandoc_cressref.yaml"),
+  csl:
+    (Path.absname("apps/pandox/priv/csl") <> "/*.csl")
+    |> Path.wildcard()
+    |> Enum.map(
+      fn p ->
+        {p |> Path.basename() |> String.split(".") |> Enum.at(0), p}
+      end)
+    |> Enum.into(%{})

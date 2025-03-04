@@ -28,9 +28,6 @@ defmodule Pandox do
     --filter=pandoc-crossref
     --citeproc
   )
-  # TODO: add-csl
-  # TODO: add-metadats
-  # -M crossrefYaml=Path
 
   def render_markdown_to_html(content, metadata_to_pandoc) do
     # 生成临时文件
@@ -42,8 +39,11 @@ defmodule Pandox do
 
     # 调用 Pandoc
     res =
-      get_pandoc()
-      |> System.cmd(args(input_file, output_file), stderr_to_stdout: true)
+      args(input_file, output_file)
+      # 使用 System.cmd 会报错
+      # |> then(&System.cmd(get_pandoc(), &1))
+      |> Enum.join(" ")
+      |> then(&System.shell(get_pandoc() <> " " <> &1))
       |> handle_result(output_file)
 
     File.rm(input_file)
@@ -52,8 +52,24 @@ defmodule Pandox do
     res
   end
 
-  defp args(input, output) do
-    @pandoc_flags ++ @pandoc_crossref_flags ++ [input, "-o", output]
+  def args(input, output) do
+    yaml_path = Application.get_env(:pandox, :crossref_yaml)
+
+    yaml = if yaml_path do
+      "-M crossrefYaml=\"" <> yaml_path <> "\""
+    else
+      ""
+    end
+
+    csl_path = Application.get_env(:pandox, :csl)["GB7714"]
+
+    csl = if csl_path do
+      "--csl=\"" <> csl_path <> "\""
+    else
+      ""
+    end
+
+    @pandoc_flags ++ @pandoc_crossref_flags ++ [yaml, csl, input, "-o", output]
   end
 
   defp build_front_matter(metadata) do

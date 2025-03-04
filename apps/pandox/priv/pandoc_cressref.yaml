@@ -1,0 +1,29 @@
+# Options for pandoc-crossref
+# Docs: http://lierdakil.github.io/pandoc-crossref/
+# Source: https://github.com/lierdakil/pandoc-crossref
+
+titleDelim: ":"
+
+figureTitle: "图"
+figPrefix: "图"
+# 图1: 图标题
+figureTemplate: $$figureTitle$$$$i$$$$titleDelim$$ $$t$$
+figPrefixTemplate: $$p$$$$i$$
+
+tableTitle: "表"
+tblPrefix: "表"
+# 表1: 表标题
+tableTemplate: $$tableTitle$$$$i$$$$titleDelim$$ $$t$$
+tblPrefixTemplate: $$p$$$$i$$
+
+eqnTitle: "式"
+eqnPrefix: "式"
+# 式(1)
+eqnTemplate: $$eqnTitle$$($$i$$)
+eqnPrefixTemplate: $$p$$($$i$$)
+# 公式template
+equationNumberTeX: \\tag
+eqnIndexTemplate: $$i$$
+
+linkReferences: true
+nameInLink: true
