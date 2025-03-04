@@ -2,11 +2,11 @@ defmodule GES233.Blog.Renderer do
   def convert(path, body, meta, opts) do
     case Path.extname(path) do
       ".md" -> convert_mardown(body, meta, opts)
-      _ -> nil
+      _ -> body
     end
   end
 
-  defp convert_mardown(body, meta, _opts) do
+  def convert_mardown(body, meta, _opts) do
     body
     |> link_replace()
     # 先过一遍 Pandox

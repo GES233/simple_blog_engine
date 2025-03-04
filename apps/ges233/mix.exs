@@ -25,8 +25,8 @@ defmodule GES233.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:nimble_publisher, "~> 1.1.0"},
-      {:makeup_elixir, ">= 0.0.0"},
+      # {:nimble_publisher, "~> 1.1.0"},
+      # {:makeup_elixir, ">= 0.0.0"},
       # {:makeup_erlang, ">= 0.0.0"},
       {:phoenix_html, "~> 3.3.4"},
       {:plug, "~> 1.16"},

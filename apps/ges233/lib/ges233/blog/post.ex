@@ -32,6 +32,7 @@ defmodule GES233.Blog.Post do
     tags: [String.t()],
     series: String.t() | nil,
     content: String.t(),
+    body: String.t(),
     progress: :final | {:in_progress, number()},
     extra: %{}
   }
@@ -44,18 +45,17 @@ defmodule GES233.Blog.Post do
     :tags,
     :series,
     :content,
+    :body,
     progress: :final,
     extra: %{}
   ]
 
-  def build(path, _content_meta, _content) do
+  def build(path, _content_meta, html_body) do
     # TODO: 可以并行化设计
     # 读取文件就一个进程
     # 但是解析可以分给很多个 Tasks
 
-    {:ok, res} = path_to_struct(path)
-
-    res
+    %{path_to_struct(path) | body: html_body}
   end
 
   @doc """
@@ -64,7 +64,6 @@ defmodule GES233.Blog.Post do
   def path_to_struct(path, extra_func \\ fn _meta_and_content -> %{} end) do
     with {:ok, file_meta, content} <- parse_post_file(path),
          content_meta = %{} <- get_post_meta(content) do
-      infos =
         file_meta
         |> Map.merge(%{
           title: content_meta[:title],
@@ -82,15 +81,20 @@ defmodule GES233.Blog.Post do
         # TODO: 引入 extra
         # 后面可能会单独用一个函数来处理
         |> Map.merge(extra_func.(content_meta))
-        # 引入内容
-        # 如果内容过大的话可能会编程 {:ref, ref_id}
+        # 引入内容相关
+        # 如果内容过大的话可能会变成 {:ref, id}
         |> Map.merge(%{content: get_post_content(content)})
-
-      {:ok, struct!(__MODULE__, infos)}
+        |> then(&struct!(__MODULE__, &1))
     else
       {:error, err} -> {:error, err, path}
       err -> {:error, err, path}
     end
+  end
+
+  def add_html_without_nimble(post) do
+    html_body = GES233.Blog.Renderer.convert_mardown(post.content, Map.get(post.extra, :pandoc, %{}), [])
+
+    %{post | body: html_body}
   end
 
   defp overwrite_create_date(meta, content_meta) do

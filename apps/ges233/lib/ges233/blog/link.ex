@@ -7,6 +7,7 @@ defmodule GES233.Blog.Link do
   # 博客
   # 多媒体
 
+  @spec inner_replace(binary(), (binary() -> binary())) :: binary()
   def inner_replace(source, func \\ &IO.inspect/1) do
     Regex.replace(@raw_link_pattern, source, fn match -> func.(match) end)
   end

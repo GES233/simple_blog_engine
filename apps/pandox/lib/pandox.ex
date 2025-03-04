@@ -12,14 +12,20 @@ defmodule Pandox do
     @pandoc_executable_name
   end
 
-  def get_args_from_meta(%{pandox: args}) do
+  def get_args_from_meta(%{"pandox" => args}) do
     # 这个部分是打算和 NimblePublisher 耦合的
     # 如果 MetaData 里有个 %{pandox: []} 字段，
     # 把它丢过来
-    args
+    do_extract_args(args)
+  end
+
+  def get_args_from_meta(%{pandox: args}) do
+    do_extract_args(args)
   end
 
   def get_args_from_meta(_), do: []
+
+  def do_extract_args(meta), do: meta
 
   @pandoc_flags ~w(
     --mathjax
@@ -50,6 +56,8 @@ defmodule Pandox do
   defp args(input, output) do
     @pandoc_flags ++ [input, "-o", output]
   end
+
+  defp build_front_matter(%{}), do: ""
 
   defp build_front_matter(metadata) do
     res = metadata
