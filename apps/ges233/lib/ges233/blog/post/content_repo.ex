@@ -6,7 +6,9 @@ defmodule GES233.Blog.Post.ContentRepo do
   为了方便管理作为单独的进程。
   """
   require Logger
-
+  # TODO
+  # 要么把这个 GenServer 写完
+  # 要么干脆放开 :ets 的权限
   # https://hexdocs.pm/elixir/main/erlang-term-storage.html
 
   use GenServer

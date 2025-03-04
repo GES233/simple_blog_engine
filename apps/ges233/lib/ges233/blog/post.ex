@@ -50,14 +50,6 @@ defmodule GES233.Blog.Post do
     extra: %{}
   ]
 
-  def build(path, _content_meta, html_body) do
-    # TODO: 可以并行化设计
-    # 读取文件就一个进程
-    # 但是解析可以分给很多个 Tasks
-
-    %{path_to_struct(path) | body: html_body}
-  end
-
   @doc """
   从文件的目录到 `Post` 结构体的函数。
   """
@@ -79,18 +71,22 @@ defmodule GES233.Blog.Post do
         series: content_meta[:series],
         progress: content_meta[:progress] || "final"
       })
+      ## 时间相关
       |> overwrite_create_date(content_meta)
-      # 更新时间格式
       |> then(fn d -> %{d | create_at: convert_date(d[:create_at])} end)
       |> then(fn d -> %{d | update_at: convert_date(d[:update_at])} end)
-      # Cleaning tags
+      ## 整理单独博客的标签
       |> then(fn d -> %{d | tags: :lists.flatten(d.tags)} end)
       |> Map.merge(extra_func.(content_meta))
-      # 引入内容相关
+      ## 引入内容相关
       # 如果内容过大的话可能会变成 {:ref, id}
       |> Map.merge(%{
-        content: content |> get_post_content() |> maybe_archive_large_content(file_meta[:id])
+        content:
+        content
+        |> get_post_content()
+        |> maybe_archive_large_content(file_meta[:id])
       })
+      ## 构建 %Post{}
       |> then(&struct!(__MODULE__, &1))
     else
       {:error, err} -> {:error, err, path}
@@ -100,7 +96,11 @@ defmodule GES233.Blog.Post do
 
   def add_html_without_nimble(post) do
     html_body =
-      GES233.Blog.Renderer.convert_mardown(post.content, Map.get(post.extra, "pandoc", %{}), [])
+      GES233.Blog.Renderer.convert_mardown(
+        post.content,
+        Map.get(post.extra, "pandoc", %{}),
+        []
+      )
 
     %{post | body: html_body}
   end
@@ -199,6 +199,9 @@ defmodule GES233.Blog.Post do
     |> hd()
   end
 
+  @doc """
+  将可能过大的内容本体放入 `GES233.Blog.Post.ContentRepo` 。
+  """
   def maybe_archive_large_content(content, id) do
     if GES233.Blog.Post.ContentRepo.enough_large?(content) do
       # content
