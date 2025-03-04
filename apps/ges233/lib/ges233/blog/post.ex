@@ -94,13 +94,8 @@ defmodule GES233.Blog.Post do
     end
   end
 
-  def add_html_without_nimble(post) do
-    html_body =
-      GES233.Blog.Renderer.convert_mardown(
-        post.content,
-        Map.get(post.extra, "pandoc", %{}),
-        []
-      )
+  def add_html(post) do
+    html_body = GES233.Blog.Renderer.convert_markdown(post, [])
 
     %{post | body: html_body}
   end
@@ -202,12 +197,12 @@ defmodule GES233.Blog.Post do
   @doc """
   将可能过大的内容本体放入 `GES233.Blog.Post.ContentRepo` 。
   """
-  def maybe_archive_large_content(content, id) do
+  def maybe_archive_large_content(content, _id) do
     if GES233.Blog.Post.ContentRepo.enough_large?(content) do
-      # content
-      # GES233.Blog.Post.ContentRepo.put(id, :raw, content)
+      content
 
-      {:ref, id}
+      # GES233.Blog.Post.ContentRepo.put(id, :raw, content)
+      # {:ref, id}
     else
       content
     end

@@ -12,17 +12,8 @@ defmodule Pandox do
     @pandoc_executable_name
   end
 
-  def get_args_from_meta(%{"pandox" => args}) do
-    # 这个部分是打算和 NimblePublisher 耦合的
-    # 如果 MetaData 里有个 %{pandox: []} 字段，
-    # 把它丢过来
-    do_extract_args(args)
-  end
-
-  def get_args_from_meta(%{pandox: args}) do
-    do_extract_args(args)
-  end
-
+  def get_args_from_meta(%{"pandoc" => args}), do: do_extract_args(args)
+  def get_args_from_meta(%{pandoc: args}), do: do_extract_args(args)
   def get_args_from_meta(_), do: []
 
   def do_extract_args(meta), do: meta
@@ -31,13 +22,13 @@ defmodule Pandox do
     --mathjax
     -f markdown+smart+emoji
     -t html
+    --filter=pandoc-crossref
+    --citeproc
   )
-
-  # --filter=pandoc-crossref --citeproc --bibliography=references.bib
 
   def render_markdown_to_html(content, metadata_to_pandoc) do
     # 生成临时文件
-    input_file = Path.join(System.tmp_dir!(), "input_#{System.unique_integer()}.md")
+    input_file = Path.join(System.tmp_dir!(), "input_#{System.unique_integer()}.md") |> IO.inspect()
     output_file = Path.join(System.tmp_dir!(), "output_#{System.unique_integer()}.html")
 
     # 写入内容（包含元数据）
@@ -59,19 +50,21 @@ defmodule Pandox do
     @pandoc_flags ++ [input, "-o", output]
   end
 
-  defp build_front_matter(%{}), do: ""
-
   defp build_front_matter(metadata) do
-    res =
-      metadata
-      |> Enum.map(fn {k, v} -> "#{inspect(k)}: #{inspect(v)}" end)
-      |> Enum.join("\n")
+    if Map.keys(metadata) == [] do
+      ""
+    else
+      res =
+        metadata
+        |> Enum.map(fn {k, v} -> "#{k}: #{v}" end)
+        |> Enum.join("\n")
 
-    """
-    ---
-    #{res}
-    ---
-    """
+      """
+      ---
+      #{res}
+      ---
+      """
+    end
   end
 
   defp handle_result({_, 0}, output_file) do
@@ -80,18 +73,5 @@ defmodule Pandox do
 
   defp handle_result({code, msg}, _) do
     raise "Pandoc failed with code #{code}: #{msg}"
-  end
-
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Pandox.hello()
-      :world
-
-  """
-  def hello do
-    :world
   end
 end

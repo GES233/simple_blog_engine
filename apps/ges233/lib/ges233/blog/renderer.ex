@@ -1,17 +1,15 @@
 defmodule GES233.Blog.Renderer do
-  def convert(path, body, meta, opts) do
-    case Path.extname(path) do
-      ".md" -> convert_mardown(body, meta, opts)
-      _ -> body
-    end
-  end
+alias GES233.Blog.{Post, Bibliography}
 
-  def convert_mardown(body, meta, _opts) do
-    body
-    |> link_replace()
+  def convert_markdown(post = %Post{}, _opts) do
+    body = link_replace(post.content)
+
+    {_, meta} = {post, %{}}
+    |> Bibliography.maybe_validate_bibliography_exist()
+    |> Bibliography.ensure_bib_format()
+
     # 先过一遍 Pandox
-    |> Pandox.render_markdown_to_html(meta)
-
+    Pandox.render_markdown_to_html(body, meta)
     # 再过一遍 PhoenixHTML
   end
 

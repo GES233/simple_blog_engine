@@ -18,7 +18,8 @@ import Config
 #
 
 config :ges233,
-  blog_root: "D:/Blog/source/_posts"
+  blog_root: "D:/Blog/source/_posts",
+  bibliography_entry: "D:/Blog/source/_bibs"
 
 config :pandox,
   execute_path: "pandoc",

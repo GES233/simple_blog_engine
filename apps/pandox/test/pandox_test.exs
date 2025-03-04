@@ -3,6 +3,6 @@ defmodule PandoxTest do
   doctest Pandox
 
   test "greets the world" do
-    assert Pandox.hello() == :world
+    assert 1 + 1 == 2
   end
 end
