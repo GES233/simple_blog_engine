@@ -15,7 +15,14 @@ defmodule GES233.Blog.Renderer do
     # 再过一遍 PhoenixHTML
   end
 
-  defp link_replace(pre) do
+  defp link_replace({:ref, id}) do
+    id
+
+    # 这块儿得改成文字本身
+    # 把本体丢给 pandoc 再得到 HTML
+  end
+
+  defp link_replace(pre) when is_binary(pre) do
     # Get meta from Registry
     # Wrap the logics into func/1
 

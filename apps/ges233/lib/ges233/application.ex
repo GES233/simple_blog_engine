@@ -7,10 +7,14 @@ defmodule GES233.Application do
     children = childrens()
 
     opts = [strategy: :one_for_one, name: GES233.Supervisor]
+
     Supervisor.start_link(children, opts)
   end
 
   defp childrens(_options \\ []) do
-    [{Bandit, scheme: :http, plug: GES233.Blog.SimpleServer, options: [port: 4000]}]
+    [
+      {Bandit, scheme: :http, plug: GES233.Blog.SimpleServer, options: [port: 4000]},
+      {GES233.Blog.Post.ContentRepo, []}
+    ]
   end
 end

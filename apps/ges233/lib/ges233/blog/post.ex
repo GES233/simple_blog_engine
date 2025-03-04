@@ -46,7 +46,7 @@ defmodule GES233.Blog.Post do
     :series,
     :content,
     :body,
-    progress: :final,
+    progress: "final",
     extra: %{}
   ]
 
@@ -77,13 +77,12 @@ defmodule GES233.Blog.Post do
       |> then(fn d -> %{d | update_at: convert_date(d[:update_at])} end)
       # Cleaning tags
       |> then(fn d -> %{d | tags: :lists.flatten(d.tags)} end)
-      # TODO: 解析进度相关
       # TODO: 引入 extra
       # 后面可能会单独用一个函数来处理
       |> Map.merge(extra_func.(content_meta))
       # 引入内容相关
       # 如果内容过大的话可能会变成 {:ref, id}
-      |> Map.merge(%{content: get_post_content(content)})
+      |> Map.merge(%{content: content |> get_post_content() |> maybe_archive_large_content(file_meta[:id])})
       |> then(&struct!(__MODULE__, &1))
     else
       {:error, err} -> {:error, err, path}
@@ -93,7 +92,7 @@ defmodule GES233.Blog.Post do
 
   def add_html_without_nimble(post) do
     html_body =
-      GES233.Blog.Renderer.convert_mardown(post.content, Map.get(post.extra, :pandoc, %{}), [])
+      GES233.Blog.Renderer.convert_mardown(post.content, Map.get(post.extra, "pandoc", %{}), [])
 
     %{post | body: html_body}
   end
@@ -186,7 +185,21 @@ defmodule GES233.Blog.Post do
   获取博客内容。
   """
   def get_post_content(content) do
-    content |> :binary.split(["\n---\n", "\r\n---\r\n"]) |> tl() |> hd()
+    content
+    |> :binary.split(["\n---\n", "\r\n---\r\n"])
+    |> tl()
+    |> hd()
+  end
+
+  def maybe_archive_large_content(content, id) do
+    if GES233.Blog.Post.ContentRepo.enough_large?(content) do
+      # content
+      # GES233.Blog.Post.ContentRepo.put(id, :raw, content)
+
+      {:ref, id}
+    else
+      content
+    end
   end
 
   def get_post_from_id([%Post{} | _] = posts_repo, id) do
