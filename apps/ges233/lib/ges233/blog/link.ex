@@ -1,4 +1,5 @@
 defmodule GES233.Blog.Link do
+  @moduledoc "形如 `:{inner_id}` => `[inner_id](inner_id_link)`"
   # 链接相关
 
   @raw_link_pattern ~r/:\{(w+)\}/

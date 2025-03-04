@@ -61,7 +61,14 @@ defmodule GES233.Blog.Post do
   @doc """
   从文件的目录到 `Post` 结构体的函数。
   """
-  def path_to_struct(path, extra_func \\ fn _meta_and_content -> %{} end) do
+  def path_to_struct(
+        path,
+        extra_func \\ fn meta_and_content ->
+          %{
+            extra: meta_and_content[:extra] || %{}
+          }
+        end
+      ) do
     with {:ok, file_meta, content} <- parse_post_file(path),
          content_meta = %{} <- get_post_meta(content) do
       file_meta
@@ -69,7 +76,8 @@ defmodule GES233.Blog.Post do
         title: content_meta[:title],
         categories: content_meta[:categories],
         tags: content_meta[:tags],
-        series: content_meta[:series]
+        series: content_meta[:series],
+        progress: content_meta[:progress] || "final"
       })
       |> overwrite_create_date(content_meta)
       # 更新时间格式
@@ -77,12 +85,12 @@ defmodule GES233.Blog.Post do
       |> then(fn d -> %{d | update_at: convert_date(d[:update_at])} end)
       # Cleaning tags
       |> then(fn d -> %{d | tags: :lists.flatten(d.tags)} end)
-      # TODO: 引入 extra
-      # 后面可能会单独用一个函数来处理
       |> Map.merge(extra_func.(content_meta))
       # 引入内容相关
       # 如果内容过大的话可能会变成 {:ref, id}
-      |> Map.merge(%{content: content |> get_post_content() |> maybe_archive_large_content(file_meta[:id])})
+      |> Map.merge(%{
+        content: content |> get_post_content() |> maybe_archive_large_content(file_meta[:id])
+      })
       |> then(&struct!(__MODULE__, &1))
     else
       {:error, err} -> {:error, err, path}

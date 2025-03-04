@@ -1,6 +1,3 @@
-defmodule GES233.Blog.Post.Registry do
-  # ...
-end
 
 defmodule GES233.Blog.Post.ContentRepo do
   @moduledoc """
@@ -43,9 +40,15 @@ defmodule GES233.Blog.Post.ContentRepo do
 
   def put(id, format, content) do
     :ets.insert(__MODULE__, {{id, format}, content})
+
+    {id, format}
   end
 
-  def get() do
-    # ...
+  def get(id, format) do
+    res = :ets.take(__MODULE__, {id, format})
+
+    :ets.insert(__MODULE__, {{id, format}, res})
+
+    res
   end
 end
