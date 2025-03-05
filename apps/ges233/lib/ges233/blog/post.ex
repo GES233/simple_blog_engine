@@ -197,12 +197,11 @@ defmodule GES233.Blog.Post do
   @doc """
   将可能过大的内容本体放入 `GES233.Blog.Post.ContentRepo` 。
   """
-  def maybe_archive_large_content(content, _id) do
+  def maybe_archive_large_content(content, id) do
     if GES233.Blog.Post.ContentRepo.enough_large?(content) do
-      content
+      GES233.Blog.Post.ContentRepo.cache_raw(content, id)
 
-      # GES233.Blog.Post.ContentRepo.put(id, :raw, content)
-      # {:ref, id}
+      {:ref, id}
     else
       content
     end

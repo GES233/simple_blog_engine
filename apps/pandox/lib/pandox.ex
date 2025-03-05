@@ -40,6 +40,7 @@ defmodule Pandox do
     # 调用 Pandoc
     res =
       args(input_file, output_file)
+      # |> IO.inspect(label: :Args)
       # 使用 System.cmd 会报错
       # |> then(&System.cmd(get_pandoc(), &1))
       |> Enum.join(" ")

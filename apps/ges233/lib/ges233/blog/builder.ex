@@ -15,6 +15,12 @@ defmodule GES233.Blog.Builder do
     |> Enum.reduce([], fn {:ok, res}, prev -> [res | prev] end)
   end
 
+  # 博客的重构：
+  # - [x] Bib
+  # - [ ] Series
+  # - [x] Tags
+  # - [ ] Categories
+  # - [ ] HTML
   def build(root_path \\ @default_rootpath) do
   # 1. 将文件系统上的内容变为 [%Post{}]
   posts = get_posts(root_path)
@@ -31,6 +37,9 @@ defmodule GES233.Blog.Builder do
 
   # 4. 将 %Posts{} 正文的链接替换为实际链接
   # 5. 调用 Pandoc 渲染为 HTML
+  _posts = posts
+  |> Enum.map(&Task.async(fn -> Post.add_html(&1) end))
+  |> Enum.map(&Task.await/1)
 
   # 6. 渲染外观以及其他界面
   # 7. 保存在特定目录

@@ -1,4 +1,3 @@
-
 defmodule GES233.Blog.Post.ContentRepo do
   @moduledoc """
   负责保存可能出现的大容量数据。
@@ -6,21 +5,34 @@ defmodule GES233.Blog.Post.ContentRepo do
   为了方便管理作为单独的进程。
   """
   require Logger
-  # TODO
-  # 要么把这个 GenServer 写完
-  # 要么干脆放开 :ets 的权限
   # https://hexdocs.pm/elixir/main/erlang-term-storage.html
 
   use GenServer
   @threshold 5000
 
   def start_link(_args) do
-    GenServer.start_link(__MODULE__, [])
+    GenServer.start_link(__MODULE__, [], name: __MODULE__)
+  end
+
+  def cache_raw(content, id) do
+    GenServer.call(__MODULE__, {:cache, {content, id, :raw}})
+  end
+
+  def cache_html(post) do
+    GenServer.call(__MODULE__, {:cache, {post, :html}})
+  end
+
+  def get_raw(id) do
+    GenServer.call(__MODULE__, {:get, {id, :raw}})
+  end
+
+  def get_html(id) do
+    GenServer.call(__MODULE__, {:get, {id, :html}})
   end
 
   @impl GenServer
   def init(_enable_options) do
-    name = :ets.new(__MODULE__, [:named_table])
+    name = :ets.new(:content_repo, [:set, :public, :named_table])
 
     ref = %{}
 
@@ -29,28 +41,26 @@ defmodule GES233.Blog.Post.ContentRepo do
     {:ok, {name, ref}}
   end
 
-  def lookup(name) do
-    case :ets.lookup(__MODULE__, name) do
-      [{^name, pid}] -> {:ok, pid}
-      [] -> :error
-    end
-  end
-
   def enough_large?(content) do
     String.length(content) >= @threshold
   end
 
-  def put(id, format, content) do
-    :ets.insert(__MODULE__, {{id, format}, content})
+  @impl true
+  def handle_call({:cache, {content, id, format}}, _from, state) do
+    # 存入 ETS 表
+    :ets.insert(:content_repo, {{id, format}, content})
 
-    {id, format}
+    {:reply, {:ref, id}, state}
   end
 
-  def get(id, format) do
-    res = :ets.take(__MODULE__, {id, format})
+  @impl true
+  def handle_call({:get, key}, _from, state) do
+    case :ets.lookup(:content_repo, key) do
+      [{^key, content}] ->
+        {:reply, {:ok, content}, state}
 
-    :ets.insert(__MODULE__, {{id, format}, res})
-
-    res
+      [] ->
+        {:reply, {:error, :not_found}, state}
+    end
   end
 end

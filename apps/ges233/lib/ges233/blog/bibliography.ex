@@ -4,23 +4,26 @@ defmodule GES233.Blog.Bibliography do
   @entry Application.compile_env(:ges233, :bibliography_entry, "/priv/_bibs")
 
   # Invoked by pandoc-crossref
-  def maybe_validate_bibliography_exist(
-        {%Post{extra: %{"pandoc" => pandox_options}} = post, bib_context}
-      ) do
-    with {:ok, bib_path_realtive} <- Map.fetch(pandox_options, "bibliography"),
-         bib_path = Path.join([@entry, bib_path_realtive]),
-         :ok <- File.touch(bib_path) do
-      {post, Map.put(bib_context, "bibliography", bib_path)}
+  def maybe_validate_bibliography_exist({%Post{extra: extra} = post, bib_context}) do
+    if Map.get(extra, "pandoc") do
+      %{"pandoc" => pandox_options} = extra
+      with {:ok, bib_path_realtive} <- Map.fetch(pandox_options, "bibliography"),
+           bib_path = Path.join([@entry, bib_path_realtive]),
+           :ok <- File.touch(bib_path) do
+        {post, Map.put(bib_context, "bibliography", bib_path)}
+      else
+        {:error, _} ->
+          Logger.warning(
+            "File #{inspect(Path.join([@entry, pandox_options["bibliography"]]))} doesn't exist."
+          )
+
+          {post, Map.put(bib_context, "bibliography", nil)}
+
+        :error ->
+          {post, Map.put(bib_context, "bibliography", nil)}
+      end
     else
-      {:error, _} ->
-        Logger.warning(
-          "File #{inspect(Path.join([@entry, pandox_options["bibliography"]]))} doesn't exist."
-        )
-
-        {post, Map.put(bib_context, "bibliography", nil)}
-
-      :error ->
-        {post, Map.put(bib_context, "bibliography", nil)}
+      {post, Map.put(bib_context, "bibliography", nil)}
     end
   end
 

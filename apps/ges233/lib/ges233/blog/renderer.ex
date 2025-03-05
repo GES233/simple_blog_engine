@@ -8,16 +8,23 @@ alias GES233.Blog.{Post, Bibliography}
     |> Bibliography.maybe_validate_bibliography_exist()
     |> Bibliography.ensure_bib_format()
 
+    meta = if Map.get(meta, "bibliography") do
+      meta
+    else
+      %{}
+    end
+
     # 先过一遍 Pandox
     Pandox.render_markdown_to_html(body, meta)
     # 再过一遍 PhoenixHTML
   end
 
   defp link_replace({:ref, id}) do
-    id
+    {:ok, raw} = Post.ContentRepo.get_raw(id)
 
     # 这块儿得改成文字本身
     # 把本体丢给 pandoc 再得到 HTML
+    link_replace(raw)
   end
 
   defp link_replace(pre) when is_binary(pre) do
