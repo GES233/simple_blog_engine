@@ -1,10 +1,11 @@
-defmodule Ges233.Blog.Media do
+defmodule GES233.Blog.Media do
   @type t :: %__MODULE__{
     id: String.t(),
     type: :pic | :pdf | :dot,
-    path: String.t()
+    path: String.t(),
+    route_head: String.t()
   }
-  defstruct [:id, :type, :path]
+  defstruct [:id, :type, :path, :route_head]
 
   # Simply copy
   def get_media_under(path, :pic) do
@@ -27,9 +28,9 @@ defmodule Ges233.Blog.Media do
     |> Enum.map(&Task.await/1)
   end
 
-  def parse_media(picture_path, type) do
-    id = Path.basename(picture_path) |> String.split(".") |> hd()
+  def parse_media(path, type) do
+    id = Path.basename(path) |> String.split(".") |> hd()
 
-    %__MODULE__{id: id, type: type, path: picture_path}
+    %__MODULE__{id: id, type: type, path: path}
   end
 end

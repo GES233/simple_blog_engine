@@ -1,4 +1,5 @@
 defmodule GES233.Blog.Builder do
+  alias GES233.Blog.Post.RegistryBuilder
   alias GES233.Blog.{Post, Tags, Series}
 
   @default_rootpath Application.compile_env(
@@ -9,22 +10,39 @@ defmodule GES233.Blog.Builder do
 
   @spec get_posts(binary()) :: [Post.t(), ...]
   def get_posts(root) do
+    do_fetch_posts(root)
+    |> Enum.reduce([], fn {:ok, res}, prev -> [res | prev] end)
+  end
+
+  def load_posts(root) do
+    do_fetch_posts(root)
+    # TODO: Archive
+  end
+
+  defp do_fetch_posts(root) do
     Path.wildcard(root <> "/**/*.md")
     |> Task.async_stream(&Post.path_to_struct/1)
-    # TODO: 可以改成装载到某 Registry 里
-    |> Enum.reduce([], fn {:ok, res}, prev -> [res | prev] end)
+  end
+
+  def build_from_root(root_path \\ @default_rootpath) do
+    # 1. 将文件系统上的内容变为 [%Post{}]
+
+    root_path
+    |> get_posts()
+    |> build_from_posts()
   end
 
   # 博客的重构：
   # - [x] Bib
-  # - [ ] Series
+  # - [x] Series
   # - [x] Tags
   # - [ ] Categories
   # - [ ] HTML
-  def build(root_path \\ @default_rootpath) do
-  # 1. 将文件系统上的内容变为 [%Post{}]
-  posts = get_posts(root_path)
-
+  # Elapse
+  # :timer.tc(&GES233.Blog.Builder.build_from_root/0)
+  # {6075904, :ok}
+  # {6167654, :ok}
+  def build_from_posts(posts) do
   # 2. 将内容建立索引
   # via tags, categories, serires, date
   # id => link on server
@@ -34,12 +52,19 @@ defmodule GES233.Blog.Builder do
 
   # 3. 装载多媒体、Bib 等内容
   # 依旧 id => link on server
+  # 需要将多媒体内容注入到 %Post{} 之中
+  meta_registry = (RegistryBuilder.build_posts_registry(posts) ++ []) |> Enum.into(%{})
 
   # 4. 将 %Posts{} 正文的链接替换为实际链接
   # 5. 调用 Pandoc 渲染为 HTML
   _posts = posts
-  |> Enum.map(&Task.async(fn -> Post.add_html(&1) end))
-  |> Enum.map(&Task.await/1)
+  |> Enum.map(&Task.async(fn -> Post.add_html(&1, meta_registry) end))
+  |> Enum.map(&Task.await(&1, 20000))
+  # Max: 1569587μs
+  # |> Enum.map(&:timer.tc(fn -> Post.add_html(&1, meta_registry) end))
+  # |> Enum.map(fn {t, _c} -> t end)
+  # |> Enum.sort_by(& &1)
+  # |> IO.inspect()
 
   # 6. 渲染外观以及其他界面
   # 7. 保存在特定目录

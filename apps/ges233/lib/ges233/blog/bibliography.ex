@@ -36,4 +36,7 @@ defmodule GES233.Blog.Bibliography do
 
     {post, context}
   end
+
+  def postlude({_post, meta}),
+    do: if(Map.get(meta, "bibliography"), do: meta, else: %{})
 end

@@ -5,10 +5,9 @@ defmodule GES233.Blog.Post.ContentRepo do
   为了方便管理作为单独的进程。
   """
   require Logger
-  # https://hexdocs.pm/elixir/main/erlang-term-storage.html
 
   use GenServer
-  @threshold 5000
+  @threshold 2000
 
   def start_link(_args) do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
@@ -18,8 +17,8 @@ defmodule GES233.Blog.Post.ContentRepo do
     GenServer.call(__MODULE__, {:cache, {content, id, :raw}})
   end
 
-  def cache_html(post) do
-    GenServer.call(__MODULE__, {:cache, {post, :html}})
+  def cache_html(html, id) do
+    GenServer.call(__MODULE__, {:cache, {html, id, :html}})
   end
 
   def get_raw(id) do

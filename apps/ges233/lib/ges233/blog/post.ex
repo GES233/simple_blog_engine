@@ -33,6 +33,7 @@ defmodule GES233.Blog.Post do
           series: String.t() | nil,
           content: String.t(),
           body: String.t(),
+          recource_repo: map(),
           progress: :final | {:in_progress, number()},
           extra: %{}
         }
@@ -46,6 +47,7 @@ defmodule GES233.Blog.Post do
     :series,
     :content,
     :body,
+    :recource_repo,
     progress: "final",
     extra: %{}
   ]
@@ -94,8 +96,16 @@ defmodule GES233.Blog.Post do
     end
   end
 
-  def add_html(post) do
-    html_body = GES233.Blog.Renderer.convert_markdown(post, [])
+  def add_html(post, meta) do
+    html_body = GES233.Blog.Renderer.convert_markdown(post, [meta: meta])
+
+    html_body = if GES233.Blog.Post.ContentRepo.enough_large?(html_body) do
+      GES233.Blog.Post.ContentRepo.cache_html(html_body, post.id)
+
+      {:ref, post.id}
+    else
+      html_body
+    end
 
     %{post | body: html_body}
   end
