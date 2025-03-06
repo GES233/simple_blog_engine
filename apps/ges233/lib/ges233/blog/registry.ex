@@ -11,7 +11,10 @@ defmodule GES233.Blog.Post.RegistryBuilder do
 
   def build_media_registry(root_path, format) do
     cond do
-      format in [:pic, :pdf, :dot] -> Media.get_media_under(root_path, format)
+      format in [:pic, :pdf, :dot] ->
+
+        Media.get_media_under(root_path, format)
+        |> Enum.map(fn m -> {m.id, m} end)
       true -> nil
     end
     # Load to registry with type
