@@ -1,6 +1,7 @@
 defmodule GES233.Blog.Bibliography do
   alias GES233.Blog.Post
   require Logger
+
   @entry Application.compile_env(:ges233, :bibliography_entry, "/priv/_bibs")
 
   # Invoked by pandoc-crossref
@@ -35,6 +36,10 @@ defmodule GES233.Blog.Bibliography do
     # 依据 categories 或显式声明确定参考文献的格式 bla bla
 
     {post, context}
+  end
+
+  def add_title_to_meta({post, meta}) do
+    {post, Map.put(meta, :title, post.title)}
   end
 
   def postlude({_post, meta}),

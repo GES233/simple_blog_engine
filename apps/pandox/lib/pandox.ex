@@ -44,7 +44,7 @@ defmodule Pandox do
       # 使用 System.cmd 会报错
       # |> then(&System.cmd(get_pandoc(), &1))
       |> Enum.join(" ")
-      |> then(&System.shell(get_pandoc() <> " " <> &1))
+      |> then(&System.shell("#{get_pandoc()} #{&1}"))
       |> handle_result(output_file)
 
     File.rm(input_file)
@@ -69,6 +69,9 @@ defmodule Pandox do
     else
       ""
     end
+
+    ## TODO: Add TOC and its template
+    # https://dev.to/bachmeil/pandoc-toc-without-standalone-mode-2ki9
 
     @pandoc_flags ++ @pandoc_crossref_flags ++ [yaml, csl, input, "-o", output]
   end

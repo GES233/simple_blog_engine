@@ -6,7 +6,8 @@ config :logger, :console,
 
 config :ges233,
   blog_root: "D:/Blog/source/_posts",
-  bibliography_entry: "D:/Blog/source/_bibs"
+  bibliography_entry: "D:/Blog/source/_bibs",
+  saved_path: "priv/generated"
 
 config :ges233, :Media,
   pic_path: "D:/Blog/source/img",

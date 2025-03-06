@@ -33,7 +33,7 @@ defmodule GES233.Blog.Post do
           series: String.t() | nil,
           content: String.t(),
           body: String.t(),
-          recource_repo: map(),
+          # recource_repo: map(),
           progress: :final | {:in_progress, number()},
           extra: %{}
         }
@@ -47,7 +47,7 @@ defmodule GES233.Blog.Post do
     :series,
     :content,
     :body,
-    :recource_repo,
+    # :recource_repo,
     progress: "final",
     extra: %{}
   ]
@@ -104,7 +104,7 @@ defmodule GES233.Blog.Post do
     |> String.split("-")
     |> Enum.drop(-1)
 
-    Enum.join(date ++ post.id, "/")
+    Enum.join((date ++ [post.id]), "/")
   end
 
   def add_html(post, meta) do
