@@ -81,6 +81,7 @@ defmodule GES233.Blog.Post do
       |> then(fn d -> %{d | tags: :lists.flatten(d.tags)} end)
       |> Map.merge(extra_func.(content_meta))
       ## 引入内容相关
+      # TODO 根据 progress 的结果向结尾添加状态
       # 如果内容过大的话可能会变成 {:ref, id}
       |> Map.merge(%{
         content:
@@ -94,6 +95,16 @@ defmodule GES233.Blog.Post do
       {:error, err} -> {:error, err, path}
       err -> {:error, err, path}
     end
+  end
+
+  def post_id_to_route(post = %__MODULE__{}) do
+    date = post.create_at
+    |> NaiveDateTime.to_date()
+    |> Date.to_string()
+    |> String.split("-")
+    |> Enum.drop(-1)
+
+    Enum.join(date ++ post.id, "/")
   end
 
   def add_html(post, meta) do

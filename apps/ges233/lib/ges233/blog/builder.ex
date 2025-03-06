@@ -1,6 +1,8 @@
 defmodule GES233.Blog.Builder do
+  require Logger
+  alias GES233.Blog.Post.ContentRepo
   alias GES233.Blog.Post.RegistryBuilder
-  alias GES233.Blog.{Post, Tags, Series}
+  alias GES233.Blog.{Post, Tags, Series, Renderer}
 
   @default_rootpath Application.compile_env(
                       :ges233,
@@ -18,10 +20,9 @@ defmodule GES233.Blog.Builder do
     |> Enum.reduce([], fn {:ok, res}, prev -> [res | prev] end)
   end
 
-  def load_posts(root) do
-    do_fetch_posts(root)
-    # TODO: Archive
-  end
+  # def load_posts(root) do
+  #   do_fetch_posts(root)
+  # end
 
   defp do_fetch_posts(root) do
     Path.wildcard(root <> "/**/*.md")
@@ -36,6 +37,17 @@ defmodule GES233.Blog.Builder do
     |> build_from_posts()
   end
 
+  # Only for test
+  def build_single_post(post_id \\ "2022-Pig-sensor") do
+    [
+      "#{@default_rootpath}/#{post_id}.md"
+      |> Post.path_to_struct()
+    ]
+    |> build_from_posts()
+    |> Enum.at(0)
+    |> then(&File.write("demo.html", &1))
+  end
+
   # 博客的重构：
   # - [x] Bib
   # - [x] Series
@@ -48,30 +60,36 @@ defmodule GES233.Blog.Builder do
   # {6167654, :ok}
   # {11537203, :ok}  # Add media related
   # {13074227, :ok}  # Remove Task
+  # {2822348, :ok}
   def build_from_posts(posts) do
     # 2. 将内容建立索引
     # via tags, categories, serires, date
     # id => link on server
     _tags_frq = Tags.get_tags_frq_from_posts(posts)
     _series = Series.fetch_all_series_from_posts(posts)
-    _sorted_posts = Enum.sort_by(posts, & &1.create_at, {:desc, NaiveDateTime})
+
+    _sorted_posts =
+      posts
+      |> RegistryBuilder.build_posts_registry()
+      |> Enum.map(fn {_, v} -> v end)
+      |> Enum.sort_by(& &1.create_at, {:desc, NaiveDateTime})
 
     # 3. 装载多媒体、Bib 等内容
     # 依旧 id => link on server
     # 需要将多媒体内容注入到 %Post{} 之中
     meta_registry =
-      (
-        RegistryBuilder.build_posts_registry(posts) ++
-        RegistryBuilder.build_media_registry(@pic_entry, :pic) ++
-        RegistryBuilder.build_media_registry(@pdf_entry, :pdf) ++
-        RegistryBuilder.build_media_registry(@dot_entry, :dot)
-      ) |> Enum.into(%{})
-      # |> Enum.reject(fn {_k, v} -> is_struct(v, Post) end)
-      # |> IO.inspect()
+      (RegistryBuilder.build_posts_registry(posts) ++
+         RegistryBuilder.build_media_registry(@pic_entry, :pic) ++
+         RegistryBuilder.build_media_registry(@pdf_entry, :pdf) ++
+         RegistryBuilder.build_media_registry(@dot_entry, :dot))
+      |> Enum.into(%{})
+
+    # |> Enum.reject(fn {_k, v} -> is_struct(v, Post) end)
+    # |> IO.inspect()
 
     # 4. 将 %Posts{} 正文的链接替换为实际链接
     # 5. 调用 Pandoc 渲染为 HTML
-    _posts =
+    posts_after =
       posts
       |> Enum.map(&Task.async(fn -> Post.add_html(&1, meta_registry) end))
       |> Enum.map(&Task.await(&1, 20000))
@@ -81,9 +99,28 @@ defmodule GES233.Blog.Builder do
       # |> Enum.sort_by(& &1)
       # |> IO.inspect()
 
+      posts_after
+    |> Enum.map(fn post ->
+      {status, html} = ContentRepo.get_html(post.id)
+
+      case status do
+        :ok ->
+          html
+
+        :error ->
+          post.body
+      end |> Renderer.add_layout(post)
+    end)
     # 6. 渲染外观以及其他界面
+
     # 7. 保存在特定目录
 
     :ok
   end
+
+  # def save_post
+
+  # def save_pic
+
+  # def save_file
 end

@@ -1,5 +1,5 @@
 defmodule GES233.Blog.Renderer do
-alias GES233.Blog.{Post, Bibliography}
+  alias GES233.Blog.{Post, Bibliography}
 
   def convert_markdown(post = %Post{}, opts) do
     all_posts_and_media = Keyword.get(opts, :meta)
@@ -11,6 +11,7 @@ alias GES233.Blog.{Post, Bibliography}
     |> Bibliography.postlude()
     # 先过一遍 Pandox
     |> then(&Pandox.render_markdown_to_html(body, &1))
+
     # 再过一遍 PhoenixHTML
   end
 
@@ -24,5 +25,17 @@ alias GES233.Blog.{Post, Bibliography}
 
   defp link_replace(%Post{content: pre}, posts_and_mata) when is_binary(pre) do
     GES233.Blog.Link.inner_replace(pre, posts_and_mata)
+  end
+
+  def add_layout(inner_html, post) do
+    inner_html
+    |> Phoenix.HTML.raw()
+    |> Phoenix.HTML.safe_to_string()
+    |> then(
+      &EEx.eval_file("apps/ges233/templates/layout.html.heex",
+        assigns: [page_title: post.title, inner_content: &1],
+        engine: Phoenix.HTML.Engine
+      )
+    )
   end
 end

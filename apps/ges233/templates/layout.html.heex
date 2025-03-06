@@ -5,11 +5,32 @@
   <meta charaset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title><% @page_title %></title>
+  <title>
+    <%= @page_title %>
+  </title>
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+  >
+  <link rel="stylesheet" href="https://unpkg.com/heti/umd/heti.min.css">
+  <script src="https://unpkg.com/heti/umd/heti-addon.min.js"></script>
+  <script>
+    const heti = new Heti('.heti');
+    heti.autoSpacing(); // 自动进行中西文混排美化和标点挤压
+  </script>
 </head>
 
 <body>
-  <% @inner_content %>
+  <main class="container">
+    <article class="heti">
+      <h2>
+        <%= @page_title %>
+      </h2>
+
+<%= @inner_content %>
+
+    </article>
+    <main>
 </body>
 
 </html>

@@ -2,11 +2,15 @@
 
 ## RoadMap
 
-- [ ] ~~Allow Registry~~ Create meta(like `meta.json` in hexo)
-  - [x] Posts
-  - [ ] Multimedia
-- [x] Configure pandoc well
-  - [x] Citation
-  - [x] Footnote
-- [ ] Using Phoenix.HTML to let us get whole page
+- [x] Create meta(like `meta.json` in hexo)
+- [ ] Link replace
+- [ ] Configure pandoc well
+  - [x] Basis
+  - [ ] Word count
+- [x] Using Phoenix.HTML to let us get whole page
+- [ ] Flaver page
+  - [ ] TOC
+  - [ ] Let progress at meta into final state
+    - ——完—— / ——未完待续—— / ——无限期停止撰写——
+- [ ] Copy and manipulate file to root
 - [ ] Serve the app via Bandit

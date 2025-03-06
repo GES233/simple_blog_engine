@@ -23,7 +23,4 @@ defmodule GES233.Blog.Post.RegistryBuilder do
   defp remove_raw_and_html(post = %Post{}) do
     %{post | content: nil, body: nil}
   end
-
-  ## TODO:
-  # 添加一个 Agent
 end
