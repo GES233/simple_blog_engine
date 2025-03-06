@@ -4,6 +4,8 @@
 
 - [x] Create meta(like `meta.json` in hexo)
 - [ ] Link replace
+  - [ ] Update link in blog to format
+  - [ ] Implement assets transform
 - [ ] Configure pandoc well
   - [x] Basis
   - [ ] Word count
