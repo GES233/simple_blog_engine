@@ -73,6 +73,8 @@ defmodule Pandox do
     ## TODO: Add TOC and its template
     # https://dev.to/bachmeil/pandoc-toc-without-standalone-mode-2ki9
 
+    # TODO 还有代码高亮
+
     @pandoc_flags ++ @pandoc_crossref_flags ++ [yaml, csl, input, "-o", output]
   end
 

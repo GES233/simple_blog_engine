@@ -9,6 +9,7 @@
 - [ ] Configure pandoc well
   - [x] Basis
   - [ ] Word count
+  - [ ] Code highlight
 - [x] Using Phoenix.HTML to let us get whole page
 - [ ] Flaver page
   - [ ] TOC
