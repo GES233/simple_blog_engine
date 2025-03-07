@@ -83,10 +83,10 @@
         <div style="text-align:center"><%= case @post.progress do %>
           <% :final -> %>
             ——完——
-          <% [:wip, _] -> %>
-            ——未完待续——
+          <% [:wip, p] -> %>
+            <%= if p <= 50, do: "——亟待更新——", else: "——未完待续——" %>
           <% [:blocking, _] -> %>
-            ——亟待更新——
+            ——无限期停止撰写——
         <% end %></div>
         </div>
       </main>

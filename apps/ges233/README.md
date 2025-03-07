@@ -3,6 +3,10 @@
 ## RoadMap
 
 - [x] Create meta(like `meta.json` in hexo)
+- [ ] Index Page
+  - [ ] SortedAsTime
+  - [ ] Tags
+  - [ ] Categories
 - [x] Link replace
 - [ ] Configure pandoc well
   - [x] Basis
@@ -12,9 +16,11 @@
 - [x] Using Phoenix.HTML to let us get whole page
 - [ ] Flaver page
   - [ ] TOC
-  - [ ] Meta(some info used in `%Posts{}`)
-  - [ ] Let progress at meta into final state
+  - [x] Meta(some info used in `%Posts{}`)
+  - [x] Let progress at meta into final state
     - ——完—— / ——未完待续—— / ——无限期停止撰写——
 - [x] Copy and manipulate file to root
 - [x] Serve the app via Bandit
-- [ ] Upload to GitHub Page
+- [ ] Git
+  - [ ] Create comment
+  - [ ] Upload to GitHub

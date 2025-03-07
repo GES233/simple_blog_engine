@@ -42,6 +42,6 @@ defmodule GES233.Blog.Link do
   end
 
   def inner_replace(source, meta, func \\ &page_convert/2) do
-    Regex.replace(@raw_link_pattern, source, fn match -> func.(match, meta) |> IO.inspect() end)
+    Regex.replace(@raw_link_pattern, source, fn match -> func.(match, meta) end)
   end
 end
