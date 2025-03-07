@@ -27,14 +27,12 @@ defmodule GES233.Blog.Renderer do
   end
 
   def add_article_layout(inner_html, post, _maybe_meta_about_blog) do
-    post.progress |> IO.inspect()
-
     inner_html
     |> Phoenix.HTML.raw()
     |> Phoenix.HTML.safe_to_string()
     |> then(
       &EEx.eval_file("apps/ges233/templates/article.html.heex",
-        assigns: [page_title: post.title, post: post, meta: Static.inject_to_assigns(), inner_content: &1],
+        assigns: [post: post, meta: Static.inject_to_assigns(), inner_content: &1],
         engine: Phoenix.HTML.Engine
       )
     )

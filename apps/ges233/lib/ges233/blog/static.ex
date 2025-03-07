@@ -5,7 +5,8 @@ defmodule GES233.Blog.Static do
     "heti_css" => {"/assets/heti.min.css", "apps/ges233/assets/vendor/heti/heti.min.css"},
     "heti_js" => {"/assets/hti-addon.min.js", "apps/ges233/assets/vendor/heti/heti-addon.min.js"},
     "picocss" => {"/assets/picocss.min.css", "apps/ges233/assets/vendor/picocss.min.css"}
-    # TODO: Code highlighting & PicoCSS
+    # TODO: Code highlighting CSS
+    # TODO: Pdf.js
   }
 
   def copy_to_path do
