@@ -13,16 +13,37 @@
 </head>
 
 <body>
-  <header>
+  <header class="container">
+    <nav>
+      <ul>
+        <li><kbd>GES233</kbd><b>'s Blog</b></li>
+      </ul>
+      <ul>
+      </ul>
+    </nav>
   </header>
   <main class="container">
     <article class="heti">
-      <h1><%= @post.title %></h1>
+      <header>
+        <h2><%= @post.title %></h2>
+        <div style="text-align:right" class="heti-skip">
+          <!--可以改成一个小的表格-->
+          <p><small>创建于 <%= NaiveDateTime.to_date(@post.create_at) |> Date.to_string %>  编辑于 <%= NaiveDateTime.to_date(@post.update_at) |> Date.to_string %></small></p>
+        </div>
+      </header>
+      <main>
+        <div>
 
 <%= @inner_content %>
 
+        </div>
+      </main>
     </article>
-    <main>
+  <main>
+  <footer>
+    <div class="container">
+    </div>
+  </footer>
 </body>
 
 </html>

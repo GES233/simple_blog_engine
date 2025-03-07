@@ -54,8 +54,8 @@ defmodule GES233.Blog.Media do
     id = [series, id_under_seires] |> Enum.join("-")
 
     case image do
-      "img" -> %__MODULE__{id: id, type: :pic, path: path, route_path: "image/#{series}/#{id_under_seires}.#{ext}"}
-      _ -> %__MODULE__{id: id_under_seires, type: :pic, path: path, route_path: "image/#{id_under_seires}.#{ext}"}
+      "img" -> %__MODULE__{id: id, type: :pic, path: path, route_path: "/image/#{series}/#{id_under_seires}.#{ext}"}
+      _ -> %__MODULE__{id: id_under_seires, type: :pic, path: path, route_path: "/image/#{id_under_seires}.#{ext}"}
     end
   end
 
@@ -83,6 +83,6 @@ defmodule GES233.Blog.Media do
   def parse_media(path, :pdf) do
     id = Path.basename(path, ".pdf")
 
-    %__MODULE__{id: id, type: :pdf, path: path, route_path: "archive/pdf/#{id}.pdf"}
+    %__MODULE__{id: id, type: :pdf, path: path, route_path: "/archive/pdf/#{id}.pdf"}
   end
 end

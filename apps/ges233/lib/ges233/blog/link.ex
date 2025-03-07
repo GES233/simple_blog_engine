@@ -34,7 +34,7 @@ defmodule GES233.Blog.Link do
       # like function defination in Julia
       # bla bla ::{DataFrame,Any}
       _ -> match
-    end |> IO.inspect()
+    end
   end
 
   def inner_replace(source, meta, func \\ &page_convert/2) do

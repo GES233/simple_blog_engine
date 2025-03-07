@@ -201,8 +201,8 @@ defmodule GES233.Blog.Builder do
   def copy_file(meta_registry) do
     meta_registry
     |> Enum.map(fn {_, v} -> v end)
+    # dot 生成的 svg 直接被别的函数解决了，不需要再 copy
     |> Enum.filter(&(is_struct(&1, Media) && &1.type in [:pic, :pdf]))
-    |> IO.inspect()
     |> Enum.map(
       &Task.async(fn ->
         "#{Application.get_env(:ges233, :saved_path)}/#{&1.route_path}"

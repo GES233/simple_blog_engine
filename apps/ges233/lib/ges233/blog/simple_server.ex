@@ -5,7 +5,7 @@ defmodule GES233.Blog.SimpleServer do
   plug(Plug.Logger)
   plug(:redirect_index)
   plug(GES233.Blog.SimpleServer.HTMLServer)
-  plug(Plug.Static, at: "/assets", from: "#{Application.compile_env(:ges233, :saved_path)}/assets")
+  plug(Plug.Static, at: "/", from: "#{Application.compile_env(:ges233, :saved_path)}/")
   plug(:not_found)
 
   def redirect_index(%Plug.Conn{path_info: path} = conn, _opts) do
