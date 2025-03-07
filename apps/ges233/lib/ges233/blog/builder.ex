@@ -1,5 +1,6 @@
 defmodule GES233.Blog.Builder do
   require Logger
+  alias GES233.Blog.Static
   alias GES233.Blog.Post.ContentRepo
   alias GES233.Blog.Post.RegistryBuilder
   alias GES233.Blog.{Post, Tags, Series, Renderer}
@@ -117,7 +118,7 @@ defmodule GES233.Blog.Builder do
       File.mkdir_p("#{Application.get_env(:ges233, :saved_path)}/#{Post.post_id_to_route(p)}")
 
       File.write(
-        "#{Application.get_env(:ges233, :saved_path)}/#{Post.post_id_to_route(p)}/inhex.html",
+        "#{Application.get_env(:ges233, :saved_path)}/#{Post.post_id_to_route(p)}/index.html",
         body |> Renderer.add_article_layout(p, meta_registry)
       )
     end)
@@ -132,6 +133,8 @@ defmodule GES233.Blog.Builder do
       end)
       |> Enum.into(%{})
       |> then(&Map.merge(meta_registry, &1))
+
+    Static.copy_to_path()
 
     {:ok, meta_registry}
     # :ok
@@ -161,7 +164,7 @@ defmodule GES233.Blog.Builder do
       case {index, page} do
         {1, _index_page} ->
           File.write(
-            "#{Application.get_env(:ges233, :saved_path)}/inhex.html",
+            "#{Application.get_env(:ges233, :saved_path)}/index.html",
             "<h1>index</h1>"
           )
 

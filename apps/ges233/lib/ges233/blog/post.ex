@@ -104,7 +104,7 @@ defmodule GES233.Blog.Post do
     |> String.split("-")
     |> Enum.drop(-1)
 
-    Enum.join((date ++ [post.id]), "/")
+    "/#{Enum.join((date ++ [post.id]), "/")}"
   end
 
   def add_html(post, meta) do

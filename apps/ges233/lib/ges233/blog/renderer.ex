@@ -1,5 +1,5 @@
 defmodule GES233.Blog.Renderer do
-  alias GES233.Blog.{Post, Bibliography}
+  alias GES233.Blog.{Post, Bibliography, Static}
 
   def convert_markdown(post = %Post{}, opts) do
     all_posts_and_media = Keyword.get(opts, :meta)
@@ -32,9 +32,15 @@ defmodule GES233.Blog.Renderer do
     |> Phoenix.HTML.safe_to_string()
     |> then(
       &EEx.eval_file("apps/ges233/templates/article.html.heex",
-        assigns: [page_title: post.title, inner_content: &1],
+        assigns: [page_title: post.title, post: post, meta: Static.inject_to_assigns(), inner_content: &1],
         engine: Phoenix.HTML.Engine
       )
+    )
+  end
+
+  def add_page_layout(_posts, {_page, _total_pages}) do
+    EEx.eval_file(
+      "apps/ges233/templates/article.html.heex"
     )
   end
 end
