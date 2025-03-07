@@ -15,14 +15,16 @@ defmodule GES233.Blog.Media do
 
   其中 `FileContentCodeBlockIfFailer` 就是可能存在错误的 DOT 文件内容。
   """
+  require Logger
 
   @type t :: %__MODULE__{
           id: String.t(),
           type: :pic | :pdf | :dot,
           path: String.t(),
-          route_path: String.t()
+          route_path: String.t(),
+          inner_content: String.t() | nil
         }
-  defstruct [:id, :type, :path, :route_path]
+  defstruct [:id, :type, :path, :route_path, :inner_content]
 
   # Simply copy
   def get_media_under(path, :pic) do
@@ -60,11 +62,22 @@ defmodule GES233.Blog.Media do
   def parse_media(path, :dot) do
     id = Path.basename(path, ".dot")
 
-    # TODO: Invoke dot to compile
-    # => success: path -> svg
-    # => failed: path -> invalid
+    case Graphviz.execute(path) do
+      {:ok, svg} ->
+        root = "#{Application.get_env(:ges233, :saved_path)}/svg"
+        File.mkdir_p(root)
 
-    %__MODULE__{id: id, type: :dot, path: path}
+        path = "#{root}/#{id}.svg"
+        File.write(path, svg)
+
+        %__MODULE__{id: id, type: :dot, path: path, route_path: "![](/svg/#{id}.svg)"}
+      {:error, {code, reason}} ->
+        Logger.warning("DOT #{id} build failed with code #{code} and reason #{reason}")
+
+        content = File.read(path)
+
+        %__MODULE__{id: id, type: :dot, path: path, inner_content: content}
+    end
   end
 
   def parse_media(path, :pdf) do

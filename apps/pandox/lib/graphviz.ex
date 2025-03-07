@@ -8,6 +8,6 @@ defmodule Graphviz do
     |> handle_result()
   end
 
-  def handle_result({res, 0}), do: res
-  def handle_result({err, _code}), do: raise err
+  def handle_result({res, 0}), do: {:ok, res}
+  def handle_result({err, code}), do: {:error, {code, err}}
 end

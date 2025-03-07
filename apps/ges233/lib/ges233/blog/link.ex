@@ -24,7 +24,13 @@ defmodule GES233.Blog.Link do
 
     case Map.get(meta, inner) do
       %Post{} -> Post.post_id_to_route(meta[inner])
-      %Media{} -> meta[inner].route_path || "/"
+
+      %Media{} -> meta[inner].route_path || """
+      ```dot
+      #{meta[inner].inner_content}
+      ```
+      """
+
       # like function defination in Julia
       # bla bla ::{DataFrame,Any}
       _ -> match

@@ -1,5 +1,6 @@
 defmodule GES233.Blog.Builder do
   require Logger
+  alias GES233.Blog.Media
   alias GES233.Blog.Static
   alias GES233.Blog.Post.ContentRepo
   alias GES233.Blog.Post.RegistryBuilder
@@ -111,17 +112,8 @@ defmodule GES233.Blog.Builder do
 
     # 7. 保存在特定目录
     bodies_with_id
-    |> Enum.map(fn {id, body} ->
-      p = meta_registry[id]
-
-      # Recursively created path.
-      File.mkdir_p("#{Application.get_env(:ges233, :saved_path)}/#{Post.post_id_to_route(p)}")
-
-      File.write(
-        "#{Application.get_env(:ges233, :saved_path)}/#{Post.post_id_to_route(p)}/index.html",
-        body |> Renderer.add_article_layout(p, meta_registry)
-      )
-    end)
+    |> Enum.map(&Task.async(fn -> save_post(&1, meta_registry) end))
+    |> Enum.map(&Task.await/1)
 
     # 8. 把 <!--more--> 之前的部分拿出来
     meta_registry =
@@ -136,7 +128,9 @@ defmodule GES233.Blog.Builder do
 
     Static.copy_to_path()
 
-    {:ok, meta_registry}
+    copy_file(meta_registry)
+
+    meta_registry
   end
 
   # def build_from_posts(diff_posts, {:partial, meta}) do
@@ -146,10 +140,7 @@ defmodule GES233.Blog.Builder do
       meta_registry
       |> Enum.map(fn {_, v} -> v end)
       |> Enum.filter(&is_struct(&1, Post))
-      # |> Enum.map(&Task.await/1)
       |> Enum.sort_by(& &1.create_at, {:desc, NaiveDateTime})
-
-    @page_pagination |> IO.inspect()
 
     pages = pagination(sorted_posts, [])
 
@@ -188,9 +179,47 @@ defmodule GES233.Blog.Builder do
     pagination(rest, [page | pages])
   end
 
-  # def save_post
+  def save_post({id, body}, meta_registry) do
+    p = meta_registry[id]
 
-  # def save_pic
+    # Recursively created path.
+    File.mkdir_p("#{Application.get_env(:ges233, :saved_path)}/#{Post.post_id_to_route(p)}")
 
-  # def save_file
+    File.write(
+      "#{Application.get_env(:ges233, :saved_path)}/#{Post.post_id_to_route(p)}/index.html",
+      body |> Renderer.add_article_layout(p, meta_registry)
+    )
+    |> case do
+      :ok ->
+        nil
+
+      {:error, reason} ->
+        Logger.warning("Save not successed when saved post `#{id}` with #{inspect(reason)}")
+    end
+  end
+
+  def copy_file(meta_registry) do
+    meta_registry
+    |> Enum.map(fn {_, v} -> v end)
+    |> Enum.filter(&(is_struct(&1, Media) && &1.type in [:pic, :pdf]))
+    |> IO.inspect()
+    |> Enum.map(
+      &Task.async(fn ->
+        "#{Application.get_env(:ges233, :saved_path)}/#{&1.route_path}"
+        |> Path.split()
+        |> :lists.droplast()
+        |> Path.join()
+        |> File.mkdir_p()
+
+        File.copy(&1.path, "#{Application.get_env(:ges233, :saved_path)}/#{&1.route_path}")
+        |> case do
+          {:ok, _} -> nil
+
+          {:error, reason} ->
+            Logger.warning("File with id: #{&1.id} copied not successfully due to #{inspect(reason)}")
+        end
+      end)
+    )
+    |> Enum.map(&Task.await/1)
+  end
 end
