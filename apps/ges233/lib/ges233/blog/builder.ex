@@ -14,6 +14,8 @@ defmodule GES233.Blog.Builder do
   @pdf_entry Application.compile_env(:ges233, [:Media, :pdf_path])
   @dot_entry Application.compile_env(:ges233, [:Media, :dot_path])
 
+  @page_pagination Application.compile_env(:ges233, [:Blog, :page_pagination])
+
   @spec get_posts(binary()) :: [Post.t(), ...]
   def get_posts(root) do
     do_fetch_posts(root)
@@ -121,25 +123,68 @@ defmodule GES233.Blog.Builder do
     end)
 
     # 8. 把 <!--more--> 之前的部分拿出来
-    meta_registry = bodies_with_id
-    |> Enum.filter(fn {_id, body} -> String.contains?(body, "<!--more-->") end)
-    |> Enum.map(fn {id, body} ->
-      {id, %{meta_registry[id] | body: String.split(body, "<!--more-->", parts: 2) |> Enum.at(0)}}
-    end) |> Enum.into(%{})
-    |> then(&Map.merge(meta_registry, &1))
-
-    _sorted_posts =
-      meta_registry
-      |> Enum.filter(&is_struct(&1, Post))
-      |> Enum.map(&Task.await/1)
-      |> Enum.sort_by(& &1.create_at, {:desc, NaiveDateTime})
+    meta_registry =
+      bodies_with_id
+      |> Enum.filter(fn {_id, body} -> String.contains?(body, "<!--more-->") end)
+      |> Enum.map(fn {id, body} ->
+        {id,
+         %{meta_registry[id] | body: String.split(body, "<!--more-->", parts: 2) |> Enum.at(0)}}
+      end)
+      |> Enum.into(%{})
+      |> then(&Map.merge(meta_registry, &1))
 
     {:ok, meta_registry}
+    # :ok
   end
 
   # def build_from_posts(diff_posts, {:partial, meta}) do
 
-  # def build_index
+  def build_index(meta_registry) do
+    sorted_posts =
+      meta_registry
+      |> Enum.map(fn {_, v} -> v end)
+      |> Enum.filter(&is_struct(&1, Post))
+      # |> Enum.map(&Task.await/1)
+      |> Enum.sort_by(& &1.create_at, {:desc, NaiveDateTime})
+
+    @page_pagination |> IO.inspect()
+
+    pages = pagination(sorted_posts, [])
+
+    page_with_id =
+      pages
+      |> length()
+      |> then(&Range.new(1, &1))
+      |> Enum.zip(pages)
+
+    for {index, page} <- page_with_id do
+      case {index, page} do
+        {1, _index_page} ->
+          File.write(
+            "#{Application.get_env(:ges233, :saved_path)}/inhex.html",
+            "<h1>index</h1>"
+          )
+
+        {num, _page} ->
+          File.mkdir_p("#{Application.get_env(:ges233, :saved_path)}/page/#{num}/index.html")
+
+          File.write(
+            "#{Application.get_env(:ges233, :saved_path)}/page/#{num}/index.html",
+            "<h1>index</h1>"
+          )
+      end
+    end
+  end
+
+  defp pagination(list, pages) when length(list) <= @page_pagination do
+    [list | pages] |> :lists.reverse()
+  end
+
+  defp pagination(list, pages) do
+    {page, rest} = Enum.split(list, @page_pagination)
+
+    pagination(rest, [page | pages])
+  end
 
   # def save_post
 

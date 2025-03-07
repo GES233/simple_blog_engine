@@ -2,9 +2,9 @@ defmodule GES233.Blog.Link do
   @moduledoc "形如 `:{inner_id}` => `inner_id_link`"
 
   require Logger
-  alias GES233.Blog.Post
+  alias GES233.Blog.{Post, Media}
 
-  @raw_link_pattern ~r/:\{(w+)\}/
+  @raw_link_pattern ~r/:\{(\S+)\}/
 
   ## 内容
   # 博客
@@ -18,7 +18,17 @@ defmodule GES233.Blog.Link do
 
   # AIO
   def page_convert(match, meta) do
-    Post.post_id_to_route(meta[match])
+    inner =
+      Regex.run(@raw_link_pattern, match)
+      |> Enum.at(1)
+
+    case Map.get(meta, inner) do
+      %Post{} -> Post.post_id_to_route(meta[inner])
+      %Media{} -> meta[inner].route_path || match
+      # like function defination in Julia
+      # bla bla ::{DataFrame,Any}
+      _ -> match
+    end
   end
 
   def inner_replace(source, meta, func \\ &page_convert/2) do

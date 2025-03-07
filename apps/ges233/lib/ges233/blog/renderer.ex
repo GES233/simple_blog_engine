@@ -31,7 +31,7 @@ defmodule GES233.Blog.Renderer do
     |> Phoenix.HTML.raw()
     |> Phoenix.HTML.safe_to_string()
     |> then(
-      &EEx.eval_file("apps/ges233/templates/layout.html.heex",
+      &EEx.eval_file("apps/ges233/templates/article.html.heex",
         assigns: [page_title: post.title, inner_content: &1],
         engine: Phoenix.HTML.Engine
       )
