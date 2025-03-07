@@ -4,8 +4,9 @@
 
 - [x] Create meta(like `meta.json` in hexo)
 - [ ] Link replace
-  - [ ] Update link in blog to format
-  - [ ] Implement assets transform
+  - [x] Update link in blog to format
+  - [x] Implement assets transform
+  - [ ] DOT Render
 - [ ] Configure pandoc well
   - [x] Basis
   - [ ] Word count
@@ -15,5 +16,5 @@
   - [ ] TOC
   - [ ] Let progress at meta into final state
     - ——完—— / ——未完待续—— / ——无限期停止撰写——
-- [ ] Copy and manipulate file to root
-- [ ] Serve the app via Bandit
+- [x] Copy and manipulate file to root
+- [x] Serve the app via Bandit

@@ -137,7 +137,6 @@ defmodule GES233.Blog.Builder do
     Static.copy_to_path()
 
     {:ok, meta_registry}
-    # :ok
   end
 
   # def build_from_posts(diff_posts, {:partial, meta}) do

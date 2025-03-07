@@ -24,11 +24,11 @@ defmodule GES233.Blog.Link do
 
     case Map.get(meta, inner) do
       %Post{} -> Post.post_id_to_route(meta[inner])
-      %Media{} -> meta[inner].route_path || match
+      %Media{} -> meta[inner].route_path || "/"
       # like function defination in Julia
       # bla bla ::{DataFrame,Any}
       _ -> match
-    end
+    end |> IO.inspect()
   end
 
   def inner_replace(source, meta, func \\ &page_convert/2) do
