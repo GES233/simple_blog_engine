@@ -25,11 +25,15 @@ defmodule GES233.Blog.Link do
     case Map.get(meta, inner) do
       %Post{} -> Post.post_id_to_route(meta[inner])
 
-      %Media{} -> meta[inner].route_path || """
+      %Media{type: :dot} -> meta[inner].route_path || """
       ```dot
       #{meta[inner].inner_content}
       ```
       """
+
+      %Media{type: :pdf} -> meta[inner].route_path |> GES233.Blog.Static.inject_when_pdf()
+
+      %Media{type: :pic} -> meta[inner].route_path
 
       # like function defination in Julia
       # bla bla ::{DataFrame,Any}
@@ -38,6 +42,6 @@ defmodule GES233.Blog.Link do
   end
 
   def inner_replace(source, meta, func \\ &page_convert/2) do
-    Regex.replace(@raw_link_pattern, source, fn match -> func.(match, meta) end)
+    Regex.replace(@raw_link_pattern, source, fn match -> func.(match, meta) |> IO.inspect() end)
   end
 end

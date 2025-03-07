@@ -3,6 +3,7 @@ defmodule GES233.Blog.Renderer do
 
   def convert_markdown(post = %Post{}, opts) do
     all_posts_and_media = Keyword.get(opts, :meta)
+
     body = link_replace(post, all_posts_and_media)
 
     {post, %{}}

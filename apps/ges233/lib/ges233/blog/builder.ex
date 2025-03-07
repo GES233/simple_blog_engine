@@ -42,14 +42,12 @@ defmodule GES233.Blog.Builder do
   end
 
   # Only for test
-  def build_single_post(post_id \\ "2022-Pig-sensor") do
+  def build_single_post(post_id \\ "Sheet-Archive") do
     [
       "#{@default_rootpath}/#{post_id}.md"
       |> Post.path_to_struct()
     ]
     |> build_from_posts(:whole)
-    |> Enum.at(0)
-    |> then(&File.write("demo.html", &1))
   end
 
   # 博客的重构：
