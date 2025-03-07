@@ -48,7 +48,7 @@ defmodule GES233.Blog.Post do
     :content,
     :body,
     # :recource_repo,
-    progress: "final",
+    progress: :final,
     extra: %{}
   ]
 
@@ -71,7 +71,7 @@ defmodule GES233.Blog.Post do
         categories: content_meta[:categories],
         tags: content_meta[:tags],
         series: content_meta[:series],
-        progress: content_meta[:progress] || "final"
+        progress: content_meta[:progress] || :final
       })
       ## 时间相关
       |> overwrite_create_date(content_meta)

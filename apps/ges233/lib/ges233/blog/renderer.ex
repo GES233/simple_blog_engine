@@ -27,6 +27,8 @@ defmodule GES233.Blog.Renderer do
   end
 
   def add_article_layout(inner_html, post, _maybe_meta_about_blog) do
+    post.progress |> IO.inspect()
+
     inner_html
     |> Phoenix.HTML.raw()
     |> Phoenix.HTML.safe_to_string()

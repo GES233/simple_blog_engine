@@ -3,6 +3,8 @@ defmodule GES233 do
   Documentation for `GES233`.
   """
 
+  defdelegate exe, to: GES233.Blog.Builder, as: :build_from_root
+
   @doc """
   Hello world.
 
