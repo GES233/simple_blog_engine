@@ -81,6 +81,8 @@ defmodule GES233.Blog.Builder do
 
     ## Common process
 
+    # TODO 加上渲染的主题
+    # 目前暂时包括（classic, default, pico）
     bodies_with_id_and_toc =
       posts
       # 4. 将 %Posts{} 正文的链接替换为实际链接
@@ -121,19 +123,23 @@ defmodule GES233.Blog.Builder do
       end)
       |> Enum.into(%{})
 
-    has_toc =
-      bodies_with_id_and_toc
-      |> Enum.filter(fn {_id, {toc, _}} -> !is_nil(toc) end)
-      |> Enum.map(fn {id, {toc, _}} -> {id, %{meta_registry[id] | toc: toc}} end)
-      |> Enum.into(%{})
+    # 这种已经没什么作用了，但我觉得这段代码最好留着
+    # 可能后期需要这种合并操作
+    # has_toc =
+    #   bodies_with_id_and_toc
+    #   |> Enum.filter(fn {_id, {toc, _}} -> !is_nil(toc) end)
+    #   |> Enum.map(fn {id, {toc, _}} -> {id, %{meta_registry[id] | toc: toc}} end)
+    #   |> Enum.into(%{})
 
-    append_posts = for id <- Map.keys(has_abstract) ++ Map.keys(has_toc) do
-      case {Map.get(has_abstract, id), Map.get(has_toc, id)} do
-        {nil, only_toc} -> {id, only_toc}
-        {only_abs, nil} -> {id, only_abs}
-        {abs, toc} -> {id, %{abs | toc: toc.toc}}
-      end
-    end |> Enum.into(%{})
+    # append_posts = for id <- Map.keys(has_abstract) ++ Map.keys(has_toc) do
+    #   case {Map.get(has_abstract, id), Map.get(has_toc, id)} do
+    #     {nil, only_toc} -> {id, only_toc}
+    #     {only_abs, nil} -> {id, only_abs}
+    #     {abs, toc} -> {id, %{abs | toc: toc.toc}}
+    #   end
+    # end |> Enum.into(%{})
+
+    append_posts = has_abstract
 
     meta_registry = Map.merge(meta_registry, append_posts)
 
