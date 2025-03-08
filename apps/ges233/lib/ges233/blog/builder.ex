@@ -1,10 +1,7 @@
 defmodule GES233.Blog.Builder do
   require Logger
-  alias GES233.Blog.Media
-  alias GES233.Blog.Static
-  alias GES233.Blog.Post.ContentRepo
-  alias GES233.Blog.Post.RegistryBuilder
-  alias GES233.Blog.{Post, Tags, Series, Renderer}
+  alias GES233.Blog.{Post, Tags, Series, Renderer, Media, Static}
+  alias GES233.Blog.Post.{ContentRepo, RegistryBuilder}
 
   @default_rootpath Application.compile_env(
                       :ges233,
@@ -42,7 +39,7 @@ defmodule GES233.Blog.Builder do
   end
 
   # Only for test
-  def build_single_post(post_id \\ "Sheet-Archive") do
+  def build_single_post(post_id \\ "World-execute-me-lyrics-analyse") do
     [
       "#{@default_rootpath}/#{post_id}.md"
       |> Post.path_to_struct()
@@ -84,7 +81,7 @@ defmodule GES233.Blog.Builder do
 
     ## Common process
 
-    bodies_with_id =
+    bodies_with_id_and_toc =
       posts
       # 4. 将 %Posts{} 正文的链接替换为实际链接
       # 5. 调用 Pandoc 渲染为 HTML
@@ -105,24 +102,40 @@ defmodule GES233.Blog.Builder do
           end
 
         # %{post | body: new_body}
-        {post.id, new_body}
+        {post.id, {post.toc, new_body}}
       end)
 
     # 7. 保存在特定目录
-    bodies_with_id
+    bodies_with_id_and_toc
     |> Enum.map(&Task.async(fn -> save_post(&1, meta_registry) end))
     |> Enum.map(&Task.await/1)
 
     # 8. 把 <!--more--> 之前的部分拿出来
-    meta_registry =
-      bodies_with_id
-      |> Enum.filter(fn {_id, body} -> String.contains?(body, "<!--more-->") end)
-      |> Enum.map(fn {id, body} ->
+
+    has_abstract =
+      bodies_with_id_and_toc
+      |> Enum.filter(fn {_id, {_, body}} -> String.contains?(body, "<!--more-->") end)
+      |> Enum.map(fn {id, {_, body}} ->
         {id,
          %{meta_registry[id] | body: String.split(body, "<!--more-->", parts: 2) |> Enum.at(0)}}
       end)
       |> Enum.into(%{})
-      |> then(&Map.merge(meta_registry, &1))
+
+    has_toc =
+      bodies_with_id_and_toc
+      |> Enum.filter(fn {_id, {toc, _}} -> !is_nil(toc) end)
+      |> Enum.map(fn {id, {toc, _}} -> {id, %{meta_registry[id] | toc: toc}} end)
+      |> Enum.into(%{})
+
+    append_posts = for id <- Map.keys(has_abstract) ++ Map.keys(has_toc) do
+      case {Map.get(has_abstract, id), Map.get(has_toc, id)} do
+        {nil, only_toc} -> {id, only_toc}
+        {only_abs, nil} -> {id, only_abs}
+        {abs, toc} -> {id, %{abs | toc: toc.toc}}
+      end
+    end |> Enum.into(%{})
+
+    meta_registry = Map.merge(meta_registry, append_posts)
 
     Static.copy_to_path()
 
@@ -177,8 +190,8 @@ defmodule GES233.Blog.Builder do
     pagination(rest, [page | pages])
   end
 
-  def save_post({id, body}, meta_registry) do
-    p = meta_registry[id]
+  def save_post({id, {toc, body}}, meta_registry) do
+    p = %{meta_registry[id] | toc: toc}
 
     # Recursively created path.
     File.mkdir_p("#{Application.get_env(:ges233, :saved_path)}/#{Post.post_id_to_route(p)}")
@@ -211,10 +224,13 @@ defmodule GES233.Blog.Builder do
 
         File.copy(&1.path, "#{Application.get_env(:ges233, :saved_path)}/#{&1.route_path}")
         |> case do
-          {:ok, _} -> nil
+          {:ok, _} ->
+            nil
 
           {:error, reason} ->
-            Logger.warning("File with id: #{&1.id} copied not successfully due to #{inspect(reason)}")
+            Logger.warning(
+              "File with id: #{&1.id} copied not successfully due to #{inspect(reason)}"
+            )
         end
       end)
     )

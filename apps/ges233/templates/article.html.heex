@@ -76,6 +76,11 @@
         </div>
       </header>
       <main>
+        <%= if !is_nil(@post.toc) do %>
+          <div>
+            <%= @post.toc %>
+          </div>
+        <% end %>
         <div>
 
 <%= @inner_content %>

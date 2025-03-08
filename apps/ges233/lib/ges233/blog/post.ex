@@ -33,7 +33,7 @@ defmodule GES233.Blog.Post do
           series: String.t() | nil,
           content: String.t(),
           body: String.t(),
-          # recource_repo: map(),
+          toc: String.t() | nil,
           progress: :final | {:in_progress, number()},
           extra: %{}
         }
@@ -47,7 +47,7 @@ defmodule GES233.Blog.Post do
     :series,
     :content,
     :body,
-    # :recource_repo,
+    toc: nil,
     progress: :final,
     extra: %{}
   ]
@@ -109,6 +109,12 @@ defmodule GES233.Blog.Post do
   def add_html(post, meta) do
     html_body = GES233.Blog.Renderer.convert_markdown(post, [meta: meta])
 
+    [toc, html_body] = if String.contains?(html_body, "TABLEOFCONTENTS") do
+      String.split(html_body, "TABLEOFCONTENTS", parts: 2)
+    else
+      [nil, html_body]
+    end
+
     html_body = if GES233.Blog.Post.ContentRepo.enough_large?(html_body) do
       GES233.Blog.Post.ContentRepo.cache_html(html_body, post.id)
 
@@ -117,7 +123,7 @@ defmodule GES233.Blog.Post do
       html_body
     end
 
-    %{post | body: html_body}
+    %{post | body: html_body, toc: toc}
   end
 
   defp overwrite_create_date(meta, content_meta) do

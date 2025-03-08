@@ -70,14 +70,18 @@ defmodule Pandox do
       ""
     end
 
+    # 可以作为一个选项
+    maybe_toc_flag = ~w(
+      --toc
+      --template
+      #{Application.get_env(:pandox, :toc_template)}
+    )
+
     # 获得模板
     # https://stackoverflow.com/questions/62774695/pandoc-where-are-css-files-for-syntax-highlighting-code
     # pandoc --print-default-template=html5
 
-    ## TODO: Add TOC and its template
-    # https://dev.to/bachmeil/pandoc-toc-without-standalone-mode-2ki9
-
-    @pandoc_flags ++ @pandoc_crossref_flags ++ [yaml, csl, input, "-o", output]
+    @pandoc_flags ++ @pandoc_crossref_flags ++ maybe_toc_flag ++ [yaml, csl, input, "-o", output]
   end
 
   defp build_front_matter(metadata) do
