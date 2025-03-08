@@ -70,10 +70,12 @@ defmodule Pandox do
       ""
     end
 
+    # 获得模板
+    # https://stackoverflow.com/questions/62774695/pandoc-where-are-css-files-for-syntax-highlighting-code
+    # pandoc --print-default-template=html5
+
     ## TODO: Add TOC and its template
     # https://dev.to/bachmeil/pandoc-toc-without-standalone-mode-2ki9
-
-    # TODO 还有代码高亮
 
     @pandoc_flags ++ @pandoc_crossref_flags ++ [yaml, csl, input, "-o", output]
   end

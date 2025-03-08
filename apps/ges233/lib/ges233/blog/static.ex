@@ -4,8 +4,10 @@ defmodule GES233.Blog.Static do
     "phx" => {"/assets/phoenix_html.js", "apps/ges233/assets/vendor/phoenix_html.js"},
     "heti_css" => {"/assets/heti.min.css", "apps/ges233/assets/vendor/heti/heti.min.css"},
     "heti_js" => {"/assets/hti-addon.min.js", "apps/ges233/assets/vendor/heti/heti-addon.min.js"},
-    "picocss" => {"/assets/picocss.min.css", "apps/ges233/assets/vendor/picocss.min.css"}
-    # TODO: Code highlighting CSS
+    "picocss" => {"/assets/picocss.min.css", "apps/ges233/assets/vendor/picocss.min.css"},
+    # 如果想要更新主题的话：
+    # https://github.com/jgm/pandoc/issues/7860#issuecomment-1938177020
+    "highlight" => {"/assets/code-highlighting.css", "apps/ges233/assets/vendor/pandoc/highlighting-breezedark.css"}
   }
 
   @static_with_file_operate %{"pdf_js" => {"/dist/pdf_js", "apps/ges233/assets/vendor/pdf_js"}}
@@ -34,7 +36,7 @@ defmodule GES233.Blog.Static do
 
   # https://stackoverflow.com/questions/31052806/pandoc-escaping-iframes-during-markdown-to-html-convert
   def inject_when_pdf(inner) do
-    "<iframe src=\"/dist/pdf_js/web/viewer.html?file=#{inner}\"></iframe>"
+    "<div class=\"aspect-ratio\"><iframe src=\"/dist/pdf_js/web/viewer.html?file=#{inner}\"></iframe></div>"
   end
 
   def inject_to_assigns do
@@ -48,12 +50,14 @@ defmodule GES233.Blog.Static do
       heti.autoSpacing();
     </script>
     """
+    code = "<link rel=\"stylesheet\" href=\"#{get_route("highlight")}\">"
 
     """
     #{phx_js}
     #{picocss}
     #{heti_css}
     #{heti_js}
+    #{code}
     """
   end
 

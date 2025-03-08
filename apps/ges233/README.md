@@ -12,7 +12,7 @@
   - [x] Basis
   - [ ] HTML template
   - [ ] Word count
-  - [ ] Code highlight
+  - [x] Code highlight
 - [x] Using Phoenix.HTML to let us get whole page
 - [ ] Flaver page
   - [ ] TOC

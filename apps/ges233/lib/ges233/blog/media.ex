@@ -9,6 +9,7 @@ defmodule GES233.Blog.Media do
     其将会变成 `![Your description](path/to/image)`
     - 如果在 /img 下面的话，那就是简单的 `:{ImageId}`
   - PDF
+    - 简单的 `:{File-Id}` 其可以经 `GES233.Blog.Static.inject_when_pdf/1` 变成嵌入页面。
   - DOT
     - 其格式最好为 `:{Dot-FileId}` ，有可能被渲染为 `![Dot-FileId](path/to/compiled/svg)` 或
     `FileContentCodeBlockIfFailer`

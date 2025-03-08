@@ -81,7 +81,6 @@ defmodule GES233.Blog.Post do
       |> then(fn d -> %{d | tags: :lists.flatten(d.tags)} end)
       |> Map.merge(extra_func.(content_meta))
       ## 引入内容相关
-      # TODO 根据 progress 的结果向结尾添加状态
       # 如果内容过大的话可能会变成 {:ref, id}
       |> Map.merge(%{
         content:
