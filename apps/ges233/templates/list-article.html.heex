@@ -23,9 +23,15 @@
     </nav>
   </header>
   <main class="container">
-    <% for _post <- @posts do
-    end %>
+    <article class="heti">
+      <%= for post <- @posts do %>
+        <%= GES233.Blog.Post.Components.card(post, :index) %>
+      <% end %>
+    </article>
   </main>
+  <footer>
+      <!-- TODO: Implement page numbering -->
+  </footer>
 </body>
 
 </html>

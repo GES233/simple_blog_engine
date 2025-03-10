@@ -77,8 +77,8 @@ defmodule GES233.Blog.Post.Components do
 
   def card(%Post{} = post, :index) do
     """
-    <article class="heti-skip">
-      <h3>#{post.title}</h3>
+    <article>
+      <a href="#{Post.post_id_to_route(post)}"><h3>#{post.title}</h3></a>
     </article>
     """
   end

@@ -149,6 +149,7 @@ defmodule GES233.Blog.Builder do
     copy_users_assets(meta_registry)
 
     meta_registry
+    |> build_index()
   end
 
   # def build_from_posts(diff_posts, {:partial, meta}) do
@@ -170,18 +171,18 @@ defmodule GES233.Blog.Builder do
 
     for {index, page} <- page_with_id do
       case {index, page} do
-        {1, _index_page} ->
+        {1, index_page} ->
           File.write(
             "#{Application.get_env(:ges233, :saved_path)}/index.html",
-            "<h1>index</h1>"
+            Renderer.add_page_layout(index_page, 1, length(pages))
           )
 
-        {num, _page} ->
-          File.mkdir_p("#{Application.get_env(:ges233, :saved_path)}/page/#{num}/index.html")
+        {num, page} ->
+          File.mkdir_p("#{Application.get_env(:ges233, :saved_path)}/page/#{num}/")
 
           File.write(
             "#{Application.get_env(:ges233, :saved_path)}/page/#{num}/index.html",
-            "<h1>index</h1>"
+            Renderer.add_page_layout(page, num, length(pages))
           )
       end
     end

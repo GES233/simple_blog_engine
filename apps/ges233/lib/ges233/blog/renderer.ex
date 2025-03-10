@@ -39,9 +39,16 @@ defmodule GES233.Blog.Renderer do
     )
   end
 
-  def add_page_layout(_posts, {_page, _total_pages}) do
+  def add_page_layout(posts, page, total_pages) do
     EEx.eval_file(
-      "apps/ges233/templates/article.html.heex"
+      "apps/ges233/templates/list-article.html.heex",
+      assigns: [
+        posts: posts,
+        page: page,
+        total_pages: total_pages,
+        meta: Static.inject_to_assigns(),
+        page_title: "首页"
+      ]
     )
   end
 end
