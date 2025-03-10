@@ -71,7 +71,7 @@ defmodule Pandox do
     end
 
     # 可以作为一个选项
-    maybe_toc_flag = = case Application.get_env(:pandox, :toc_template) do
+    maybe_toc_flag = case Application.get_env(:pandox, :toc_template) do
       nil -> []
       template_with_toc ->
         ~w(

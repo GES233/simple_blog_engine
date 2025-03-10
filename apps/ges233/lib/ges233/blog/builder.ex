@@ -1,5 +1,6 @@
 defmodule GES233.Blog.Builder do
   require Logger
+  alias GES233.Blog.Categories
   alias GES233.Blog.{Post, Tags, Series, Renderer, Media, Static}
   alias GES233.Blog.Post.{ContentRepo, RegistryBuilder}
 
@@ -64,7 +65,7 @@ defmodule GES233.Blog.Builder do
     # 2. 将内容建立索引
     # via tags, categories, serires, date
     _tags_frq = Tags.get_tags_frq_from_posts(posts)
-    _categories = []
+    _categories = Categories.build_category_tree(posts)
     _series = Series.fetch_all_series_from_posts(posts)
 
     # 3. 装载多媒体、Bib 等内容
@@ -145,7 +146,7 @@ defmodule GES233.Blog.Builder do
 
     Static.copy_to_path()
 
-    copy_file(meta_registry)
+    copy_users_assets(meta_registry)
 
     meta_registry
   end
@@ -215,7 +216,7 @@ defmodule GES233.Blog.Builder do
     end
   end
 
-  def copy_file(meta_registry) do
+  def copy_users_assets(meta_registry) do
     meta_registry
     |> Enum.map(fn {_, v} -> v end)
     # dot 生成的 svg 直接被别的函数解决了，不需要再 copy

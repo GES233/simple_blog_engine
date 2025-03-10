@@ -69,18 +69,18 @@ defmodule GES233.Blog.Categories do
   # 递归插入分类路径到树中
   defp insert_category(node, [current | rest], post_id, depth) do
     # 将字符串转为 atom
-    current_atom = String.to_atom(current)
-    
+    # current_atom = String.to_atom(current)
+
     # 查找或创建当前层级的子节点
     {matched_child, other_children} =
-      Enum.split_with(node.child, fn %Node{name: name} -> name == current_atom end)
+      Enum.split_with(node.child, fn %Node{name: name} -> name == current end)
 
     child_node =
       case matched_child do
         [] ->
           # 创建新节点
           %Node{
-            name: current_atom,
+            name: current,
             relative_depth: depth,
             child: [],
             posts: [post_id]

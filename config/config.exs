@@ -21,9 +21,9 @@ config :pandox,
   execute_path: "pandoc",
   render_args: [],
   toc_template: "apps/pandox/priv/template/with_toc.html",
-  crossref_yaml: Path.absname("apps/pandox/priv/pandoc_cressref.yaml"),
+  crossref_yaml: "apps/pandox/priv/pandoc_cressref.yaml",
   csl:
-    (Path.absname("apps/pandox/priv/csl") <> "/*.csl")
+    "apps/pandox/priv/csl/*.csl"
     |> Path.wildcard()
     |> Enum.map(
       fn p ->

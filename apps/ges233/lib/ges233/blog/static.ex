@@ -51,6 +51,10 @@ defmodule GES233.Blog.Static do
     </script>
     """
     code = "<link rel=\"stylesheet\" href=\"#{get_route("highlight")}\">"
+    _article_card = """
+    <style>
+    </style>
+    """
 
     """
     #{phx_js}
