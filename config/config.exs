@@ -15,7 +15,9 @@ config :ges233, :Media,
   dot_path: "D:/Blog/source/src"
 
 config :ges233, :Blog,
-  page_pagination: 12
+  page_pagination: 12,
+  name: "自留地",
+  description: "记录学习生活的大小事"
 
 config :pandox,
   execute_path: "pandoc",

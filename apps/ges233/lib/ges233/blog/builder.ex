@@ -1,18 +1,13 @@
 defmodule GES233.Blog.Builder do
   require Logger
-  alias GES233.Blog.Categories
-  alias GES233.Blog.{Post, Tags, Series, Renderer, Media, Static}
+  alias GES233.Blog.{Post, Tags, Series, Renderer, Media, Static, Categories}
   alias GES233.Blog.Post.{ContentRepo, RegistryBuilder}
 
   @default_rootpath Application.compile_env(
                       :ges233,
                       :blog_root,
-                      File.cwd!() |> Path.join("priv/_posts")
+                      "priv/_posts"
                     )
-
-  @pic_entry Application.compile_env(:ges233, [:Media, :pic_path])
-  @pdf_entry Application.compile_env(:ges233, [:Media, :pdf_path])
-  @dot_entry Application.compile_env(:ges233, [:Media, :dot_path])
 
   @page_pagination Application.compile_env(:ges233, [:Blog, :page_pagination])
 
@@ -22,17 +17,13 @@ defmodule GES233.Blog.Builder do
     |> Enum.reduce([], fn {:ok, res}, prev -> [res | prev] end)
   end
 
-  # def load_posts(root) do
-  #   do_fetch_posts(root)
-  # end
-
   defp do_fetch_posts(root) do
     Path.wildcard(root <> "/**/*.md")
     |> Task.async_stream(&Post.path_to_struct/1)
   end
 
   def build_from_root(root_path \\ @default_rootpath) do
-    # 1. 将文件系统上的内容变为 [%Post{}]
+    # 将文件系统上的内容变为 [%Post{}]
 
     root_path
     |> get_posts()
@@ -48,12 +39,6 @@ defmodule GES233.Blog.Builder do
     |> build_from_posts(:whole)
   end
 
-  # 博客的重构：
-  # - [x] Bib
-  # - [x] Series
-  # - [x] Tags
-  # - [ ] Categories
-  # - [x] HTML
   # Elapse
   # :timer.tc(&GES233.Blog.Builder.build_from_root/0)
   # {6075904, :ok}
@@ -62,99 +47,51 @@ defmodule GES233.Blog.Builder do
   # {13074227, :ok}  # Remove Task
   # {2822348, :ok}
   def build_from_posts(posts, :whole) do
-    # 2. 将内容建立索引
-    # via tags, categories, serires, date
-    _tags_frq = Tags.get_tags_frq_from_posts(posts)
-    _categories = Categories.build_category_tree(posts)
-    _series = Series.fetch_all_series_from_posts(posts)
-
-    # 3. 装载多媒体、Bib 等内容
-    # 依旧 id => link on server
-    # 需要将多媒体内容注入到 %Post{} 之中
-    # 可能还需要博客的一些信息
+    # 2. 装载多媒体、Bib 等内容
     meta_registry =
-      ((RegistryBuilder.build_posts_registry(posts) ++
-          RegistryBuilder.build_media_registry(@pic_entry, :pic) ++
-          RegistryBuilder.build_media_registry(@pdf_entry, :pdf) ++
-          RegistryBuilder.build_media_registry(@dot_entry, :dot)) ++
-         [])
-      |> Enum.into(%{})
-
-    ## Common process
-
-    # TODO 加上渲染的主题
-    # 目前暂时包括（classic, default, pico）
-    bodies_with_id_and_toc =
       posts
-      # 4. 将 %Posts{} 正文的链接替换为实际链接
-      # 5. 调用 Pandoc 渲染为 HTML
-      |> Enum.map(&Task.async(fn -> Post.add_html(&1, meta_registry) end))
-      |> Enum.map(&Task.await(&1, 20000))
-      # Max: 1569587μs
-      # 6. 渲染外观以及其他界面
-      |> Enum.map(fn post ->
-        {status, html} = ContentRepo.get_html(post.id)
-
-        new_body =
-          case status do
-            :ok ->
-              html
-
-            :error ->
-              post.body
-          end
-
-        # %{post | body: new_body}
-        {post.id, {post.toc, new_body}}
-      end)
-
-    # 7. 保存在特定目录
-    bodies_with_id_and_toc
-    |> Enum.map(&Task.async(fn -> save_post(&1, meta_registry) end))
-    |> Enum.map(&Task.await/1)
-
-    # 8. 把 <!--more--> 之前的部分拿出来
-
-    has_abstract =
-      bodies_with_id_and_toc
-      |> Enum.filter(fn {_id, {_, body}} -> String.contains?(body, "<!--more-->") end)
-      |> Enum.map(fn {id, {_, body}} ->
-        {id,
-         %{meta_registry[id] | body: String.split(body, "<!--more-->", parts: 2) |> Enum.at(0)}}
-      end)
-      |> Enum.into(%{})
-
-    # 这种已经没什么作用了，但我觉得这段代码最好留着
-    # 可能后期需要这种合并操作
-    # has_toc =
-    #   bodies_with_id_and_toc
-    #   |> Enum.filter(fn {_id, {toc, _}} -> !is_nil(toc) end)
-    #   |> Enum.map(fn {id, {toc, _}} -> {id, %{meta_registry[id] | toc: toc}} end)
-    #   |> Enum.into(%{})
-
-    # append_posts = for id <- Map.keys(has_abstract) ++ Map.keys(has_toc) do
-    #   case {Map.get(has_abstract, id), Map.get(has_toc, id)} do
-    #     {nil, only_toc} -> {id, only_toc}
-    #     {only_abs, nil} -> {id, only_abs}
-    #     {abs, toc} -> {id, %{abs | toc: toc.toc}}
-    #   end
-    # end |> Enum.into(%{})
-
-    append_posts = has_abstract
-
-    meta_registry = Map.merge(meta_registry, append_posts)
+      |> RegistryBuilder.get_meta_registry()
+      |> render_posts(posts)
+      |> copy_users_assets()
 
     Static.copy_to_path()
 
-    copy_users_assets(meta_registry)
+    index_registry = get_index_registry(meta_registry)
 
-    meta_registry
-    |> build_index()
+    {meta_registry, index_registry} |> build_index()
+
+    {meta_registry, index_registry}
   end
 
-  # def build_from_posts(diff_posts, {:partial, meta}) do
+  def build_from_posts(diff_posts, {:partial, {meta_registry, _}}) do
+    updated_meta = meta_registry
+    |> render_posts(diff_posts)
+    |> copy_users_assets()
 
-  def build_index(meta_registry) do
+    Static.copy_to_path()
+
+    index_registry = get_index_registry(updated_meta)
+
+    {updated_meta, index_registry} |> build_index()
+
+    {updated_meta, index_registry}
+  end
+
+  def get_index_registry(meta_registry) do
+    posts =
+      meta_registry
+      |> Enum.filter(fn {_, p} -> is_struct(p, Post) end)
+      |> Enum.map(fn {_, v} -> v end)
+
+    # via tags, categories, serires, date
+    %{
+      "tags-with-frequrent" => Tags.get_tags_frq_from_posts(posts),
+      "categories" => Categories.build_category_tree(posts),
+      "series" => Series.fetch_all_series_from_posts(posts)
+    }
+  end
+
+  def build_index({meta_registry, _index_registry}) do
     sorted_posts =
       meta_registry
       |> Enum.map(fn {_, v} -> v end)
@@ -186,6 +123,8 @@ defmodule GES233.Blog.Builder do
           )
       end
     end
+
+    ## TODO: Add /about
   end
 
   defp pagination(list, pages) when length(list) <= @page_pagination do
@@ -196,25 +135,6 @@ defmodule GES233.Blog.Builder do
     {page, rest} = Enum.split(list, @page_pagination)
 
     pagination(rest, [page | pages])
-  end
-
-  def save_post({id, {toc, body}}, meta_registry) do
-    p = %{meta_registry[id] | toc: toc}
-
-    # Recursively created path.
-    File.mkdir_p("#{Application.get_env(:ges233, :saved_path)}/#{Post.post_id_to_route(p)}")
-
-    File.write(
-      "#{Application.get_env(:ges233, :saved_path)}/#{Post.post_id_to_route(p)}/index.html",
-      body |> Renderer.add_article_layout(p, meta_registry)
-    )
-    |> case do
-      :ok ->
-        nil
-
-      {:error, reason} ->
-        Logger.warning("Save not successed when saved post `#{id}` with #{inspect(reason)}")
-    end
   end
 
   def copy_users_assets(meta_registry) do
@@ -243,5 +163,84 @@ defmodule GES233.Blog.Builder do
       end)
     )
     |> Enum.map(&Task.await/1)
+
+    meta_registry
+  end
+
+  defp render_posts(meta_registry, posts) do
+    bodies_with_id_and_toc =
+      posts
+      # 将 %Posts{} 正文的链接替换为实际链接 & 调用 Pandoc 渲染为 HTML
+      |> Enum.map(&Task.async(fn -> Post.add_html(&1, meta_registry) end))
+      |> Enum.map(&Task.await(&1, 20000))
+      # Max: 1569587μs
+      # 渲染文章网页的外观
+      |> Enum.map(fn post ->
+        {status, html} = ContentRepo.get_html(post.id)
+
+        new_body =
+          case status do
+            :ok ->
+              html
+
+            :error ->
+              post.body
+          end
+
+        {post.id, {post.toc, new_body}}
+      end)
+
+    # 保存在特定目录
+    bodies_with_id_and_toc
+    |> Enum.map(&Task.async(fn -> save_post(&1, meta_registry) end))
+    |> Enum.map(&Task.await/1)
+
+    # 把 <!--more--> 之前的部分拿出来
+
+    has_abstract =
+      bodies_with_id_and_toc
+      |> Enum.filter(fn {_id, {_, body}} -> String.contains?(body, "<!--more-->") end)
+      |> Enum.map(fn {id, {_, body}} ->
+        {id,
+         %{meta_registry[id] | body: String.split(body, "<!--more-->", parts: 2) |> Enum.at(0)}}
+      end)
+      |> Enum.into(%{})
+
+    # 这种已经没什么作用了，但我觉得这段代码最好留着
+    # 可能后期需要这种合并操作
+    # has_toc =
+    #   bodies_with_id_and_toc
+    #   |> Enum.filter(fn {_id, {toc, _}} -> !is_nil(toc) end)
+    #   |> Enum.map(fn {id, {toc, _}} -> {id, %{meta_registry[id] | toc: toc}} end)
+    #   |> Enum.into(%{})
+
+    # append_posts = for id <- Map.keys(has_abstract) ++ Map.keys(has_toc) do
+    #   case {Map.get(has_abstract, id), Map.get(has_toc, id)} do
+    #     {nil, only_toc} -> {id, only_toc}
+    #     {only_abs, nil} -> {id, only_abs}
+    #     {abs, toc} -> {id, %{abs | toc: toc.toc}}
+    #   end
+    # end |> Enum.into(%{})
+
+    Map.merge(meta_registry, has_abstract)
+  end
+
+  def save_post({id, {toc, body}}, meta_registry) do
+    p = %{meta_registry[id] | toc: toc}
+
+    # Recursively created path.
+    File.mkdir_p("#{Application.get_env(:ges233, :saved_path)}/#{Post.post_id_to_route(p)}")
+
+    File.write(
+      "#{Application.get_env(:ges233, :saved_path)}/#{Post.post_id_to_route(p)}/index.html",
+      body |> Renderer.add_article_layout(p, meta_registry)
+    )
+    |> case do
+      :ok ->
+        nil
+
+      {:error, reason} ->
+        Logger.warning("Save not successed when saved post `#{id}` with #{inspect(reason)}")
+    end
   end
 end

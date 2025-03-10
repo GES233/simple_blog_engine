@@ -22,15 +22,44 @@
       </ul>
     </nav>
   </header>
+
   <main class="container">
     <article class="heti">
+
       <%= for post <- @posts do %>
         <%= GES233.Blog.Post.Components.card(post, :index) %>
       <% end %>
+
     </article>
   </main>
+
   <footer>
-      <!-- TODO: Implement page numbering -->
+    <div align="center">
+      <%= if @page == 1 do %>
+        <button class="outline secondary" onClick="window.location.href='/'">1</button>
+      <% else %>
+        <button class="outline" onClick="window.location.href='/'">1</button>
+      <% end %>
+      <%= if @total_pages <= 10 do %>
+        <%= for p <- 2..@total_pages do %>
+          <%= if @page == p do %>
+            <button class="outline secondary" onClick="window.location.href='/page/<%= p %>'"><%= p %></button>
+          <% else %>
+            <button class="outline" onClick="window.location.href='/page/<%= p %>'"><%= p %></button>
+          <% end %>
+        <% end %>
+        <% else %>
+          <!-- <%= cond do %>
+            <% @page <= 3 -> %>
+            A
+            <% @page >= @total_pages ->  %>
+            B
+            <% true -> %>
+            C
+          <% end %>
+          <%# Only: 1, 2, ..., p-1, p, p+1, -2, -1 %> -->
+      <% end %>
+    </div>
   </footer>
 </body>
 
