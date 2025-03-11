@@ -56,30 +56,35 @@ defmodule Pandox do
   def args(input, output) do
     yaml_path = Application.get_env(:pandox, :crossref_yaml)
 
-    yaml = if yaml_path do
-      "-M crossrefYaml=\"" <> yaml_path <> "\""
-    else
-      ""
-    end
+    yaml =
+      if yaml_path do
+        "-M crossrefYaml=\"" <> yaml_path <> "\""
+      else
+        ""
+      end
 
     csl_path = Application.get_env(:pandox, :csl)["GB7714"]
 
-    csl = if csl_path do
-      "--csl=\"" <> csl_path <> "\""
-    else
-      ""
-    end
+    csl =
+      if csl_path do
+        "--csl=\"" <> csl_path <> "\""
+      else
+        ""
+      end
 
     # 可以作为一个选项
-    maybe_toc_flag = case Application.get_env(:pandox, :toc_template) do
-      nil -> []
-      template_with_toc ->
-        ~w(
+    maybe_toc_flag =
+      case Application.get_env(:pandox, :toc_template) do
+        nil ->
+          []
+
+        template_with_toc ->
+          ~w(
           --toc
           --template
           #{template_with_toc}
         )
-    end
+      end
 
     # 获得模板
     # https://stackoverflow.com/questions/62774695/pandoc-where-are-css-files-for-syntax-highlighting-code

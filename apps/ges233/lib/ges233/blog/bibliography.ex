@@ -8,6 +8,7 @@ defmodule GES233.Blog.Bibliography do
   def maybe_validate_bibliography_exist({%Post{extra: extra} = post, bib_context}) do
     if Map.get(extra, "pandoc") do
       %{"pandoc" => pandox_options} = extra
+
       with {:ok, bib_path_realtive} <- Map.fetch(pandox_options, "bibliography"),
            bib_path = Path.join([@entry, bib_path_realtive]),
            :ok <- File.touch(bib_path) do

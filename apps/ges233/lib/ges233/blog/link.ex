@@ -12,21 +12,27 @@ defmodule GES233.Blog.Link do
       |> Enum.at(1)
 
     case Map.get(meta, inner) do
-      %Post{} -> Post.post_id_to_route(meta[inner])
+      %Post{} ->
+        Post.post_id_to_route(meta[inner])
 
-      %Media{type: :dot} -> meta[inner].route_path || """
-      ```dot
-      #{meta[inner].inner_content}
-      ```
-      """
+      %Media{type: :dot} ->
+        meta[inner].route_path ||
+          """
+          ```dot
+          #{meta[inner].inner_content}
+          ```
+          """
 
-      %Media{type: :pdf} -> meta[inner].route_path |> GES233.Blog.Static.inject_when_pdf()
+      %Media{type: :pdf} ->
+        meta[inner].route_path |> GES233.Blog.Static.inject_when_pdf()
 
-      %Media{type: :pic} -> meta[inner].route_path
+      %Media{type: :pic} ->
+        meta[inner].route_path
 
       # like function defination in Julia
       # bla bla ::{DataFrame,Any}
-      _ -> match
+      _ ->
+        match
     end
   end
 

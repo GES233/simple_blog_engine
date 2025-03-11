@@ -84,9 +84,9 @@ defmodule GES233.Blog.Post do
       # 如果内容过大的话可能会变成 {:ref, id}
       |> Map.merge(%{
         content:
-        content
-        |> get_post_content()
-        |> maybe_archive_large_content(file_meta[:id])
+          content
+          |> get_post_content()
+          |> maybe_archive_large_content(file_meta[:id])
       })
       ## 构建 %Post{}
       |> then(&struct!(__MODULE__, &1))
@@ -97,31 +97,34 @@ defmodule GES233.Blog.Post do
   end
 
   def post_id_to_route(post = %__MODULE__{}) do
-    date = post.create_at
-    |> NaiveDateTime.to_date()
-    |> Date.to_string()
-    |> String.split("-")
-    |> Enum.drop(-1)
+    date =
+      post.create_at
+      |> NaiveDateTime.to_date()
+      |> Date.to_string()
+      |> String.split("-")
+      |> Enum.drop(-1)
 
-    "/#{Enum.join((date ++ [post.id]), "/")}"
+    "/#{Enum.join(date ++ [post.id], "/")}"
   end
 
   def add_html(post, meta) do
-    html_body = GES233.Blog.Renderer.convert_markdown(post, [meta: meta])
+    html_body = GES233.Blog.Renderer.convert_markdown(post, meta: meta)
 
-    [toc, html_body] = if String.contains?(html_body, "TABLEOFCONTENTS") do
-      String.split(html_body, "TABLEOFCONTENTS", parts: 2)
-    else
-      [nil, html_body]
-    end
+    [toc, html_body] =
+      if String.contains?(html_body, "TABLEOFCONTENTS") do
+        String.split(html_body, "TABLEOFCONTENTS", parts: 2)
+      else
+        [nil, html_body]
+      end
 
-    html_body = if GES233.Blog.Post.ContentRepo.enough_large?(html_body) do
-      GES233.Blog.Post.ContentRepo.cache_html(html_body, post.id)
+    html_body =
+      if GES233.Blog.Post.ContentRepo.enough_large?(html_body) do
+        GES233.Blog.Post.ContentRepo.cache_html(html_body, post.id)
 
-      {:ref, post.id}
-    else
-      html_body
-    end
+        {:ref, post.id}
+      else
+        html_body
+      end
 
     %{post | body: html_body, toc: toc}
   end

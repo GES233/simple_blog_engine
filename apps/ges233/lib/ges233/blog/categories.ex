@@ -53,9 +53,10 @@ defmodule GES233.Blog.Categories do
   """
   def build_category_tree(posts) do
     # 获取所有分类并附加文章ID
-    all_categories_with_posts = Enum.flat_map(posts, fn post ->
-      Enum.map(post.categories, &{&1, post.id})
-    end)
+    all_categories_with_posts =
+      Enum.flat_map(posts, fn post ->
+        Enum.map(post.categories, &{&1, post.id})
+      end)
 
     # 初始化根节点
     root = Node.init_node()
@@ -85,6 +86,7 @@ defmodule GES233.Blog.Categories do
             child: [],
             posts: [post_id]
           }
+
         [existing | _] ->
           # 更新已有节点的 posts
           %Node{existing | posts: [post_id | existing.posts]}

@@ -64,9 +64,10 @@ defmodule GES233.Blog.Builder do
   end
 
   def build_from_posts(diff_posts, {:partial, {meta_registry, _}}) do
-    updated_meta = meta_registry
-    |> render_posts(diff_posts)
-    |> copy_users_assets()
+    updated_meta =
+      meta_registry
+      |> render_posts(diff_posts)
+      |> copy_users_assets()
 
     Static.copy_to_path()
 

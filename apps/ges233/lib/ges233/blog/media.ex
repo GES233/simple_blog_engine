@@ -50,14 +50,20 @@ defmodule GES233.Blog.Media do
   def parse_media(path) do
     [_, exp] = Path.basename(path) |> String.split(".", parts: 2)
 
-    format = case exp do
-      "dot" -> :dot
-      "pdf" -> :pdf
-      _ -> cond do
-        exp in ["jpg", "jpeg", "webp", "png"] -> :pic
-        true -> :invalid
+    format =
+      case exp do
+        "dot" ->
+          :dot
+
+        "pdf" ->
+          :pdf
+
+        _ ->
+          cond do
+            exp in ["jpg", "jpeg", "webp", "png"] -> :pic
+            true -> :invalid
+          end
       end
-    end
 
     parse_media(path, format)
   end
@@ -70,8 +76,21 @@ defmodule GES233.Blog.Media do
     id = [series, id_under_seires] |> Enum.join("-")
 
     case image do
-      "img" -> %__MODULE__{id: id, type: :pic, path: path, route_path: "/image/#{series}/#{id_under_seires}.#{ext}"}
-      _ -> %__MODULE__{id: id_under_seires, type: :pic, path: path, route_path: "/image/#{id_under_seires}.#{ext}"}
+      "img" ->
+        %__MODULE__{
+          id: id,
+          type: :pic,
+          path: path,
+          route_path: "/image/#{series}/#{id_under_seires}.#{ext}"
+        }
+
+      _ ->
+        %__MODULE__{
+          id: id_under_seires,
+          type: :pic,
+          path: path,
+          route_path: "/image/#{id_under_seires}.#{ext}"
+        }
     end
   end
 
@@ -87,6 +106,7 @@ defmodule GES233.Blog.Media do
         File.write(path, svg)
 
         %__MODULE__{id: id, type: :dot, path: path, route_path: "![](/svg/#{id}.svg)"}
+
       {:error, {code, reason}} ->
         Logger.warning("DOT #{id} build failed with code #{code} and reason #{reason}")
 

@@ -1,5 +1,6 @@
 defmodule GES233.Blog.Static do
   alias GES233.Blog.Static.FlatFiles
+
   @static_index %{
     "phx" => {"/assets/phoenix_html.js", "apps/ges233/assets/vendor/phoenix_html.js"},
     "heti_css" => {"/assets/heti.min.css", "apps/ges233/assets/vendor/heti/heti.min.css"},
@@ -7,7 +8,9 @@ defmodule GES233.Blog.Static do
     "picocss" => {"/assets/picocss.min.css", "apps/ges233/assets/vendor/picocss.min.css"},
     # 如果想要更新主题的话：
     # https://github.com/jgm/pandoc/issues/7860#issuecomment-1938177020
-    "highlight" => {"/assets/code-highlighting.css", "apps/ges233/assets/vendor/pandoc/highlighting-breezedark.css"},
+    "highlight" =>
+      {"/assets/code-highlighting.css",
+       "apps/ges233/assets/vendor/pandoc/highlighting-breezedark.css"},
     "favicon" => {"/favicon.ico", "apps/ges233/assets/favicon.ico"}
   }
 
@@ -24,7 +27,8 @@ defmodule GES233.Blog.Static do
       files = FlatFiles.list_all(source)
 
       for f <- files do
-        target_f = String.replace(f, source, "#{Application.get_env(:ges233, :saved_path)}/#{target}")
+        target_f =
+          String.replace(f, source, "#{Application.get_env(:ges233, :saved_path)}/#{target}")
 
         target_f |> Path.split() |> :lists.droplast() |> Path.join() |> File.mkdir_p()
 
@@ -44,6 +48,7 @@ defmodule GES233.Blog.Static do
     phx_js = "<script src=\"#{get_route("phx")}\"></script>"
     picocss = "<link rel =\"stylesheet\" href=\"#{get_route("picocss")}\" >"
     heti_css = "<link rel=\"stylesheet\" href=\"#{get_route("heti_css")}\">"
+
     heti_js = """
     <script src="#{get_route("heti_js")}"></script>
     <script>
@@ -51,7 +56,9 @@ defmodule GES233.Blog.Static do
       heti.autoSpacing();
     </script>
     """
+
     code = "<link rel=\"stylesheet\" href=\"#{get_route("highlight")}\">"
+
     _sober = """
     <script type="module" src="https://unpkg.com/sober@1.0.6/dist/main.js">
     </script>

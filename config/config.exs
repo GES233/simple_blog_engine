@@ -6,6 +6,7 @@ config :logger, :console,
 
 config :ges233,
   blog_root: "D:/Blog/source/_posts",
+  about: "D:/Blog/source/about.md",
   bibliography_entry: "D:/Blog/source/_bibs",
   saved_path: "priv/generated"
 
@@ -27,8 +28,7 @@ config :pandox,
   csl:
     "apps/pandox/priv/csl/*.csl"
     |> Path.wildcard()
-    |> Enum.map(
-      fn p ->
-        {p |> Path.basename() |> String.split(".") |> Enum.at(0), p}
-      end)
+    |> Enum.map(fn p ->
+      {p |> Path.basename() |> String.split(".") |> Enum.at(0), p}
+    end)
     |> Enum.into(%{})

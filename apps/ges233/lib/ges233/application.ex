@@ -12,11 +12,12 @@ defmodule GES233.Application do
   end
 
   defp childrens(_options \\ []) do
-    server? = if (Application.get_env(:ges233, :saved_path) |> File.ls!() |> length()) > 0 do
-      [{Bandit, scheme: :http, plug: GES233.Blog.SimpleServer}]
-    else
-      []
-    end
+    server? =
+      if Application.get_env(:ges233, :saved_path) |> File.ls!() |> length() > 0 do
+        [{Bandit, scheme: :http, plug: GES233.Blog.SimpleServer}]
+      else
+        []
+      end
 
     [
       {GES233.Blog.Post.ContentRepo, []},
