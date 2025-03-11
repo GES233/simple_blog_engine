@@ -1,5 +1,5 @@
 defmodule GES233.Blog.Watcher do
-  alias GES233.Blog.{Builder, Media, Post}
+  alias GES233.Blog.{Builder, Post, Media}
 
   use GenServer
 
@@ -47,48 +47,100 @@ defmodule GES233.Blog.Watcher do
   # FileSystem related
 
   def handle_info(
-        {:file_event, watcher_pid, {path, _events}},
-        %{watchers: %{posts: posts_watcher, assets: assets_watcher}, meta: {meta, index}}
+        {:file_event, _watcher_pid, {_path, _events} = got},
+        %{watchers: %{posts: _posts_watcher, assets: _assets_watcher}, meta: {_meta, _index}} = s
       ) do
-        new_meta = case watcher_pid do
-      ^posts_watcher ->
-        # Post => 渲染
-        # Bib => 渲染 extra[:bibliography] 中有这个的 Posts
-        id = path
-        |> Path.basename()
-        |> :binary.split(".")
-        |> hd()
+    IO.inspect(got, label: :event)
 
-        if id in Map.keys(meta) do
-          # Post
-          Builder.build_from_posts(Post.path_to_struct(path), {:partial, {meta, index}})
-        else
-          # Bib
-          posts =
-            meta
-            |> Enum.filter(fn {_, p} -> is_struct(p, Post) end)
-            |> Enum.map(fn {_, v} -> v end)
-            |> Enum.filter(&Map.get(&1.extra, "pandoc"))
-            |> Enum.filter(&(&1.extra["pandoc"]["bibliography"] == id))
+    # 将命令改为操作，在特定的事件窗口（e.g. 2000ms无更新）执行更新
 
-            Builder.build_from_posts(posts, {:partial, {meta, index}})
-        end
+    # {:noreply, %{watchers: %{posts: posts_watcher, assets: assets_watcher}, meta: new_meta}}
+    {:noreply, s}
+  end
 
-      ^assets_watcher ->
-        Media.parse_media(
-          path
-          |> :binary.split(".")
-          |> hd(),
-          path
+  def do_update(diff_paths, {meta, index}, :update) do
+    # update 操作包含一个隐藏的前提：没有在 meta 里的都是 bibliography
+    ids =
+      Enum.map(
+        diff_paths,
+        &(&1
           |> Path.basename()
           |> :binary.split(".")
-          |> Enum.at(1)
-          |> String.to_atom()
-        )
+          |> hd())
+      )
 
-        {meta, index}
+    maybe_bib =
+      ids
+      |> Enum.reject(&(&1 in Map.keys(meta)))
+
+    posts_within_bib =
+      if length(maybe_bib) >= 1 do
+        meta
+        |> Enum.filter(fn {_, p} -> is_struct(p, Post) end)
+        |> Enum.map(fn {_, v} -> v end)
+        |> Enum.filter(&(!is_nil(Map.get(&1.extra, "pandoc"))))
+        |> Enum.filter(&(!is_nil(Map.get(&1.extra["pandoc"], "bibliography"))))
+        |> Enum.filter(&(&1.extra["pandoc"]["bibliography"] in maybe_bib))
+      else
+        []
+      end
+
+    posts =
+      Enum.filter(meta, fn {k, _} -> k in ids end)
+      |> Enum.filter(fn {_, v} -> is_struct(v, Post) end)
+      |> Keyword.keys()
+
+    # If Media
+
+    maybe_media =
+      Enum.filter(meta, fn {k, _} -> k in ids end)
+      |> Enum.filter(fn {_, v} -> is_struct(v, Media) end)
+      |> Keyword.keys()
+
+    media_validator = maybe_media |> Enum.map(&"#{&1}.")
+
+    meta =
+      diff_paths
+      |> Enum.filter(&String.contains?(&1, media_validator))
+      |> Enum.map(&Media.parse_media/1)
+      |> Enum.map(fn m -> {m.id, m} end)
+      |> Enum.into(%{})
+      |> then(&Map.merge(meta, &1))
+
+    diff_paths
+    |> Enum.filter(&String.contains?(&1, posts_within_bib ++ posts))
+    |> Enum.map(&Post.path_to_struct/1)
+    |> Builder.build_from_posts({:partial, {meta, index}})
+  end
+
+  def do_update(created_paths, {_meta, _index}, :create) do
+    # Is path under `Application.get_env(:ges233, :blog_root)` ?
+    _maybe_posts =
+      Enum.filter(created_paths, &String.contains?(&1, Application.get_env(:ges233, :blog_root)))
+
+    _maybe_bib =
+      Enum.filter(
+        created_paths,
+        &String.contains?(&1, Application.get_env(:ges233, :bibliography_entry))
+      )
+
+    _maybe_media = []
+  end
+
+  def update_bib(bib_paths, meta) do
+    bib_paths
+    |> List.wrap()
+    |> Enum.filter(&String.contains?(&1, Application.get_env(:ges233, :bibliography_entry)))
+
+    if length(bib_paths) >= 1 do
+      meta
+      |> Enum.filter(fn {_, p} -> is_struct(p, Post) end)
+      |> Enum.map(fn {_, v} -> v end)
+      |> Enum.filter(&(!is_nil(Map.get(&1.extra, "pandoc"))))
+      |> Enum.filter(&(!is_nil(Map.get(&1.extra["pandoc"], "bibliography"))))
+      |> Enum.filter(&(&1.extra["pandoc"]["bibliography"] in bib_paths))
+    else
+      []
     end
-
-    {:noreply, %{watchers: %{posts: posts_watcher, assets: assets_watcher}, meta: new_meta}}
   end
 end

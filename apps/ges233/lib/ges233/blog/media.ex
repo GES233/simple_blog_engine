@@ -47,6 +47,21 @@ defmodule GES233.Blog.Media do
     |> Enum.map(&Task.await/1)
   end
 
+  def parse_media(path) do
+    [_, exp] = Path.basename(path) |> String.split(".", parts: 2)
+
+    format = case exp do
+      "dot" -> :dot
+      "pdf" -> :pdf
+      _ -> cond do
+        exp in ["jpg", "jpeg", "webp", "png"] -> :pic
+        true -> :invalid
+      end
+    end
+
+    parse_media(path, format)
+  end
+
   def parse_media(path, :pic) do
     [series, image] = path |> Path.split() |> Enum.reverse() |> Enum.slice(1..2)
 
