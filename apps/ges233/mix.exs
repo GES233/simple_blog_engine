@@ -30,7 +30,8 @@ defmodule GES233.MixProject do
       {:plug, "~> 1.16"},
       {:bandit, "~> 1.0"},
       {:yaml_elixir, "~> 2.11"},
-      {:pandox, in_umbrella: true}
+      {:pandox, in_umbrella: true},
+      {:file_system, "~> 1.0"}
     ]
   end
 end

@@ -19,7 +19,8 @@ defmodule GES233.Application do
     end
 
     [
-      {GES233.Blog.Post.ContentRepo, []}
+      {GES233.Blog.Post.ContentRepo, []},
+      # {GES233.Blog.Watcher, []}
     ] ++ server?
   end
 end

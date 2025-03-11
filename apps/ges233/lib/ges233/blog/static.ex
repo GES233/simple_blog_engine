@@ -51,9 +51,9 @@ defmodule GES233.Blog.Static do
     </script>
     """
     code = "<link rel=\"stylesheet\" href=\"#{get_route("highlight")}\">"
-    _article_card = """
-    <style>
-    </style>
+    _sober = """
+    <script type="module" src="https://unpkg.com/sober@1.0.6/dist/main.js">
+    </script>
     """
 
     """
