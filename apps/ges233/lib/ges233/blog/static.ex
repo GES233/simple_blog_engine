@@ -7,7 +7,8 @@ defmodule GES233.Blog.Static do
     "picocss" => {"/assets/picocss.min.css", "apps/ges233/assets/vendor/picocss.min.css"},
     # 如果想要更新主题的话：
     # https://github.com/jgm/pandoc/issues/7860#issuecomment-1938177020
-    "highlight" => {"/assets/code-highlighting.css", "apps/ges233/assets/vendor/pandoc/highlighting-breezedark.css"}
+    "highlight" => {"/assets/code-highlighting.css", "apps/ges233/assets/vendor/pandoc/highlighting-breezedark.css"},
+    "favicon" => {"/favicon.ico", "apps/ges233/assets/favicon.ico"}
   }
 
   @static_with_file_operate %{"pdf_js" => {"/dist/pdf_js", "apps/ges233/assets/vendor/pdf_js"}}
