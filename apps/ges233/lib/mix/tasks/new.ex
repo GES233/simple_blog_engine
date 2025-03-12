@@ -7,7 +7,7 @@ defmodule Mix.Tasks.G.New do
     File.write("#{Application.get_env(:ges233, :blog_root)}/#{path}.md", """
     ---
     title: #{path}
-    date: #{NaiveDateTime.local_now() |> NaiveDateTime.to_date() |> Date.to_string()}
+    date: #{NaiveDateTime.local_now() |> NaiveDateTime.to_string()}
     tags: []
     categories:
     - []
