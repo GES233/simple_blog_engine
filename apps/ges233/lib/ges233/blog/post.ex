@@ -34,7 +34,7 @@ defmodule GES233.Blog.Post do
           content: String.t(),
           body: String.t(),
           toc: String.t() | nil,
-          progress: :final | {:in_progress, number()},
+          progress: any(),
           extra: %{}
         }
   defstruct [
