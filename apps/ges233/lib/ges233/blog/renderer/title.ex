@@ -6,8 +6,10 @@ defmodule GES233.Blog.Renderer.Title do
     "#{post_title} - #{@site_title}"
   end
 
+  def in_list(1), do: "#{@site_title} :: 首页"
+
   def in_list(page_num) do
-    "{{Blabla}} :: #{page_num |> Integer.to_string()}"
+    "#{@site_title} :: 第 #{page_num |> Integer.to_string()} 页"
   end
 
   def about() do

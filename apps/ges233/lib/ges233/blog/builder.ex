@@ -112,7 +112,7 @@ defmodule GES233.Blog.Builder do
         {1, index_page} ->
           File.write(
             "#{Application.get_env(:ges233, :saved_path)}/index.html",
-            Renderer.add_page_layout(index_page, 1, length(pages))
+            Renderer.add_index_layout(index_page, 1, length(pages))
           )
 
         {num, page} ->
@@ -120,7 +120,7 @@ defmodule GES233.Blog.Builder do
 
           File.write(
             "#{Application.get_env(:ges233, :saved_path)}/page/#{num}/index.html",
-            Renderer.add_page_layout(page, num, length(pages))
+            Renderer.add_index_layout(page, num, length(pages))
           )
       end
     end
