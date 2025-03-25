@@ -24,3 +24,6 @@ erl_crash.dump
 
 # Generated
 /priv/generated/
+
+## Content(use other repo)
+source/
