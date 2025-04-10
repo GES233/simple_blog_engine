@@ -4,6 +4,11 @@ defmodule GES233.Application do
   use Application
 
   def start(_start_type, _start_args) do
+    # Create `/generated` folder if not exist.
+    Application.get_env(:ges233, :saved_path)
+    |> File.exists?()
+    |> if(do: File.mkdir!(Application.get_env(:ges233, :saved_path)))
+
     children = childrens()
 
     opts = [strategy: :one_for_one, name: GES233.Supervisor]

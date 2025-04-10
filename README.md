@@ -35,5 +35,3 @@ category:
 ---
 Your content.
 ```
-
-TODO: Create generated if path not exist.
