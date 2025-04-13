@@ -22,8 +22,9 @@ erl_crash.dump
 # Temporary files, for example, from tests.
 /tmp/
 
-# Generated
+# Generated and Git Repo
 /priv/generated/
+.deploy_git/
 
 ## Content(use other repo)
 source/
