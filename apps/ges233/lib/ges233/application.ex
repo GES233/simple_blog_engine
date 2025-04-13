@@ -7,7 +7,7 @@ defmodule GES233.Application do
     # Create `/generated` folder if not exist.
     Application.get_env(:ges233, :saved_path)
     |> File.exists?()
-    |> if(do: File.mkdir!(Application.get_env(:ges233, :saved_path)))
+    |> unless(do: File.mkdir!(Application.get_env(:ges233, :saved_path)))
 
     children = childrens()
 

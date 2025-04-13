@@ -31,7 +31,8 @@ defmodule GES233.MixProject do
       {:bandit, "~> 1.0"},
       {:yaml_elixir, "~> 2.11"},
       {:pandox, in_umbrella: true},
-      {:file_system, "~> 1.0"}
+      {:file_system, "~> 1.0"},
+      {:git_cli, "~> 0.3.0"}
     ]
   end
 end
