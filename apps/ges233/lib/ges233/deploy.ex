@@ -32,17 +32,20 @@ defmodule GES233.Deploy do
   def commit_git(target_path \\ get_git_path()) do
     repo = if valid_repo(target_path), do: %Git.Repository{path: target_path} |> IO.inspect()
 
-    Git.add(repo) |> IO.inspect(label: :add)
+    Git.add(repo, ["."]) |> IO.inspect(label: :add)
 
-    Git.commit(repo, ["-m", "Commit on #{DateTime.utc_now()}+0000"]) |> IO.inspect(label: :commit)
-
-    Git.push(repo) |> IO.inspect(label: :push)
+    Git.commit(repo, ["-m", "Commit on #{DateTime.utc_now()}+0000"])
+    |> IO.inspect(label: :commit)
+    |> case do
+      {:ok, _} -> Git.push(repo) |> IO.inspect(label: :push)
+      _ -> nil
+    end
   end
 
   def exec() do
     path = get_git_path()
 
-    copy_files_to_git(path)
+    :ok = copy_files_to_git(path)
 
     commit_git(path)
   end
