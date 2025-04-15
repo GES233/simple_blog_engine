@@ -9,7 +9,8 @@ Only for individual.
 ## Prerequisite
 
 - Pandoc
-- Graphviz\[Optional\]
+  - Pandoc-crossref
+- Graphviz
 
 ## How to use
 

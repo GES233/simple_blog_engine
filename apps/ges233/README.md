@@ -3,8 +3,8 @@
 ## RoadMap
 
 - [x] Create meta(like `meta.json` in hexo)
-- [ ] Index Page
-  - [ ] SortedAsTime
+- [x] Index Page
+  - [x] SortedAsTime
   - [ ] Tags
   - [ ] Categories
 - [x] Link replace
@@ -17,6 +17,6 @@
   - [ ] Footer
 - [x] Copy and manipulate file to root
 - [x] Serve the app via Bandit
-- [ ] Git
-  - [ ] Create comment
-  - [ ] Upload to GitHub
+- [x] Git
+  - [x] Create comment
+  - [x] Upload to GitHub

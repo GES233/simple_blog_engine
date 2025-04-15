@@ -20,6 +20,10 @@ config :ges233, :Blog,
   name: "自留地",
   description: "记录学习生活的大小事"
 
+config :ges233, :Git,
+  repo: "https://github.com/GES233/GES233.github.io",
+  branch: "site"
+
 config :pandox,
   execute_path: "pandoc",
   render_args: [],
