@@ -96,6 +96,7 @@ defmodule GES233.Blog.Post do
     end
   end
 
+  @spec post_id_to_route(GES233.Blog.Post.t()) :: nonempty_binary()
   def post_id_to_route(post = %__MODULE__{}) do
     date =
       post.create_at
@@ -107,6 +108,7 @@ defmodule GES233.Blog.Post do
     "/#{Enum.join(date ++ [post.id], "/")}"
   end
 
+  @spec add_html(GES233.Blog.Post.t(), any()) :: GES233.Blog.Post.t()
   def add_html(post, meta) do
     html_body = GES233.Blog.Renderer.convert_markdown(post, meta: meta)
 

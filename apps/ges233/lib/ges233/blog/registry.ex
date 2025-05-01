@@ -5,6 +5,8 @@ defmodule GES233.Blog.Post.RegistryBuilder do
   @pdf_entry Application.compile_env(:ges233, [:Media, :pdf_path])
   @dot_entry Application.compile_env(:ges233, [:Media, :dot_path])
 
+  @type post_registry :: %{atom() => Post.t()}
+
   def build_posts_registry(posts) do
     posts
     |> Enum.map(&Task.async(fn -> remove_raw_and_html(&1) end))

@@ -90,6 +90,10 @@ defmodule GES233.Blog.Builder do
       "categories" => Categories.build_category_tree(posts),
       "series" => Series.fetch_all_series_from_posts(posts)
     }
+
+    # Add about
+
+    # Add secret
   end
 
   def build_index({meta_registry, _index_registry}) do
@@ -126,6 +130,8 @@ defmodule GES233.Blog.Builder do
     end
 
     ## TODO: Add /about
+
+    ## TODO: Add /secret
   end
 
   defp pagination(list, pages) when length(list) <= @page_pagination do

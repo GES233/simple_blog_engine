@@ -2,6 +2,7 @@ defmodule GES233.Blog.Tags do
   # 标签
   alias GES233.Blog.Post
 
+  @spec get_tags_frq_from_posts([Post.t()]) :: %{atom() => [Post.t()]}
   def get_tags_frq_from_posts(posts) do
     posts
     |> Enum.reduce([], &[&1.tags | &2])
