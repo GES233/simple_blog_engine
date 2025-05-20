@@ -1,6 +1,7 @@
 defmodule GES233.Deploy do
   @git_path [
-    ~S"D:\Blog\.deploy_git"
+    ~S"D:\Blog\.deploy_git",
+    ~S"D:\Blog\site_repo"
   ]
 
   def get_git_path do
