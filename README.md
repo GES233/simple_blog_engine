@@ -11,6 +11,7 @@ Only for individual.
 - Pandoc
   - Pandoc-crossref
 - Graphviz
+- Lilypond
 
 ## How to use
 

@@ -41,9 +41,19 @@ defmodule GES233.Blog.Media do
     |> Enum.map(&Task.await/1)
   end
 
+  ## Render
+
+  # Graphviz graph(*.dot) -> svg
   def get_media_under(path, :dot) do
     Path.wildcard(path <> "**/*.dot")
     |> Enum.map(&Task.async(fn -> parse_media(&1, :dot) end))
+    |> Enum.map(&Task.await/1)
+  end
+
+  # Music sheet snippet(*.ly) -> svg
+  def get_media_under(path, :lilypond) do
+    Path.wildcard(path <> "**/*.ly")
+    |> Enum.map(&Task.async(fn -> parse_media(&1, :lilypond) end))
     |> Enum.map(&Task.await/1)
   end
 
@@ -57,6 +67,9 @@ defmodule GES233.Blog.Media do
 
         "pdf" ->
           :pdf
+
+        "ly" ->
+          :lilypond
 
         _ ->
           cond do
@@ -113,6 +126,28 @@ defmodule GES233.Blog.Media do
         content = File.read(path)
 
         %__MODULE__{id: id, type: :dot, path: path, inner_content: content}
+    end
+  end
+
+  def parse_media(path, :lilypond) do
+    id = Path.basename(path, ".ly")
+
+    case Lilypond.execute(path) do
+      {:ok, svg} ->
+        root = "#{Application.get_env(:ges233, :saved_path)}/svg"
+        File.mkdir_p(root)
+
+        path = "#{root}/#{id}.svg"
+        File.write(path, svg)
+
+        %__MODULE__{id: id, type: :lilypond, path: path, route_path: "![](/svg/#{id}.svg)"}
+
+      {:error, {code, reason}} ->
+        Logger.warning("DOT #{id} build failed with code #{code} and reason #{reason}")
+
+        content = File.read(path)
+
+        %__MODULE__{id: id, type: :lilypond, path: path, inner_content: content}
     end
   end
 
