@@ -3,9 +3,20 @@ defmodule GES233.Deploy do
     ~S"D:\Blog\.deploy_git",
     ~S"D:\Blog\site_repo"
   ]
+  @new_git_path "site_repo"
 
   def get_git_path do
-    @git_path |> Enum.filter(&valid_repo/1) |> hd()
+    maybe_path = @git_path
+    |> Enum.filter(&valid_repo/1)
+
+    if length(maybe_path) > 0 do
+      hd(maybe_path)
+    else
+      # TODO: create new git repo.
+      Git.clone!([Application.get_env(:ges233, :Git)[:repo], @new_git_path])
+
+      @new_git_path
+    end
   end
 
   defp valid_repo(path) do
@@ -48,6 +59,6 @@ defmodule GES233.Deploy do
 
     :ok = copy_files_to_git(path)
 
-    commit_git(path)
+    # commit_git(path)
   end
 end
