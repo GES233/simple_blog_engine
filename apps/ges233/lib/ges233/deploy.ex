@@ -12,8 +12,9 @@ defmodule GES233.Deploy do
     if length(maybe_path) > 0 do
       hd(maybe_path)
     else
-      # TODO: create new git repo.
       Git.clone!([Application.get_env(:ges233, :Git)[:repo], @new_git_path])
+
+      # TODO: Switch to `site` branch.
 
       @new_git_path
     end
