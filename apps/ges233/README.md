@@ -5,8 +5,7 @@
 - [x] Create meta(like `meta.json` in hexo)
 - [x] Index Page
   - [x] SortedAsTime
-  - [ ] Tags
-  - [ ] Categories
+  - [x] Tags
 - [x] Link replace
 - [ ] Configure pandoc well
   - [ ] Word count
@@ -20,3 +19,7 @@
 - [x] Git
   - [x] Create comment
   - [x] Upload to GitHub
+- [ ] About(`/about`)
+- [ ] Index based on categories
+- [ ] Index based on tags
+- [ ] Friend link
