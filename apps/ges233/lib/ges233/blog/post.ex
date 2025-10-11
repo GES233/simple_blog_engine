@@ -75,6 +75,15 @@ defmodule GES233.Blog.Post do
       })
       ## 时间相关
       |> overwrite_create_date(content_meta)
+      |> overwrite_update_date(
+        path
+        |> Path.split()
+        |> Enum.reverse()
+        |> tl()
+        |> tl()
+        |> Enum.reverse()
+        |> Path.join()
+      )
       |> then(fn d -> %{d | create_at: convert_date(d[:create_at])} end)
       |> then(fn d -> %{d | update_at: convert_date(d[:update_at])} end)
       ## 整理单独博客的标签
@@ -135,6 +144,20 @@ defmodule GES233.Blog.Post do
     maybe_create_from_file = content_meta[:create_at] || content_meta[:date]
 
     Map.put(meta, :create_at, maybe_create_from_file || meta[:create_at])
+  end
+
+  # 先这么放着
+  # 期望是从 Git 的提交记录找
+  defp overwrite_update_date(meta, root_path) do
+    {:ok, maybe_update_from_git_commit, _} =
+      Git.execute_command(
+        %Git.Repository{path: root_path},
+        "log",
+        ~w(--pretty=format:\"%cd\" --date=iso-strict -1 _posts/#{meta.id}.md),
+        fn date_string -> date_string |> String.replace(~r("), "") |> DateTime.from_iso8601() end
+      )
+
+    Map.put(meta, :update_at, maybe_update_from_git_commit)
   end
 
   defp convert_date(%DateTime{} = datetime), do: datetime

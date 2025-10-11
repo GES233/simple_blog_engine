@@ -25,7 +25,7 @@
   <main class="container">
     <article class="heti">
 
-<%= GES233.Blog.Post.Components.card(@post, :article) %>
+<%= GES233.Blog.Render.PostComponents.card(@post, :article) %>
 
       <main>
         <%= if !is_nil(@post.toc) do %>
@@ -40,6 +40,8 @@
         <div style="text-align:center"><%= case @post.progress do %>
           <% :final -> %>
             ——完——
+          <% :longterm -> %>
+            ——长期更新——
           <% [:wip, p] -> %>
             <%= if p <= 50, do: "——亟待更新——", else: "——未完待续——" %>
           <% [:blocking, _] -> %>

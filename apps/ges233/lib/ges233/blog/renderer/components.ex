@@ -1,4 +1,4 @@
-defmodule GES233.Blog.Post.Components do
+defmodule GES233.Blog.Render.PostComponents do
   alias GES233.Blog.Post
 
   def show_tags(tags) do
@@ -21,6 +21,14 @@ defmodule GES233.Blog.Post.Components do
         """
         <svg width="14px" height="14px" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
           <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+        </svg><small>100%</small>
+        """
+
+      # 长期更新
+      :longterm ->
+        """
+        <svg width="14px" height="14px" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
         </svg><small>100%</small>
         """
 
@@ -66,11 +74,11 @@ defmodule GES233.Blog.Post.Components do
           </div>
           <div>
             <small>进度</small>
-            #{GES233.Blog.Post.Components.appearance_status(post.progress)}
+            #{GES233.Blog.Render.PostComponents.appearance_status(post.progress)}
           </div>
         </div>
         <div class="pico">
-          #{GES233.Blog.Post.Components.show_tags(post.tags)}
+          #{GES233.Blog.Render.PostComponents.show_tags(post.tags)}
         </div>
       </header>
     """

@@ -59,6 +59,6 @@ defmodule GES233.Deploy do
 
     :ok = copy_files_to_git(path)
 
-    # commit_git(path)
+    commit_git(path)
   end
 end

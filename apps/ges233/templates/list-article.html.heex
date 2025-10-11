@@ -27,7 +27,7 @@
     <article class="heti">
 
       <%= for post <- @posts do %>
-        <%= GES233.Blog.Post.Components.card(post, :index) %>
+        <%= GES233.Blog.Render.PostComponents.card(post, :index) %>
       <% end %>
 
     </article>
