@@ -36,3 +36,5 @@ config :pandox,
       {p |> Path.basename() |> String.split(".") |> Enum.at(0), p}
     end)
     |> Enum.into(%{})
+
+config :elixir, :time_zone_database, Tz.TimeZoneDatabase
