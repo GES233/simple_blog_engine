@@ -9,7 +9,8 @@ defmodule GES233.Blog.Page do
   ]
 
   @page_mapper %{
-    about: {"about.md", "/about"}
+    about: {"about.md", "/about"},
+    friends: {"friends.md", "/friends"}
   }
   @valid_roles Map.keys(@page_mapper)
 
