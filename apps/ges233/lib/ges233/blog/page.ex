@@ -20,56 +20,76 @@ defmodule GES233.Blog.Page do
     |> Enum.map(&add_html(&1, meta_registry))
   end
 
-  def get_route_by_role(role)when is_atom(role) and role in @valid_roles do
+  def get_route_by_role(role) when is_atom(role) and role in @valid_roles do
     {_, route} = @page_mapper[role]
 
     route
   end
 
   def location_to_struct(role) do
-    with {:ok, page_meta, content} <- parse_page_file(role),
-         content_meta = %{} <- content |> get_page_meta() |> parse_page_meta(role) do
+    with {:ok, page_meta, raw} <- parse_page_file(role),
+         content_meta = %{} <- raw |> get_page_meta() |> parse_page_meta(role) do
       page_meta
-        |> Map.merge(content_meta)
-        |> Map.merge(%{
+      |> Map.merge(content_meta)
+      |> Map.merge(%{
         content:
-          content
+          raw
           |> get_page_content()
           |> maybe_archive_large_content(role)
       })
-        |> then(&struct!(__MODULE__, &1))
+      |> then(&struct!(__MODULE__, &1))
     else
       {:error, err} -> {:error, err, role}
       err -> {:error, err, role}
     end
   end
 
+  def add_html(%__MODULE__{role: :friends} = page, meta) do
+    # Injects friends list with style.
+    # Clear friends in meta.
+
+    inner_body =
+      page
+      |> Map.merge(%{
+        content:
+          page.content
+          |> EEx.eval_string(assigns: [friends: page.extra[:friends]])
+      })
+      |> GES233.Blog.Renderer.convert_markdown(meta: meta)
+
+    do_postlude(page, inner_body)
+  end
+
   def add_html(page, meta) do
-    html_body = GES233.Blog.Renderer.convert_markdown(page, meta: meta)
+    inner_body = GES233.Blog.Renderer.convert_markdown(page, meta: meta)
 
-    [toc, html_body] =
-      if String.contains?(html_body, "TABLEOFCONTENTS") do
-        String.split(html_body, "TABLEOFCONTENTS", parts: 2)
+    do_postlude(page, inner_body)
+  end
+
+  def do_postlude(page_or_post, inner_body) do
+    [toc, inner_body] =
+      if String.contains?(inner_body, "TABLEOFCONTENTS") do
+        String.split(inner_body, "TABLEOFCONTENTS", parts: 2)
       else
-        [nil, html_body]
+        [nil, inner_body]
       end
 
-    html_body =
-      if GES233.Blog.ContentRepo.enough_large?(html_body) do
-        GES233.Blog.ContentRepo.cache_html(html_body, page.role)
+    inner_body =
+      if GES233.Blog.ContentRepo.enough_large?(inner_body) do
+        GES233.Blog.ContentRepo.cache_html(inner_body, page_or_post.role)
 
-        {:ref, page.role}
+        {:ref, page_or_post.role}
       else
-        html_body
+        inner_body
       end
 
-    %{page | body: html_body, toc: toc}
+    %{page_or_post | body: inner_body, toc: toc}
   end
 
   defp parse_page_file(role)
        when is_atom(role) and role in @valid_roles do
     path =
-      "#{Application.get_env(:ges233, :page_entry)}/#{{location, _} = @page_mapper[role];
+      "#{Application.get_env(:ges233, :page_entry)}/#{{location, _} = @page_mapper[role]
       location}"
 
     case File.exists?(path) do

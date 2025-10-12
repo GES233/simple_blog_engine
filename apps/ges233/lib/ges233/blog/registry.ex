@@ -10,7 +10,7 @@ defmodule GES233.Blog.Post.RegistryBuilder do
   def build_posts_registry(posts) do
     posts
     |> Enum.map(&Task.async(fn -> remove_raw_and_html(&1) end))
-    |> Enum.map(&Task.await/1)
+    |> Enum.map(&Task.await(&1, 10000))
     |> Enum.map(fn post -> {post.id, post} end)
 
     # |> Enum.into(%{})

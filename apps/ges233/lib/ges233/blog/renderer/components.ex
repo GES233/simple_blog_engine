@@ -111,3 +111,17 @@ defmodule GES233.Blog.Render.PostComponents do
     """
   end
 end
+
+defmodule GES233.Blog.Renderer.PageComponents do
+  alias GES233.Blog.Page.Friend
+
+  def friend(%Friend{} = friend) do
+    """
+    #### #{friend.name}
+
+    ![#{friend.site}](#{friend.avatar})
+
+    _#{friend.desp|| "`nil`"}_
+    """
+  end
+end

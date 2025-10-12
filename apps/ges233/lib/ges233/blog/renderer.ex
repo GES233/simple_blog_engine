@@ -4,17 +4,19 @@ defmodule GES233.Blog.Renderer do
   def convert_markdown(post = %{}, opts) do
     all_posts_and_media = Keyword.get(opts, :meta)
 
+    # callback_pre_pandoc = Keyword.get(opts, :pre_pandoc_callback, (& &1))
+    # callback_after_pandoc = Keyword.get(opts, :pre_after_callback, (& &1))
+
     body = link_replace(post, all_posts_and_media)
 
     {post, %{}}
+    # |> then(&callback_pre_pandoc)
     |> Bibliography.maybe_validate_bibliography_exist()
     |> Bibliography.ensure_bib_format()
     |> Bibliography.add_title_to_meta()
     |> Bibliography.postlude()
-    # 先过一遍 Pandox
     |> then(&Pandox.render_markdown_to_html(body, &1))
-
-    # 再过一遍 PhoenixHTML
+    # |> then(&callback_after_pandoc)
   end
 
   defp link_replace(%{content: {:ref, id}}, posts_and_mata) do
