@@ -5,7 +5,7 @@ defmodule GES233.Blog.Media do
   乱七八糟的规矩：
 
   - 图片
-    - 如果这个图片有系列的话（也就是在 /img 下面的文件夹的里边）那是 `![Your description](:{Seires-Id})`
+    - 如果这个图片有系列的话（也就是在 `/img` 下面的文件夹的里边）那是 `![Your description](:{Seires-FileNameExcludeExt})`
     其将会变成 `![Your description](path/to/image)`
     - 如果在 /img 下面的话，那就是简单的 `:{ImageId}`
   - PDF
@@ -13,6 +13,8 @@ defmodule GES233.Blog.Media do
   - DOT
     - 其格式最好为 `:{Dot-FileId}` ，有可能被渲染为 `![Dot-FileId](path/to/compiled/svg)` 或
     `FileContentCodeBlockIfFailer`
+  - LY
+    - Lilypond 主要有两种使用情况：一是整个谱表，二是乐谱的片段。
 
   其中 `FileContentCodeBlockIfFailer` 就是可能存在错误的 DOT 文件内容。
   """
@@ -51,6 +53,7 @@ defmodule GES233.Blog.Media do
   end
 
   # Music sheet snippet(*.ly) -> svg
+  # other format(e.g. pdf/png) can use image or pdf
   def get_media_under(path, :lilypond) do
     Path.wildcard(path <> "**/*.ly")
     |> Enum.map(&Task.async(fn -> parse_media(&1, :lilypond) end))

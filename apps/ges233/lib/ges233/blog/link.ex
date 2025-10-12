@@ -19,6 +19,7 @@ defmodule GES233.Blog.Link do
         meta[inner].route_path ||
           """
           ```dot
+          // Compile failed!
           #{meta[inner].inner_content}
           ```
           """
@@ -28,6 +29,8 @@ defmodule GES233.Blog.Link do
 
       %Media{type: :pic} ->
         meta[inner].route_path
+
+      # TODO: Lilypond
 
       # like function defination in Julia
       # bla bla ::{DataFrame,Any}
@@ -43,7 +46,7 @@ defmodule GES233.Blog.Link do
       """
       <style>
         /* Reference: https://www.webhek.com/post/responsive-video-iframes-keeping-aspect-ratio-with-only-css/ */
-        /* 这个规则规定了iframe父元素容器的尺寸，我们要去它的宽高比应该是 25:14 */
+        /* 这个规则规定了iframe父元素容器的尺寸，我们要求它的宽高比应该是 25:14 */
         .aspect-ratio {
           position: relative;
           /* heti 的容器下允许使用 100% */

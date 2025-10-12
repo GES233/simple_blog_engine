@@ -1,4 +1,4 @@
-defmodule GES233.Blog.Post.ContentRepo do
+defmodule GES233.Blog.ContentRepo do
   @moduledoc """
   负责保存可能出现的大容量数据。
 

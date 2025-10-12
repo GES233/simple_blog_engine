@@ -1,7 +1,7 @@
 defmodule GES233.Blog.Builder do
   require Logger
-  alias GES233.Blog.{Post, Tags, Series, Renderer, Media, Static, Categories}
-  alias GES233.Blog.Post.{ContentRepo, RegistryBuilder}
+  alias GES233.Blog.{Post, Tags, Series, Renderer, Media, Static, Categories, Page, ContentRepo}
+  alias GES233.Blog.Post.RegistryBuilder
 
   @default_rootpath Application.compile_env(
                       :ges233,
@@ -58,9 +58,9 @@ defmodule GES233.Blog.Builder do
 
     index_registry = get_index_registry(meta_registry)
 
-    {meta_registry, index_registry} |> build_index()
-
     {meta_registry, index_registry}
+    |> build_index()
+    |> build_pages()
   end
 
   def build_from_posts(diff_posts, {:partial, {meta_registry, _}}) do
@@ -73,9 +73,9 @@ defmodule GES233.Blog.Builder do
 
     index_registry = get_index_registry(updated_meta)
 
-    {updated_meta, index_registry} |> build_index()
-
     {updated_meta, index_registry}
+    |> build_index()
+    |> build_pages()
   end
 
   def get_index_registry(meta_registry) do
@@ -88,15 +88,12 @@ defmodule GES233.Blog.Builder do
     %{
       "tags-with-frequrent" => Tags.get_tags_frq_from_posts(posts),
       "categories" => Categories.build_category_tree(posts),
-      "series" => Series.fetch_all_series_from_posts(posts)
+      "series" => Series.fetch_all_series_from_posts(posts),
+      "single_pages" => Page.all_in_one(meta_registry)
     }
-
-    # Add about
-
-    # Add secret
   end
 
-  def build_index({meta_registry, _index_registry}) do
+  def build_index({meta_registry, _index_registry} = context) do
     sorted_posts =
       meta_registry
       |> Enum.map(fn {_, v} -> v end)
@@ -132,6 +129,38 @@ defmodule GES233.Blog.Builder do
     ## TODO: Add /about
 
     ## TODO: Add /secret
+
+    ## TODO: Add /friends
+    context
+  end
+
+  def build_pages({_meta_registry, %{"single_pages" => pages}} = context) do
+    opt = (fn page ->
+        {status, html} = ContentRepo.get_html(page.role)
+
+        new_body =
+          case status do
+            :ok ->
+              html
+
+            :error ->
+              page.body
+          end
+
+        new_body
+      end)
+
+    for page <- pages do
+      inner_html = opt.(page)
+      path =
+        ~w(#{Application.get_env(:ges233, :saved_path) |> Path.absname()} #{page.role |> Page.get_route_by_role()})
+        |> Path.join()
+      File.mkdir_p(path)
+
+      File.write(~w(#{path} index.html) |> Path.join(), Renderer.add_pages_layout(inner_html, page))
+    end
+
+    context
   end
 
   defp pagination(list, pages) when length(list) <= @page_pagination do

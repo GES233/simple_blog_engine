@@ -1,7 +1,7 @@
 defmodule GES233.Blog.Renderer do
-  alias GES233.Blog.{Post, Bibliography, Static, Renderer}
+  alias GES233.Blog.{Bibliography, Static, Renderer, ContentRepo, Post, Page}
 
-  def convert_markdown(post = %Post{}, opts) do
+  def convert_markdown(post = %{}, opts) do
     all_posts_and_media = Keyword.get(opts, :meta)
 
     body = link_replace(post, all_posts_and_media)
@@ -17,17 +17,17 @@ defmodule GES233.Blog.Renderer do
     # 再过一遍 PhoenixHTML
   end
 
-  defp link_replace(%Post{content: {:ref, id}}, posts_and_mata) do
-    {:ok, raw} = Post.ContentRepo.get_raw(id)
+  defp link_replace(%{content: {:ref, id}}, posts_and_mata) do
+    {:ok, raw} = ContentRepo.get_raw(id)
 
     GES233.Blog.Link.inner_replace(raw, posts_and_mata)
   end
 
-  defp link_replace(%Post{content: pre}, posts_and_mata) when is_binary(pre) do
+  defp link_replace(%{content: pre}, posts_and_mata) when is_binary(pre) do
     GES233.Blog.Link.inner_replace(pre, posts_and_mata)
   end
 
-  def add_article_layout(inner_html, post, _maybe_meta_about_blog) do
+  def add_article_layout(inner_html, post = %Post{}, _maybe_meta_about_blog) do
     inner_html
     |> Phoenix.HTML.raw()
     |> Phoenix.HTML.safe_to_string()
@@ -49,6 +49,18 @@ defmodule GES233.Blog.Renderer do
         meta: Static.inject_to_assigns(),
         page_title: Renderer.Title.in_list(page)
       ]
+    )
+  end
+
+  def add_pages_layout(inner_html, page_struct = %Page{}) do
+    inner_html
+    |> Phoenix.HTML.raw()
+    |> Phoenix.HTML.safe_to_string()
+    |> then(
+      &EEx.eval_file("apps/ges233/templates/page.html.heex",
+        assigns: [page: page_struct, meta: Static.inject_to_assigns(), inner_content: &1, page_title: Renderer.Title.in_article(page_struct.title)],
+        engine: Phoenix.HTML.Engine
+      )
     )
   end
 end

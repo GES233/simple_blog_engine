@@ -21,7 +21,7 @@ defmodule GES233.Blog.Post do
   也可能会存在额外的元数据。
   """
 
-  alias GES233.Blog.Post
+  alias GES233.Blog.{Post, Page}
 
   @type t :: %__MODULE__{
           id: atom() | String.t(),
@@ -64,7 +64,7 @@ defmodule GES233.Blog.Post do
         end
       ) do
     with {:ok, file_meta, content} <- parse_post_file(path),
-         content_meta = %{} <- get_post_meta(content) do
+         content_meta = %{} <- Page.get_page_meta(content) do
       file_meta
       |> Map.merge(%{
         title: content_meta[:title],
@@ -94,8 +94,8 @@ defmodule GES233.Blog.Post do
       |> Map.merge(%{
         content:
           content
-          |> get_post_content()
-          |> maybe_archive_large_content(file_meta[:id])
+          |> Page.get_page_content()
+          |> Page.maybe_archive_large_content(file_meta[:id])
       })
       ## 构建 %Post{}
       |> then(&struct!(__MODULE__, &1))
@@ -129,8 +129,8 @@ defmodule GES233.Blog.Post do
       end
 
     html_body =
-      if GES233.Blog.Post.ContentRepo.enough_large?(html_body) do
-        GES233.Blog.Post.ContentRepo.cache_html(html_body, post.id)
+      if GES233.Blog.ContentRepo.enough_large?(html_body) do
+        GES233.Blog.ContentRepo.cache_html(html_body, post.id)
 
         {:ref, post.id}
       else
@@ -146,7 +146,6 @@ defmodule GES233.Blog.Post do
     Map.put(meta, :create_at, maybe_create_from_file || meta[:create_at])
   end
 
-  # 先这么放着
   # 期望是从 Git 的提交记录找
   defp overwrite_update_date(meta, root_path) do
       maybe_update_from_git_commit =
@@ -196,76 +195,6 @@ defmodule GES233.Blog.Post do
 
   def get_post_id(path) do
     path |> Path.basename() |> String.split(".") |> hd()
-  end
-
-  @doc """
-  读取文件的元数据并且将其传递用作后用。
-
-  当前形式是：
-
-      ---
-      %{blabla: blabla}
-      ---
-
-  也就是 Elixir 的 Nap。
-
-  也兼容 YAML （原来博客的格式）。
-  """
-  def get_post_meta(content) do
-    meta =
-      content
-      |> :binary.split(["\n---\n", "\r\n---\r\n"])
-      |> hd()
-      |> :binary.split(["---\n", "---\r\n"])
-      |> tl()
-      |> hd()
-
-    format =
-      cond do
-        String.starts_with?(meta, "%{") -> :map
-        true -> :yaml
-      end
-
-    get_meta_from_map(meta, format)
-  end
-
-  defp get_meta_from_map(meta, :map) do
-    meta
-    |> Code.eval_string()
-    |> case do
-      {%{} = meta, _binding} -> meta
-      _ -> :invalid_map
-    end
-  end
-
-  defp get_meta_from_map(meta, :yaml) do
-    meta
-    |> YamlElixir.read_from_string!(atoms: true)
-    |> Enum.map(fn {k, v} -> {String.to_atom(k), v} end)
-    |> Enum.into(%{})
-  end
-
-  @doc """
-  获取博客内容。
-  """
-  def get_post_content(content) do
-    content
-    |> :binary.split(["\n---\n", "\r\n---\r\n"])
-    |> tl()
-    |> hd()
-  end
-
-  @doc """
-  将可能过大的内容本体放入 `GES233.Blog.Post.ContentRepo` 。
-  """
-  def maybe_archive_large_content(content, id) do
-    if GES233.Blog.Post.ContentRepo.enough_large?(content) do
-      GES233.Blog.Post.ContentRepo.cache_raw(content, id)
-
-      {:ref, id}
-    else
-      content
-    end
   end
 
   def get_post_from_id([%Post{} | _] = posts_repo, id) do

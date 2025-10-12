@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>
-    <%= @post_title %>
+    <%= @page_title %>
   </title>
   <%= @meta %>
   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -34,30 +34,16 @@
   <main class="container">
     <article class="heti">
 
-<%= GES233.Blog.Render.PostComponents.card(@post, :article) %>
-
       <main>
-        <%= if !is_nil(@post.toc) do %>
+        <%= if !is_nil(@page.toc) do %>
           <div>
-            <%= @post.toc %>
+            <%= @page.toc %>
           </div>
         <% end %>
         <div>
 
 <%= @inner_content %>
 
-        <div style="text-align:center"><%= case @post.progress do %>
-          <% :final -> %>
-            ——完——
-          <% :longterm -> %>
-            ——长期更新——
-          <% [:longterm, p] -> %>
-            <%= if p <= 50, do: "——亟待更新——", else: "——长期更新——" %>
-          <% [:wip, p] -> %>
-            <%= if p <= 50, do: "——亟待更新——", else: "——未完待续——" %>
-          <% [:blocking, _] -> %>
-            ——无限期停止撰写——
-        <% end %></div>
         </div>
       </main>
     </article>
