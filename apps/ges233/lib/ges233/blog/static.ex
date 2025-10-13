@@ -44,7 +44,7 @@ defmodule GES233.Blog.Static do
     "<div class=\"aspect-ratio\"><iframe src=\"/dist/pdf_js/web/viewer.html?file=#{inner}\"></iframe></div>"
   end
 
-  def inject_to_assigns do
+  def inject_to_assigns(opts \\ []) do
     phx_js = "<script src=\"#{get_route("phx")}\"></script>"
     picocss = "<link rel =\"stylesheet\" href=\"#{get_route("picocss")}\" >"
     heti_css = "<link rel=\"stylesheet\" href=\"#{get_route("heti_css")}\">"
@@ -64,12 +64,79 @@ defmodule GES233.Blog.Static do
     </script>
     """
 
+    friends = """
+    <style>
+      .friend-card {
+        display: flex;
+        align-items: flex-start;
+        padding: 1.5rem;
+        margin: 1rem 0;
+        border: 1px solid #e1e5e9;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+      }
+
+      .friend-card:hover {
+        border-color: #3498db;
+        box-shadow: 0 2px 8px rgba(52, 152, 219, 0.1);
+      }
+
+      .friend-avatar {
+        flex-shrink: 0;
+        margin-right: 1.5rem;
+      }
+
+      .friend-avatar img {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #f1f3f4;
+      }
+
+      .friend-content {
+        flex: 1;
+      }
+
+      /* 响应式设计 */
+      @media (max-width: 768px) {
+        .friend-card {
+          flex-direction: column;
+          text-align: center;
+        }
+
+        .friend-avatar {
+          margin-right: 0;
+          margin-bottom: 1rem;
+        }
+
+        .friend-avatar img {
+          width: 80px;
+          height: 80px;
+        }
+      }
+
+      /* 网格布局容器样式 */
+      .heti-skip {
+        display: grid;
+        gap: 1.5rem;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      }
+      </style>
+    """
+
+    opt = cond do
+      :friends in opts -> "#{friends}"
+      true -> ""
+    end
+
     """
     #{phx_js}
     #{picocss}
     #{heti_css}
     #{heti_js}
     #{code}
+    #{opt}
     """
   end
 
