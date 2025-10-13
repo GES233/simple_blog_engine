@@ -1,6 +1,6 @@
 defmodule GES233.Blog.Builder do
   require Logger
-  alias GES233.Blog.{Post, Tags, Series, Renderer, Media, Static, Categories, Page, ContentRepo}
+  alias GES233.Blog.{Post, Tags, Series, Renderer, Media, Static, Categories, Page, ContentRepo, Context}
   alias GES233.Blog.Post.RegistryBuilder
 
   @default_rootpath Application.compile_env(
@@ -46,6 +46,7 @@ defmodule GES233.Blog.Builder do
   # {11537203, :ok}  # Add media related
   # {13074227, :ok}  # Remove Task
   # {2822348, :ok}
+  @spec build_from_posts([Post.t()], :whole | {:partial, Context.t()}) :: Context.t()
   def build_from_posts(posts, :whole) do
     # 2. 装载多媒体、Bib 等内容
     meta_registry =
@@ -126,11 +127,6 @@ defmodule GES233.Blog.Builder do
       end
     end
 
-    ## TODO: Add /about
-
-    ## TODO: Add /secret
-
-    ## TODO: Add /friends
     context
   end
 

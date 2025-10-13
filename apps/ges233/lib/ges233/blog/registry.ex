@@ -1,5 +1,5 @@
 defmodule GES233.Blog.Post.RegistryBuilder do
-  alias GES233.Blog.{Post, Media}
+  alias GES233.Blog.{Post, Media, Context}
 
   @pic_entry Application.compile_env(:ges233, [:Media, :pic_path])
   @pdf_entry Application.compile_env(:ges233, [:Media, :pdf_path])
@@ -33,6 +33,7 @@ defmodule GES233.Blog.Post.RegistryBuilder do
     %{post | content: nil, body: nil}
   end
 
+  @spec get_meta_registry([Post.t()]) :: Context.meta_registry()
   def get_meta_registry(posts) do
     ((build_posts_registry(posts) ++
         build_media_registry(@pic_entry, :pic) ++
