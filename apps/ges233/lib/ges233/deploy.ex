@@ -55,11 +55,11 @@ defmodule GES233.Deploy do
     end
   end
 
-  def exec() do
+  def exec(commit \\ false) do
     path = get_git_path()
 
     :ok = copy_files_to_git(path)
 
-    commit_git(path)
+    if commit, do: commit_git(path)
   end
 end

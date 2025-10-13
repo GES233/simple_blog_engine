@@ -116,12 +116,49 @@ defmodule GES233.Blog.Renderer.PageComponents do
   alias GES233.Blog.Page.Friend
 
   def friend(%Friend{} = friend) do
+    avatar_part =
+      if friend.avatar do
+        """
+        <div class="friend-avatar">
+          <img src="#{friend.avatar}" alt="#{friend.name}" loading="lazy">
+        </div>
+        """
+      else
+        ""
+      end
+
+    desp_part =
+      if friend.desp do
+        """
+        <hgroup>
+          <h3>#{friend.name}</h3>
+          <p>#{friend.desp}</p>
+        </hgroup>
+        """
+      else
+        """
+        <h3>#{friend.name}</h3>
+        """
+      end
+
+    site_link =
+      if friend.site do
+        if friend.site |> String.contains?("ges233") do
+          """
+            <button disabled class="outline"><a href="#{friend.site}" target="_blank" rel="noopener">就是这儿！</a></button>
+          """
+        else
+          """
+            <button class="outline"><a href="#{friend.site}" target="_blank" rel="noopener">让我访问！</a></button>
+          """
+        end
+      else
+        ""
+      end
+
+
     """
-    #### #{friend.name}
-
-    ![#{friend.site}](#{friend.avatar})
-
-    _#{friend.desp|| "`nil`"}_
+    <div class="friend-card">#{avatar_part}<div class="friend-content">#{desp_part}#{site_link}</div></div>
     """
   end
 end

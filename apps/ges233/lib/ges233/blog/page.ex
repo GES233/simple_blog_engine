@@ -53,7 +53,17 @@ defmodule GES233.Blog.Page do
       |> Map.merge(%{
         content:
           page.content
-          |> EEx.eval_string(assigns: [friends: page.extra[:friends]])
+          |> EEx.eval_string(
+            assigns: [
+              friends: page.extra[:friends],
+              self: %GES233.Blog.Page.Friend{
+                name: "自留地 - GES233's Blog",
+                site: "https://ges233.github.io",
+                desp: "得以存在便是一个奇迹，能够思考就是一件乐事。",
+                avatar: "https://avatars.githubusercontent.com/u/30802664?v=4"
+              }
+            ]
+          )
       })
       |> GES233.Blog.Renderer.convert_markdown(meta: meta)
 
