@@ -18,8 +18,8 @@ defmodule GES233.Blog.Static do
 
   ## 对文件的复制/移动操作
 
-  def copy_static, do:
-    Writer.SinglePage.copy_static_to_path(@static_index, @static_with_file_operate)
+  def copy_static,
+    do: Writer.SinglePage.copy_static_to_path(@static_index, @static_with_file_operate)
 
   ## 对页面 HTML 的操作
 
@@ -109,10 +109,11 @@ defmodule GES233.Blog.Static do
       </style>
     """
 
-    opt = cond do
-      :friends in opts -> "#{friends}"
-      true -> ""
-    end
+    opt =
+      cond do
+        :friends in opts -> "#{friends}"
+        true -> ""
+      end
 
     """
     #{phx_js}

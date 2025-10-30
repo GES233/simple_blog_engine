@@ -12,7 +12,6 @@ defmodule Mix.Tasks.G.New do
     categories:
     - []
     ---
-    """
-    )
+    """)
   end
 end

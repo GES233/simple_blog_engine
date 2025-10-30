@@ -16,6 +16,7 @@ defmodule GES233.Blog.Renderer do
     |> Bibliography.add_title_to_meta()
     |> Bibliography.postlude()
     |> then(&Pandox.render_markdown_to_html(body, &1))
+
     # |> then(&callback_after_pandoc)
   end
 
@@ -35,7 +36,12 @@ defmodule GES233.Blog.Renderer do
     |> Phoenix.HTML.safe_to_string()
     |> then(
       &EEx.eval_file("apps/ges233/templates/article.html.heex",
-        assigns: [post: post, meta: Static.inject_to_assigns(), inner_content: &1, post_title: Renderer.Title.in_article(post.title)],
+        assigns: [
+          post: post,
+          meta: Static.inject_to_assigns(),
+          inner_content: &1,
+          post_title: Renderer.Title.in_article(post.title)
+        ],
         engine: Phoenix.HTML.Engine
       )
     )
@@ -57,17 +63,23 @@ defmodule GES233.Blog.Renderer do
   def add_pages_layout(inner_html, page_struct = %Page{}) do
     friends? = page_struct.role == :friends
 
-    opts = cond do
-      friends? -> [:friends]
-      true -> []
-    end
+    opts =
+      cond do
+        friends? -> [:friends]
+        true -> []
+      end
 
     inner_html
     |> Phoenix.HTML.raw()
     |> Phoenix.HTML.safe_to_string()
     |> then(
       &EEx.eval_file("apps/ges233/templates/page.html.heex",
-        assigns: [page: page_struct, meta: Static.inject_to_assigns(opts), inner_content: &1, page_title: Renderer.Title.in_article(page_struct.title)],
+        assigns: [
+          page: page_struct,
+          meta: Static.inject_to_assigns(opts),
+          inner_content: &1,
+          page_title: Renderer.Title.in_article(page_struct.title)
+        ],
         engine: Phoenix.HTML.Engine
       )
     )

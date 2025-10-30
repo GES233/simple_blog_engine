@@ -17,7 +17,8 @@ defmodule GES233.Blog.Writer do
     |> length()
     |> then(&Range.new(1, &1))
     |> Enum.zip(pages)
-    |> Task.async_stream(fn {index, page} -> WriterSingle.write_index_page(index, page, pages) end,
+    |> Task.async_stream(
+      fn {index, page} -> WriterSingle.write_index_page(index, page, pages) end,
       max_concurrency: System.schedulers_online()
     )
     |> Stream.run()
@@ -34,9 +35,7 @@ defmodule GES233.Blog.Writer do
         "index.html"
       ]
       |> Path.join()
-      |> WriterSingle.write_single_page(
-        Renderer.add_pages_layout(get_body_from_page(page), page)
-      )
+      |> WriterSingle.write_single_page(Renderer.add_pages_layout(get_body_from_page(page), page))
     end)
     |> Stream.run()
 
@@ -280,9 +279,7 @@ defmodule GES233.Blog.Writer.SinglePage do
           :ok
 
         {:error, reason} ->
-          Logger.warning(
-            "File #{file} copied not successfully due to #{inspect(reason)}"
-          )
+          Logger.warning("File #{file} copied not successfully due to #{inspect(reason)}")
       end
     end
 

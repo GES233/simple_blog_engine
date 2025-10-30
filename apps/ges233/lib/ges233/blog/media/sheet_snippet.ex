@@ -3,7 +3,7 @@ defmodule GES233.Blog.Media.SheetSnippet do
   defstruct [
     :snippet_folder,
     :snippet_name,
-    :lilypond_version,
+    :lilypond_version
   ]
 
   # def get_lilypond_version(), do: Lilypond.execute()

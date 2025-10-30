@@ -6,14 +6,15 @@ defmodule GES233.Deploy do
   @new_git_path "site_repo"
 
   def get_git_path do
-    maybe_path = @git_path
-    |> Enum.filter(&valid_repo/1)
+    maybe_path =
+      @git_path
+      |> Enum.filter(&valid_repo/1)
 
     if length(maybe_path) > 0 do
       hd(maybe_path)
     else
       Git.clone!([Application.get_env(:ges233, :Git)[:repo], @new_git_path])
-      #Switch to `site` branch.
+      # Switch to `site` branch.
       |> Git.checkout(["site"])
 
       @new_git_path

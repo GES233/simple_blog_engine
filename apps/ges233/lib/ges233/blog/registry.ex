@@ -57,8 +57,9 @@ defmodule GES233.Blog.Post.RegistryBuilder do
       |> Enum.map(&Task.async(fn -> remove_raw_and_html(&1) end))
       |> Enum.map(&Task.await(&1, 10000))
 
-    posts_registry = posts
-      |> Enum.map(&({&1.id, &1}))
+    posts_registry =
+      posts
+      |> Enum.map(&{&1.id, &1})
 
     media_registry =
       build_media_registry(@pic_entry, :pic) ++

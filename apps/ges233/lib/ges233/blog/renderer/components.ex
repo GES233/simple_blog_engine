@@ -156,7 +156,6 @@ defmodule GES233.Blog.Renderer.PageComponents do
         ""
       end
 
-
     """
     <div class="friend-card">#{avatar_part}<div class="friend-content">#{desp_part}#{site_link}</div></div>
     """

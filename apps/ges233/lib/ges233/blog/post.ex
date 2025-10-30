@@ -148,19 +148,21 @@ defmodule GES233.Blog.Post do
 
   # 期望是从 Git 的提交记录找
   defp overwrite_update_date(meta, root_path) do
-      maybe_update_from_git_commit =
+    maybe_update_from_git_commit =
       Git.execute_command(
         %Git.Repository{path: root_path},
         "log",
         ~w(--pretty=format:\"%cd\" --date=iso-strict -1 _posts/#{meta.id}.md),
-        fn date_string -> date_string |> String.replace(~r("), "") |> DateTime.from_iso8601() |>
-        case do
-          # Uncommit file.
-          {:error, _} -> DateTime.now!("Asia/Shanghai")
-
-          {:ok, commit_time, _} -> commit_time
+        fn date_string ->
+          date_string
+          |> String.replace(~r("), "")
+          |> DateTime.from_iso8601()
+          |> case do
+            # Uncommit file.
+            {:error, _} -> DateTime.now!("Asia/Shanghai")
+            {:ok, commit_time, _} -> commit_time
+          end
         end
-      end
       )
 
     Map.put(meta, :update_at, maybe_update_from_git_commit)
