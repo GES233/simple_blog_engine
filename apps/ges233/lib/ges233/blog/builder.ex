@@ -10,12 +10,7 @@ defmodule GES233.Blog.Builder do
   }
 
   alias GES233.Blog.Post.RegistryBuilder
-
-  @default_rootpath Application.compile_env(
-                      :ges233,
-                      :blog_root,
-                      "priv/_posts"
-                    )
+  import RegistryBuilder, only: [get_posts_root_path: 0]
 
   @spec get_posts(binary()) :: [Post.t(), ...]
   def get_posts(root) do
@@ -34,7 +29,7 @@ defmodule GES233.Blog.Builder do
   # 5879091 (Only VSCode)
   # 6867661(VSCode and Browser opened)
   @spec build_from_root() :: Context.t()
-  def build_from_root(root_path \\ @default_rootpath) do
+  def build_from_root(root_path \\ get_posts_root_path()) do
     # 将文件系统上的内容变为 [%Post{}]
 
     root_path
@@ -43,12 +38,22 @@ defmodule GES233.Blog.Builder do
   end
 
   # Only for test
-  def build_single_post(post_id \\ "World-execute-me-lyrics-analyse") do
+  def build_single_post(post_id \\ "World-execute-me-lyrics-analyse", context \\ [])
+
+  def build_single_post(post_id, []) do
     [
-      "#{@default_rootpath}/#{post_id}.md"
+      "#{get_posts_root_path()}/#{post_id}.md"
       |> Post.path_to_struct()
     ]
     |> build_from_posts(:whole)
+  end
+
+  def build_single_post(post_id, context) do
+    [
+      "#{get_posts_root_path()}/#{post_id}.md"
+      |> Post.path_to_struct()
+    ]
+    |> build_from_posts({:partial, context})
   end
 
   @spec build_from_posts([Post.t()], :whole | {:partial, Context.t()}) :: Context.t()

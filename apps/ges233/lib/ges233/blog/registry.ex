@@ -12,6 +12,13 @@ defmodule GES233.Blog.Post.RegistryBuilder do
 
   @type post_registry :: %{atom() => Post.t()}
 
+  ## 
+
+  def get_posts_root_path, do: @default_rootpath
+  def get_pic_entry, do: @pic_entry
+  def get_pdf_entry, do: @pdf_entry
+  def get_dot_entry, do: @dot_entry
+
   def build_posts_registry(posts) do
     posts
     |> Enum.map(&Task.async(fn -> remove_raw_and_html(&1) end))

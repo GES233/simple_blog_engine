@@ -4,6 +4,8 @@ defmodule GES233.Blog.Bibliography do
 
   @entry Application.compile_env(:ges233, :bibliography_entry, "/priv/_bibs")
 
+  def get_bibliography_entry, do: @entry
+
   # Invoked by pandoc-crossref
   def maybe_validate_bibliography_exist({%{extra: extra} = page_has_extra, bib_context}) do
     if Map.get(extra, "pandoc") do

@@ -14,6 +14,8 @@ defmodule GES233.Blog.Page do
   }
   @valid_roles Map.keys(@page_mapper)
 
+  def get_all_path_partial, do: @valid_roles
+
   def all_in_one(meta_registry) do
     @valid_roles
     |> Enum.map(&location_to_struct/1)

@@ -21,7 +21,7 @@ defmodule GES233.Blog.Post do
   也可能会存在额外的元数据。
   """
 
-  alias GES233.Blog.{Post, Page}
+  alias GES233.Blog.{Post, Page, Context}
 
   @type t :: %__MODULE__{
           id: atom() | String.t(),
@@ -117,7 +117,7 @@ defmodule GES233.Blog.Post do
     "/#{Enum.join(date ++ [post.id], "/")}"
   end
 
-  @spec add_html(GES233.Blog.Post.t(), any()) :: GES233.Blog.Post.t()
+  @spec add_html(GES233.Blog.Post.t(), Context.meta_registry()) :: GES233.Blog.Post.t()
   def add_html(post, meta) do
     html_body = GES233.Blog.Renderer.convert_markdown(post, meta: meta)
 
