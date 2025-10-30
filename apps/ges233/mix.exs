@@ -33,7 +33,8 @@ defmodule GES233.MixProject do
       {:pandox, in_umbrella: true},
       {:file_system, "~> 1.0"},
       {:git_cli, "~> 0.3.0"},
-      {:tz, "~> 0.28"}
+      {:tz, "~> 0.28"},
+      {:jason, "~> 1.4"}
     ]
   end
 end

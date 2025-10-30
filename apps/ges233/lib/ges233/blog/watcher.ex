@@ -14,7 +14,7 @@ defmodule GES233.Blog.Watcher do
   import GES233.Blog.Bibliography, only: [get_bibliography_entry: 0]
   import GES233.Blog.PathUtils
 
-  alias GES233.Blog.{Media, Post, Writer, Builder}
+  alias GES233.Blog.{Media, Post, Writer, Builder, Broadcaster}
 
   @category_definitions [
                           {:post, get_posts_root_path()},
@@ -151,6 +151,7 @@ defmodule GES233.Blog.Watcher do
 
     # |> handle_page_changes(page_changes)
 
+    Broadcaster.broadcast({:reload, %{timestamp: DateTime.now!("Asia/Shanghai")}})
     IO.puts("Update complete")
 
     # 重置状态并返回

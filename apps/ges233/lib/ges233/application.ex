@@ -11,7 +11,10 @@ defmodule GES233.Application do
     |> File.exists?()
     |> unless(do: File.mkdir!(Application.get_env(:ges233, :saved_path)))
 
-    children = [{GES233.Blog.ContentRepo, []}]
+    children = [
+      {GES233.Blog.ContentRepo, []},
+      {GES233.Blog.Broadcaster, []}
+    ]
 
     opts = [strategy: :one_for_one, name: GES233.Supervisor]
 

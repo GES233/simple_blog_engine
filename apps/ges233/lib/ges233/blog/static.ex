@@ -109,7 +109,30 @@ defmodule GES233.Blog.Static do
       </style>
     """
 
-    opt =
+    sse_script =
+    if Mix.env() == :dev do
+      """
+
+      <script type="text/javascript">
+        const eventSource = new EventSource("/sse");
+
+        eventSource.addEventListener("reload", (e) => {
+          // console.log("Server sent reload event. Reloading page...");
+          window.location.reload();
+          // console.log("Reload complete.");
+        });
+
+        eventSource.onerror = (err) => {
+          console.error("EventSource failed:", err);
+          eventSource.close();
+        };
+      </script>
+      """
+    else
+      ""
+    end
+
+    maybe_friends =
       cond do
         :friends in opts -> "#{friends}"
         true -> ""
@@ -121,7 +144,7 @@ defmodule GES233.Blog.Static do
     #{heti_css}
     #{heti_js}
     #{code}
-    #{opt}
+    #{maybe_friends}#{sse_script}
     """
   end
 
