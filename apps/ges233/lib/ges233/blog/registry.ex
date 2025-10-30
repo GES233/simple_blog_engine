@@ -1,5 +1,5 @@
 defmodule GES233.Blog.Post.RegistryBuilder do
-  alias GES233.Blog.{Post, Media, Context}
+  alias GES233.Blog.{Post, Media, Context, Tags, Categories, Series, Page}
 
   @default_rootpath Application.compile_env(
                       :ges233,
@@ -67,5 +67,21 @@ defmodule GES233.Blog.Post.RegistryBuilder do
 
     (posts_registry ++ media_registry)
     |> Enum.into(%{})
+  end
+
+  @spec get_index_registry(Context.meta_registry()) :: Context.index_registry()
+  def get_index_registry(meta_registry) do
+    posts =
+      meta_registry
+      |> Enum.filter(fn {_, p} -> is_struct(p, Post) end)
+      |> Enum.map(fn {_, v} -> v end)
+
+    # via tags, categories, serires, date
+    %{
+      "tags-with-frequrent" => Tags.get_tags_frq_from_posts(posts),
+      "categories" => Categories.build_category_tree(posts),
+      "series" => Series.fetch_all_series_from_posts(posts),
+      "single_pages" => Page.all_in_one(meta_registry)
+    }
   end
 end

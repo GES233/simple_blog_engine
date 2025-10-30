@@ -4,15 +4,15 @@ defmodule GES233.Blog.Writer do
 
   @saved_path Application.compile_env(:ges233, :saved_path)
 
-  ## Post related
+  ## HTML related
 
   @spec write_post_html(GES233.Blog.Post.t(), binary(), any()) :: :ok
   def write_post_html(post, html_body, context) do
-    path = Path.join(@saved_path, Post.post_id_to_route(post))
 
     full_html = GES233.Blog.Renderer.add_article_layout(html_body, post, context)
 
-    path
+    [@saved_path, Post.post_id_to_route(post), "index.html"]
+    |> Path.join()
     |> write_html(full_html)
     |> case do
       :ok ->
@@ -20,6 +20,18 @@ defmodule GES233.Blog.Writer do
 
       {:error, reason} ->
         Logger.warning("Save not successed when saved post `#{post.id}` with #{inspect(reason)}")
+    end
+  end
+
+  @spec write_single_page(binary(), binary()) :: :ok
+  def write_single_page(abs_path, inner_html) do
+    write_html(abs_path, inner_html)
+    |> case do
+      :ok ->
+        :ok
+
+      {:error, reason} ->
+        Logger.warning("Save not successed when saved single page `#{abs_path}` with #{inspect(reason)}")
     end
   end
 
@@ -100,7 +112,7 @@ defmodule GES233.Blog.Writer do
         fn {_name, {route, real}} ->
           copy_with_log.(real, "#{Application.get_env(:ges233, :saved_path)}/#{route}")
         end,
-        max_concurrency: 4
+        max_concurrency: System.schedulers_online()
       ),
       fn {:ok, _} -> :ok end
     )
@@ -110,7 +122,7 @@ defmodule GES233.Blog.Writer do
 
       Enum.map(
         Task.async_stream(files, &single_file_oprate_in_dir_copy(&1, name, source, target),
-          max_concurrency: 4
+          max_concurrency: System.schedulers_online()
         ),
         fn {:ok, _} ->
           :ok
