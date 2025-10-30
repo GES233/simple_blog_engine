@@ -51,13 +51,10 @@ defmodule GES233.Blog.Builder do
   end
 
   # Elapse
-  # :timer.tc(&GES233.Blog.Builder.build_from_root/0)
-  # {6075904, :ok}
-  # {6167654, :ok}
-  # {11537203, :ok}  # Add media related
-  # {13074227, :ok}  # Remove Task
-  # {2822348, :ok}
-  # {5731738, :ok}  # Add Task back
+  # {elapse, _} = :timer.tc(&GES233.Blog.Builder.build_from_root/0); elapse
+  # Not accurate
+  # 5879091 (Only VSCode)
+  # 6867661(VSCode and Browser opened)
   @spec build_from_posts([Post.t()], :whole | {:partial, Context.t()}) :: Context.t()
   def build_from_posts(posts, :whole) do
     # 2. 装载多媒体、Bib 等内容
@@ -91,6 +88,7 @@ defmodule GES233.Blog.Builder do
     |> build_pages()
   end
 
+  @spec build_index(Context.t()) :: Context.t()
   def build_index({meta_registry, _index_registry} = context) do
     pages =
       meta_registry
@@ -111,6 +109,7 @@ defmodule GES233.Blog.Builder do
     context
   end
 
+  @spec build_pages(Context.t()) :: Context.t()
   def build_pages({_meta_registry, %{"single_pages" => pages}} = context) do
     Task.async_stream(pages, fn page ->
       [
@@ -154,7 +153,8 @@ defmodule GES233.Blog.Builder do
     bodies_with_id_and_toc =
       posts
       # 将 %Posts{} 正文的链接替换为实际链接 & 调用 Pandoc 渲染为 HTML
-      |> Task.async_stream(&Post.add_html(&1, meta_registry),
+      |> Task.async_stream(
+        &Post.add_html(&1, meta_registry),
         max_concurrency: System.schedulers_online()
       )
       |> Enum.map(fn {:ok, post} -> post end)
@@ -186,11 +186,9 @@ defmodule GES233.Blog.Builder do
   end
 
   def save_post({id, {toc, body}}, meta_registry) do
-    page = %{meta_registry[id] | toc: toc}
-
-    page
+    meta_registry[id]
     |> Writer.write_post_html(
-      body |> Renderer.add_article_layout(page, meta_registry),
+      body |> Renderer.add_article_layout(%{meta_registry[id] | toc: toc}, meta_registry),
       meta_registry
     )
   end
