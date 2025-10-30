@@ -1,10 +1,14 @@
 defmodule GES233.Blog.Watcher do
-  alias GES233.Blog.{Builder, Post, Media}
+  alias GES233.Blog.Builder
 
   use GenServer
 
   def start_link(args) do
-    GenServer.start_link(__MODULE__, args)
+    GenServer.start_link(__MODULE__, args, name: __MODULE__)
+  end
+
+  def started? do
+    Process.whereis(__MODULE__) != nil
   end
 
   def init(_init_args) do
@@ -35,7 +39,11 @@ defmodule GES233.Blog.Watcher do
       :ok,
       %{
         meta: do_init(),
-        watchers: %{posts: posts_watcher, assets: assets_watcher}
+        watchers: %{posts: posts_watcher, assets: assets_watcher},
+        # 新增状态
+        # 使用 Map 来存储 {path => event_type}
+        diffs: %{},
+        timer_ref: nil
       }
     }
   end
@@ -47,100 +55,48 @@ defmodule GES233.Blog.Watcher do
   # FileSystem related
 
   def handle_info(
-        {:file_event, _watcher_pid, {_path, _events} = got},
-        %{watchers: %{posts: _posts_watcher, assets: _assets_watcher}, meta: {_meta, _index}} = s
+        {:file_event, _watcher_pid, {path, events}},
+        %{timer_ref: old_timer} = state
       ) do
-    IO.inspect(got, label: :event)
+    # 如果已经有计时器在运行，取消它
+    if old_timer, do: Process.cancel_timer(old_timer)
 
-    # 将命令改为操作，在特定的事件窗口（e.g. 2000ms无更新）执行更新
-
-    # {:noreply, %{watchers: %{posts: posts_watcher, assets: assets_watcher}, meta: new_meta}}
-    {:noreply, s}
-  end
-
-  def do_update(diff_paths, {meta, index}, :update) do
-    # update 操作包含一个隐藏的前提：没有在 meta 里的都是 bibliography
-    ids =
-      Enum.map(
-        diff_paths,
-        &(&1
-          |> Path.basename()
-          |> :binary.split(".")
-          |> hd())
-      )
-
-    maybe_bib =
-      ids
-      |> Enum.reject(&(&1 in Map.keys(meta)))
-
-    posts_within_bib =
-      if length(maybe_bib) >= 1 do
-        meta
-        |> Enum.filter(fn {_, p} -> is_struct(p, Post) end)
-        |> Enum.map(fn {_, v} -> v end)
-        |> Enum.filter(&(!is_nil(Map.get(&1.extra, "pandoc"))))
-        |> Enum.filter(&(!is_nil(Map.get(&1.extra["pandoc"], "bibliography"))))
-        |> Enum.filter(&(&1.extra["pandoc"]["bibliography"] in maybe_bib))
-      else
-        []
+    # 从事件列表中推断主要事件类型（例如 :created, :modified, :deleted）
+    # file_system 库通常会给出 :created, :modified, :deleted, :renamed 等原子
+    # 这里我们简化处理，你可以根据 file_system 库的实际输出来调整
+    event_type =
+      cond do
+        :created in events -> :create
+        :deleted in events -> :delete
+        # 其他情况都视为更新
+        true -> :update
       end
 
-    posts =
-      Enum.filter(meta, fn {k, _} -> k in ids end)
-      |> Enum.filter(fn {_, v} -> is_struct(v, Post) end)
-      |> Keyword.keys()
+    # 将新的变更合并到 diffs 中
+    # 如果一个文件先被创建又被修改，我们最终只关心它是被创建的
+    new_diffs =
+      Map.update(state.diffs, path, event_type, fn existing_event ->
+        if existing_event == :create, do: :create, else: event_type
+      end)
 
-    # If Media
+    # 启动一个新的计时器，在 500ms 后向自己发送 :process_changes 消息
+    # 这个延迟时间可以配置化
+    delay_ms = 500
+    new_timer = Process.send_after(self(), :process_changes, delay_ms)
 
-    maybe_media =
-      Enum.filter(meta, fn {k, _} -> k in ids end)
-      |> Enum.filter(fn {_, v} -> is_struct(v, Media) end)
-      |> Keyword.keys()
+    # 更新状态
+    new_state =
+      state
+      |> Map.put(:diffs, new_diffs)
+      |> Map.put(:timer_ref, new_timer)
 
-    media_validator = maybe_media |> Enum.map(&"#{&1}.")
-
-    meta =
-      diff_paths
-      |> Enum.filter(&String.contains?(&1, media_validator))
-      |> Enum.map(&Media.parse_media/1)
-      |> Enum.map(fn m -> {m.id, m} end)
-      |> Enum.into(%{})
-      |> then(&Map.merge(meta, &1))
-
-    diff_paths
-    |> Enum.filter(&String.contains?(&1, posts_within_bib ++ posts))
-    |> Enum.map(&Post.path_to_struct/1)
-    |> Builder.build_from_posts({:partial, {meta, index}})
+    {:noreply, new_state}
   end
 
-  def do_update(created_paths, {_meta, _index}, :create) do
-    # Is path under `Application.get_env(:ges233, :blog_root)` ?
-    _maybe_posts =
-      Enum.filter(created_paths, &String.contains?(&1, Application.get_env(:ges233, :blog_root)))
+  # TODO
+  def handle_info(:process_changes, state) do
+    IO.puts("Change detected, processing updates...")
 
-    _maybe_bib =
-      Enum.filter(
-        created_paths,
-        &String.contains?(&1, Application.get_env(:ges233, :bibliography_entry))
-      )
-
-    _maybe_media = []
-  end
-
-  def update_bib(bib_paths, meta) do
-    bib_paths
-    |> List.wrap()
-    |> Enum.filter(&String.contains?(&1, Application.get_env(:ges233, :bibliography_entry)))
-
-    if length(bib_paths) >= 1 do
-      meta
-      |> Enum.filter(fn {_, p} -> is_struct(p, Post) end)
-      |> Enum.map(fn {_, v} -> v end)
-      |> Enum.filter(&(!is_nil(Map.get(&1.extra, "pandoc"))))
-      |> Enum.filter(&(!is_nil(Map.get(&1.extra["pandoc"], "bibliography"))))
-      |> Enum.filter(&(&1.extra["pandoc"]["bibliography"] in bib_paths))
-    else
-      []
-    end
+    {:noreply, state}
   end
 end
