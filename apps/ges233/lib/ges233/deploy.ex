@@ -13,8 +13,8 @@ defmodule GES233.Deploy do
       hd(maybe_path)
     else
       Git.clone!([Application.get_env(:ges233, :Git)[:repo], @new_git_path])
-
-      # TODO: Switch to `site` branch.
+      #Switch to `site` branch.
+      |> Git.checkout(["site"])
 
       @new_git_path
     end
@@ -25,7 +25,7 @@ defmodule GES233.Deploy do
   end
 
   def copy_files_to_git(target_path \\ get_git_path()) do
-    GES233.Blog.Writer.copy_all_files_except_git(target_path)
+    GES233.Blog.Writer.SinglePage.copy_all_files_except_git(target_path)
   end
 
   def commit_git(target_path \\ get_git_path()) do

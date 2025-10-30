@@ -1,4 +1,84 @@
 defmodule GES233.Blog.Writer do
+  alias GES233.Blog.Writer.SinglePage, as: WriterSingle
+  alias GES233.Blog.{Post, Page, Renderer, Media, Context, ContentRepo}
+
+  @page_pagination Application.compile_env(:ges233, [:Blog, :page_pagination])
+
+  @spec write_index(Context.t()) :: Context.t()
+  def write_index({meta_registry, _index_registry} = context) do
+    pages =
+      meta_registry
+      |> Enum.map(fn {_, v} -> v end)
+      |> Enum.filter(&is_struct(&1, Post))
+      |> Enum.sort_by(& &1.create_at, {:desc, NaiveDateTime})
+      |> pagination([])
+
+    pages
+    |> length()
+    |> then(&Range.new(1, &1))
+    |> Enum.zip(pages)
+    |> Task.async_stream(fn {index, page} -> WriterSingle.write_index_page(index, page, pages) end,
+      max_concurrency: System.schedulers_online()
+    )
+    |> Stream.run()
+
+    context
+  end
+
+  @spec write_standalone_pages(Context.t()) :: Context.t()
+  def write_standalone_pages({_meta_registry, %{"single_pages" => pages}} = context) do
+    Task.async_stream(pages, fn page ->
+      [
+        Application.get_env(:ges233, :saved_path) |> Path.absname(),
+        page.role |> Page.get_route_by_role(),
+        "index.html"
+      ]
+      |> Path.join()
+      |> WriterSingle.write_single_page(
+        Renderer.add_pages_layout(get_body_from_page(page), page)
+      )
+    end)
+    |> Stream.run()
+
+    context
+  end
+
+  defp pagination(list, pages) when length(list) <= @page_pagination do
+    [list | pages] |> :lists.reverse()
+  end
+
+  defp pagination(list, pages) do
+    {page, rest} = Enum.split(list, @page_pagination)
+
+    pagination(rest, [page | pages])
+  end
+
+  @spec copy_users_assets(Context.meta_registry()) :: Context.meta_registry()
+  def copy_users_assets(meta_registry) do
+    meta_registry
+    |> Enum.map(fn {_, v} -> v end)
+    # dot 生成的 svg 直接被别的函数解决了，不需要再 copy
+    |> Enum.filter(&(is_struct(&1, Media) && &1.type in [:pic, :pdf]))
+    |> Task.async_stream(&WriterSingle.copy_media_asset/1)
+    |> Stream.run()
+
+    meta_registry
+  end
+
+  defp get_body_from_page(page) do
+    {status, html} = ContentRepo.get_html(page.role)
+
+    case status do
+      :ok ->
+        html
+
+      :error ->
+        page.body
+    end
+  end
+end
+
+defmodule GES233.Blog.Writer.SinglePage do
   require Logger
   alias GES233.Blog.{Post, Renderer, Media}
 
