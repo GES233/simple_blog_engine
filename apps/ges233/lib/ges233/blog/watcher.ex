@@ -99,4 +99,10 @@ defmodule GES233.Blog.Watcher do
 
     {:noreply, state}
   end
+
+  def handle_info(msg, state) do
+    IO.inspect(msg)
+
+    {:noreply, state}
+  end
 end

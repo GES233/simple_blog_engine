@@ -26,7 +26,7 @@ defmodule GES233.Deploy do
 
   def copy_files_to_git(target_path \\ get_git_path()) do
     deploy_file_list = Application.get_env(:ges233, :saved_path)
-    |> GES233.Blog.Static.FlatFiles.list_all
+    |> FlatFiles.list_all
 
     for file <- deploy_file_list do
       target_f = String.replace(file, "#{Application.get_env(:ges233, :saved_path)}", target_path)

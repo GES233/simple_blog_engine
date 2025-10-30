@@ -55,7 +55,7 @@ defmodule GES233.Blog.Builder do
       |> render_posts(posts)
       |> copy_users_assets()
 
-    Static.copy_to_path()
+    Static.copy_static()
 
     index_registry = get_index_registry(meta_registry)
 
@@ -70,7 +70,7 @@ defmodule GES233.Blog.Builder do
       |> render_posts(diff_posts)
       |> copy_users_assets()
 
-    Static.copy_to_path()
+    Static.copy_static()
 
     index_registry = get_index_registry(updated_meta)
 

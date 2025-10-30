@@ -1,6 +1,11 @@
 defmodule GES233.Blog.Post.RegistryBuilder do
   alias GES233.Blog.{Post, Media, Context}
 
+  @default_rootpath Application.compile_env(
+                      :ges233,
+                      :blog_root,
+                      "priv/_posts"
+                    )
   @pic_entry Application.compile_env(:ges233, [:Media, :pic_path])
   @pdf_entry Application.compile_env(:ges233, [:Media, :pdf_path])
   @dot_entry Application.compile_env(:ges233, [:Media, :dot_path])
@@ -40,6 +45,27 @@ defmodule GES233.Blog.Post.RegistryBuilder do
         build_media_registry(@pdf_entry, :pdf) ++
         build_media_registry(@dot_entry, :dot)) ++
        [])
+    |> Enum.into(%{})
+  end
+
+  @spec build_meta_from_root(binary()) :: %{binary() => Post.t() | Media.t()}
+  def build_meta_from_root(root \\ @default_rootpath) do
+    posts =
+      Path.wildcard(root <> "/**/*.md")
+      |> Task.async_stream(&Post.path_to_struct/1)
+      |> Enum.reduce([], fn {:ok, res}, acc -> [res | acc] end)
+      |> Enum.map(&Task.async(fn -> remove_raw_and_html(&1) end))
+      |> Enum.map(&Task.await(&1, 10000))
+
+    posts_registry = posts
+      |> Enum.map(&({&1.id, &1}))
+
+    media_registry =
+      build_media_registry(@pic_entry, :pic) ++
+        build_media_registry(@pdf_entry, :pdf) ++
+        build_media_registry(@dot_entry, :dot) ++ []
+
+    (posts_registry ++ media_registry)
     |> Enum.into(%{})
   end
 end
