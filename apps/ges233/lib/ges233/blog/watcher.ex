@@ -1,17 +1,15 @@
 defmodule GES233.Blog.Watcher do
-  alias GES233.Blog.Builder
-
   use GenServer
 
-  def start_link(args) do
-    GenServer.start_link(__MODULE__, args, name: __MODULE__)
+  def start_link(initial_context) do
+    GenServer.start_link(__MODULE__, initial_context, name: __MODULE__)
   end
 
   def started? do
     Process.whereis(__MODULE__) != nil
   end
 
-  def init(_init_args) do
+  def init(initial_context) do
     posts = [
       dirs: [
         Application.get_env(:ges233, :blog_root),
@@ -38,7 +36,7 @@ defmodule GES233.Blog.Watcher do
     {
       :ok,
       %{
-        meta: do_init(),
+        meta: initial_context,
         watchers: %{posts: posts_watcher, assets: assets_watcher},
         # 新增状态
         # 使用 Map 来存储 {path => event_type}
@@ -46,10 +44,6 @@ defmodule GES233.Blog.Watcher do
         timer_ref: nil
       }
     }
-  end
-
-  defp do_init() do
-    Builder.build_from_root()
   end
 
   # FileSystem related
@@ -64,6 +58,8 @@ defmodule GES233.Blog.Watcher do
     # 从事件列表中推断主要事件类型（例如 :created, :modified, :deleted）
     # file_system 库通常会给出 :created, :modified, :deleted, :renamed 等原子
     # 这里我们简化处理，你可以根据 file_system 库的实际输出来调整
+    IO.inspect({path, events})
+
     event_type =
       cond do
         :created in events -> :create
@@ -96,6 +92,8 @@ defmodule GES233.Blog.Watcher do
   # TODO
   def handle_info(:process_changes, state) do
     IO.puts("Change detected, processing updates...")
+
+    IO.inspect(state.diffs, label: :update_items)
 
     {:noreply, state}
   end

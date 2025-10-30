@@ -9,12 +9,15 @@ defmodule GES233.Blog.Bibliography do
     if Map.get(extra, "pandoc") do
       %{"pandoc" => pandox_options} = extra
 
+      # 最开始选用 File.touch/1 使为了确保文件存在
+      # 但是这会触发 FileSystem 的事件
+      # 后续可能会做出修改
       with {:ok, bib_path_realtive} <- Map.fetch(pandox_options, "bibliography"),
            bib_path = Path.join([@entry, bib_path_realtive]),
-           :ok <- File.touch(bib_path) do
+           true <- File.exists?(bib_path) do
         {page_has_extra, Map.put(bib_context, "bibliography", bib_path)}
       else
-        {:error, _} ->
+        false ->
           Logger.warning(
             "File #{inspect(Path.join([@entry, pandox_options["bibliography"]]))} doesn't exist."
           )
