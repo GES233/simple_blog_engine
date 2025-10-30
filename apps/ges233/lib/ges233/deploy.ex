@@ -25,21 +25,7 @@ defmodule GES233.Deploy do
   end
 
   def copy_files_to_git(target_path \\ get_git_path()) do
-    deploy_file_list = Application.get_env(:ges233, :saved_path)
-    |> FlatFiles.list_all
-
-    for file <- deploy_file_list do
-      target_f = String.replace(file, "#{Application.get_env(:ges233, :saved_path)}", target_path)
-
-      target_f |> Path.split() |> :lists.droplast() |> Path.join() |> File.mkdir_p() |> case do
-        {:error, reason} -> IO.inspect(reason)
-        _ -> nil
-      end
-
-      File.copy(file, target_f)
-    end
-
-    :ok
+    GES233.Blog.Writer.copy_all_files_except_git(target_path)
   end
 
   def commit_git(target_path \\ get_git_path()) do

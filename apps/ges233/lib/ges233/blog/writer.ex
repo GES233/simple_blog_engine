@@ -8,7 +8,6 @@ defmodule GES233.Blog.Writer do
 
   @spec write_post_html(GES233.Blog.Post.t(), binary(), any()) :: :ok
   def write_post_html(post, html_body, context) do
-
     full_html = GES233.Blog.Renderer.add_article_layout(html_body, post, context)
 
     [@saved_path, Post.post_id_to_route(post), "index.html"]
@@ -31,7 +30,9 @@ defmodule GES233.Blog.Writer do
         :ok
 
       {:error, reason} ->
-        Logger.warning("Save not successed when saved single page `#{abs_path}` with #{inspect(reason)}")
+        Logger.warning(
+          "Save not successed when saved single page `#{abs_path}` with #{inspect(reason)}"
+        )
     end
   end
 
@@ -166,6 +167,47 @@ defmodule GES233.Blog.Writer do
           "Static file #{current_file} in #{name} copied not successfully due to #{inspect(reason)}"
         )
     end
+  end
+
+  ## Git
+
+  def copy_all_files_except_git(target_path) do
+    deploy_file_list =
+      Application.get_env(:ges233, :saved_path)
+      |> FlatFiles.list_all()
+
+    do_copy = fn file ->
+      target_f = String.replace(file, "#{Application.get_env(:ges233, :saved_path)}", target_path)
+
+      target_f
+      |> Path.split()
+      |> :lists.droplast()
+      |> Path.join()
+      |> File.mkdir_p()
+      |> case do
+        {:error, reason} ->
+          Logger.warning(
+            "Directory #{Path.dirname(target_f)} created not successfully due to #{inspect(reason)}"
+          )
+
+        _ ->
+          nil
+      end
+
+      File.copy(file, target_f)
+      |> case do
+        {:ok, _} ->
+          :ok
+
+        {:error, reason} ->
+          Logger.warning(
+            "File #{file} copied not successfully due to #{inspect(reason)}"
+          )
+      end
+    end
+
+    Task.async_stream(deploy_file_list, do_copy, max_concurrency: System.schedulers_online())
+    |> Stream.run()
   end
 end
 

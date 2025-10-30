@@ -112,30 +112,18 @@ defmodule GES233.Blog.Builder do
   end
 
   def build_pages({_meta_registry, %{"single_pages" => pages}} = context) do
-    get_inner_html = fn page ->
-      {status, html} = ContentRepo.get_html(page.role)
-
-      new_body =
-        case status do
-          :ok ->
-            html
-
-          :error ->
-            page.body
-        end
-
-      new_body
-    end
-
-    for page <- pages do
+    Task.async_stream(pages, fn page ->
       [
         Application.get_env(:ges233, :saved_path) |> Path.absname(),
         page.role |> Page.get_route_by_role(),
         "index.html"
       ]
       |> Path.join()
-      |> Writer.write_single_page(Renderer.add_pages_layout(get_inner_html.(page), page))
-    end
+      |> Writer.write_single_page(
+        Renderer.add_pages_layout(get_body_from_post_and_page(page, :role), page)
+      )
+    end)
+    |> Stream.run()
 
     context
   end
@@ -166,28 +154,21 @@ defmodule GES233.Blog.Builder do
     bodies_with_id_and_toc =
       posts
       # 将 %Posts{} 正文的链接替换为实际链接 & 调用 Pandoc 渲染为 HTML
-      |> Task.async_stream(&Post.add_html(&1, meta_registry), max_concurrency: System.schedulers_online())
+      |> Task.async_stream(&Post.add_html(&1, meta_registry),
+        max_concurrency: System.schedulers_online()
+      )
       |> Enum.map(fn {:ok, post} -> post end)
       # Max: 1569587μs
       # 渲染文章网页的外观
       |> Enum.map(fn post ->
-        {status, html} = ContentRepo.get_html(post.id)
-
-        new_body =
-          case status do
-            :ok ->
-              html
-
-            :error ->
-              post.body
-          end
-
-        {post.id, {post.toc, new_body}}
+        {post.id, {post.toc, get_body_from_post_and_page(post, :id)}}
       end)
 
     # 保存在特定目录
     bodies_with_id_and_toc
-    |> Task.async_stream(&save_post(&1, meta_registry), max_concurrency: System.schedulers_online())
+    |> Task.async_stream(&save_post(&1, meta_registry),
+      max_concurrency: System.schedulers_online()
+    )
     |> Stream.run()
 
     # 把 <!--more--> 之前的部分拿出来
@@ -212,5 +193,17 @@ defmodule GES233.Blog.Builder do
       body |> Renderer.add_article_layout(page, meta_registry),
       meta_registry
     )
+  end
+
+  defp get_body_from_post_and_page(page_or_post, key) do
+    {status, html} = ContentRepo.get_html(Map.get(page_or_post, key))
+
+    case status do
+      :ok ->
+        html
+
+      :error ->
+        page_or_post.body
+    end
   end
 end
