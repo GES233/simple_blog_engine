@@ -3,7 +3,6 @@ defmodule GES233.Blog.Builder do
 
   alias GES233.Blog.{
     Post,
-    Renderer,
     Static,
     ContentRepo,
     Context,
@@ -122,9 +121,9 @@ defmodule GES233.Blog.Builder do
   end
 
   def save_post({id, {toc, body}}, meta_registry) do
-    meta_registry[id]
+    %{meta_registry[id] | toc: toc}
     |> Writer.SinglePage.write_post_html(
-      body |> Renderer.add_article_layout(%{meta_registry[id] | toc: toc}, meta_registry),
+      body,
       meta_registry
     )
   end
