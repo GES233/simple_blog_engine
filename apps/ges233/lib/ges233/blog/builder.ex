@@ -74,6 +74,10 @@ defmodule GES233.Blog.Builder do
     |> Writer.write_standalone_pages()
   end
 
+  def build_from_posts([], {:partial, context}) do
+    context
+  end
+
   def build_from_posts(diff_posts, {:partial, {meta_registry, _}}) do
     updated_meta =
       meta_registry

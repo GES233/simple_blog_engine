@@ -12,8 +12,18 @@ defmodule GES233.Blog.Watcher do
     ]
 
   import GES233.Blog.Bibliography, only: [get_bibliography_entry: 0]
+  import GES233.Blog.PathUtils
 
-  alias GES233.Blog.{Media, Post}
+  alias GES233.Blog.{Media, Post, Writer, Builder}
+
+  @category_definitions [
+                          {:post, get_posts_root_path()},
+                          {:bib, get_bibliography_entry()},
+                          {:media, get_pic_entry()},
+                          {:media, get_pdf_entry()},
+                          {:media, get_dot_entry()}
+                        ]
+                        |> Enum.map(fn {k, path} -> {k, normalize(path)} end)
 
   def start_link(initial_context) do
     GenServer.start_link(__MODULE__, initial_context, name: __MODULE__)
@@ -66,7 +76,7 @@ defmodule GES233.Blog.Watcher do
         {:file_event, _watcher_pid, {raw_path, events}},
         %{timer_ref: old_timer} = state
       ) do
-    path = normalize_path(raw_path)
+    path = normalize(raw_path)
 
     # 如果已经有计时器在运行，取消它
     if old_timer, do: Process.cancel_timer(old_timer)
@@ -157,7 +167,7 @@ defmodule GES233.Blog.Watcher do
     # Enum.find_value 会遍历我们的规则列表，
     # 找到第一个匹配的规则，并返回其分类名。
     # 如果没有找到，它会返回 nil。
-    Enum.find_value(category_definitions(), fn {category, base_path} ->
+    Enum.find_value(@category_definitions, fn {category, base_path} ->
       if String.starts_with?(path, base_path), do: category
     end)
   end
@@ -174,10 +184,11 @@ defmodule GES233.Blog.Watcher do
       |> Map.new(fn m -> {m.id, m} end)
 
     # 2. 更新 meta_registry
-    new_meta_registry = Map.merge(meta_registry, updated_media)
-
-    # 3. 把新文件复制到目标目录
-    # Builder.copy_assets(Map.values(updated_media))
+    new_meta_registry =
+      meta_registry
+      |> Map.merge(updated_media)
+      # 3. 把新文件复制到目标目录
+      |> Writer.copy_users_assets()
 
     # 4. 返回更新后的上下文
     {new_meta_registry, index_registry}
@@ -203,36 +214,64 @@ defmodule GES233.Blog.Watcher do
       |> Map.merge(meta_registry)
 
     # 3. 找出所有受影响的文章（直接修改的 + 引用了变化bib的）
-    # posts_to_rebuild = find_affected_posts(updated_posts, bib_paths, new_meta_registry)
+    posts_id_to_rebuild = find_affected_posts_id(updated_posts, bib_paths, new_meta_registry)
 
     # 4. 调用 Builder 进行部分构建
-    # Builder.build_from_posts(posts_to_rebuild, {:partial, {new_meta_registry, index_registry}})
-    # ...
+    Builder.build_from_posts(
+      posts_id_to_rebuild,
+      {:partial, {new_meta_registry, index_registry}}
+    )
 
     # 临时返回更新后的上下文
     {new_meta_registry, index_registry}
   end
 
-  defp category_definitions(),
-    do:
-      Enum.map(
-        [
-          {:post, get_posts_root_path()},
-          {:bib, get_bibliography_entry()},
-          {:media, get_pic_entry()},
-          {:media, get_pdf_entry()},
-          {:media, get_dot_entry()}
-        ],
-        fn {k, path} -> {k, normalize_path(path)} end
-      )
+  defp find_affected_posts_id(updated_posts, bib_paths, new_meta_registry) do
+    case {updated_posts, bib_paths} do
+      {[], []} ->
+        []
 
-  defp normalize_path(path) do
-    normalized = path |> Path.expand()
+      {_posts, []} ->
+        updated_posts
 
-    if :os.type() == {:win32, :nt} do
-      Regex.replace(~r/^[A-Z]:/, String.replace(normalized, "\\", "/"), &String.downcase/1)
+      {updated_posts, updated_bib_paths} ->
+        all_existed_bib_in_posts =
+          new_meta_registry
+          # |> Enum.map(fn {id, maybe_post} -> maybe_post end)
+          |> Enum.filter(fn {_id, post} -> is_struct(post, Post) end)
+          |> Enum.filter(fn {_id, post} -> check_biblio_exist(post, new_meta_registry) end)
+          |> Enum.map(fn {id, post} -> {id, post.extra["pandoc"]["bibliography"]} end)
+          # |> Enum.map(&String.replace_prefix(&1, @category_definitions[:bib], ""))
+          |> Enum.map(fn {id, bib_path} -> {id, Path.basename(bib_path, ".bib")} end)
+
+        updated_bib = updated_bib_paths |> Enum.map(&Path.basename(&1, ".bib"))
+
+        updated_posts_from_bib =
+          Enum.find_value(all_existed_bib_in_posts, fn {post_id, bib} ->
+            if bib in updated_bib, do: post_id
+          end)
+          |> case do
+            list = [_ | _] -> Enum.map(list, &Post.path_to_struct("#{get_posts_root_path()}/#{&1}.md"))
+            post -> [Post.path_to_struct("#{get_posts_root_path()}/#{post}.md")]
+          end
+
+        updated_posts ++ updated_posts_from_bib
+    end
+  end
+
+  # 和 Bibliography.maybe_validate_bibliography_exist()
+  # 不同的是，本函数不涉及对文件系统的处理
+  # 以节省时间与性能消耗
+  defp check_biblio_exist(%{extra: extra}, _meta) do
+    if Map.get(extra, "pandoc") do
+      %{"pandoc" => pandox_options} = extra
+
+      case Map.fetch(pandox_options, "bibliography") do
+        {:ok, _bib_path_realtive} -> true
+        :error -> false
+      end
     else
-      normalized
+      false
     end
   end
 end

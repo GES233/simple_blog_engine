@@ -1,5 +1,4 @@
 defmodule GES233.Blog.Bibliography do
-  # alias GES233.Blog.page_has_extra
   require Logger
 
   @entry Application.compile_env(:ges233, :bibliography_entry, "/priv/_bibs")
