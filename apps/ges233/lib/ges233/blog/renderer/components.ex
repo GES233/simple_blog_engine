@@ -1,4 +1,4 @@
-defmodule GES233.Blog.Render.PostComponents do
+defmodule GES233.Blog.Renderer.PostComponents do
   alias GES233.Blog.Post
 
   def show_tags(tags) do
@@ -81,11 +81,11 @@ defmodule GES233.Blog.Render.PostComponents do
           </div>
           <div>
             <small>进度</small>
-            #{GES233.Blog.Render.PostComponents.appearance_status(post.progress)}
+            #{appearance_status(post.progress)}
           </div>
         </div>
         <div class="pico">
-          #{GES233.Blog.Render.PostComponents.show_tags(post.tags)}
+          #{show_tags(post.tags)}
         </div>
       </header>
     """
