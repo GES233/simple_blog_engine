@@ -141,12 +141,12 @@ defmodule GES233.Blog.Watcher do
     {post_changes, archive_changes} =
       classified_changes
       |> Map.get(:post, [])
-      |> Enum.split_with(fn path -> Path.extname(path) == "*.md" end)
+      |> Enum.split_with(fn path -> Path.extname(path) == ".md" end)
 
     {bib_changes, _} =
       classified_changes
       |> Map.get(:bib, [])
-      |> Enum.split_with(fn path -> Path.extname(path) == "*.bib" end)
+      |> Enum.split_with(fn path -> Path.extname(path) == ".bib" end)
 
     media_changes = Map.get(classified_changes, :media, [])
     # page_changes = Map.get(classified_changes, :page, [])
