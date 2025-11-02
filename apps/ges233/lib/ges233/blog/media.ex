@@ -39,8 +39,8 @@ defmodule GES233.Blog.Media do
   # Use pdf.js
   def get_media_under(path, :pdf) do
     Path.wildcard(path <> "**/*.pdf")
-    |> Enum.map(&Task.async(fn -> parse_media(&1, :pdf) end))
-    |> Enum.map(&Task.await/1)
+    |> Task.async_stream(&parse_media(&1, :pdf))
+    |> Stream.run()
   end
 
   ## Render
@@ -48,16 +48,16 @@ defmodule GES233.Blog.Media do
   # Graphviz graph(*.dot) -> svg
   def get_media_under(path, :dot) do
     Path.wildcard(path <> "**/*.dot")
-    |> Enum.map(&Task.async(fn -> parse_media(&1, :dot) end))
-    |> Enum.map(&Task.await/1)
+    |> Task.async_stream(&parse_media(&1, :dot))
+    |> Stream.run()
   end
 
   # Music sheet snippet(*.ly) -> svg
   # other format(e.g. pdf/png) can use image or pdf
   def get_media_under(path, :lilypond) do
     Path.wildcard(path <> "**/*.ly")
-    |> Enum.map(&Task.async(fn -> parse_media(&1, :lilypond) end))
-    |> Enum.map(&Task.await/1)
+    |> Task.async_stream(&parse_media(&1, :lilypond))
+    |> Stream.run()
   end
 
   def parse_media(path) do

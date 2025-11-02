@@ -30,7 +30,13 @@ defmodule GES233.Blog.Link do
       %Media{type: :pic} ->
         meta[inner].route_path
 
-      # TODO: Lilypond
+      %Media{type: :lilypond} ->
+        meta[inner].route_path ||
+          """
+          ```lilypond
+          #{(meta[inner].inner_content)}
+          ```
+          """
 
       # like function defination in Julia
       # bla bla ::{DataFrame,Any}
