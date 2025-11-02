@@ -38,26 +38,30 @@
 
       <main>
         <%= if !is_nil(@post.toc) do %>
-          <div>
+        <div class="heti-skip">
+          <details class="dropdown">
+            <summary>目录</summary>
             <%= @post.toc %>
-          </div>
+          </details>
+        </div>
         <% end %>
         <div>
 
 <%= @inner_content %>
 
-        <div style="text-align:center"><%= case @post.progress do %>
-          <% :final -> %>
-            ——完——
-          <% :longterm -> %>
-            ——长期更新——
-          <% [:longterm, p] -> %>
-            <%= if p <= 50, do: "——亟待更新——", else: "——长期更新——" %>
-          <% [:wip, p] -> %>
-            <%= if p <= 50, do: "——亟待更新——", else: "——未完待续——" %>
-          <% [:blocking, _] -> %>
-            ——无限期停止撰写——
-        <% end %></div>
+          <div style="text-align:center" class="heti"><%= case @post.progress do %>
+            <% :final -> %>
+              ——完——
+            <% :longterm -> %>
+              ——长期更新——
+            <% [:longterm, p] -> %>
+              <%= if p <= 50, do: "——亟待更新——", else: "——长期更新——" %>
+            <% [:wip, p] -> %>
+              <%= if p <= 50, do: "——亟待更新——", else: "——未完待续——" %>
+            <% [:blocking, _] -> %>
+              ——无限期停止撰写——
+          <% end %>
+          </div>
         </div>
       </main>
     </article>

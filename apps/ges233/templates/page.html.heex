@@ -36,9 +36,12 @@
 
       <main>
         <%= if !is_nil(@page.toc) do %>
-          <div>
+        <div class="heti-skip">
+          <details class="dropdown">
+            <summary>目录</summary>
             <%= @page.toc %>
-          </div>
+          </details>
+        </div>
         <% end %>
         <div>
 
