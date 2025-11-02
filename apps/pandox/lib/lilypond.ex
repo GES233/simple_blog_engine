@@ -1,7 +1,6 @@
 defmodule Lilypond do
   require Logger
 
-  # 自动查找 lilypond 可执行文件
   @executable System.find_executable("lilypond") || "lilypond"
 
   @doc """

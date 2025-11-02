@@ -5,7 +5,7 @@ defmodule Pandox do
 
   # 默认的 pandoc 可执行文件的地址
   # （我假定你是通过 Scoop/apt/Homebrew 等方式安装的）
-  @pandoc_executable_name "pandoc"
+  @pandoc_executable_name System.find_executable("pandoc") || "pandoc"
 
   def get_pandoc() do
     # 还要考虑从配置中读取可执行文件的地址的情况

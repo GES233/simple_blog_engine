@@ -1,5 +1,5 @@
 defmodule Graphviz do
-  def get_dot(), do: "dot"
+  def get_dot(), do: System.find_executable("dot") || "dot"
 
   # AIO
   # dot -Tsvg "d:/Blog/source/src/Hypothalamus-pipuitory-axis.dot" > "saved.svg"

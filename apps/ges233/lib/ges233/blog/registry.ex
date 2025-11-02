@@ -12,7 +12,7 @@ defmodule GES233.Blog.Post.RegistryBuilder do
 
   @type post_registry :: %{atom() => Post.t()}
 
-  ## 
+  ##
 
   def get_posts_root_path, do: @default_rootpath
   def get_pic_entry, do: @pic_entry
@@ -30,9 +30,12 @@ defmodule GES233.Blog.Post.RegistryBuilder do
 
   def build_media_registry(root_path, format) do
     cond do
-      format in [:pic, :pdf, :dot] ->
+      format in [:pic, :pdf, :dot, :lilypond] ->
         Media.get_media_under(root_path, format)
-        |> Enum.map(fn m -> {m.id, m} end)
+        # 从 Task.async_stream/2 再 Enum.to_list/1 的
+        # 记得把 {:ok, data} 变成 data
+        |> Enum.map(fn {:ok, m} -> {m.id, m}
+        end)
 
       true ->
         nil

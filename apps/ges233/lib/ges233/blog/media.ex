@@ -32,15 +32,15 @@ defmodule GES233.Blog.Media do
   # Simply copy
   def get_media_under(path, :pic) do
     Path.wildcard(path <> "/**/*.{jpg,jpeg,png,webp}")
-    |> Enum.map(&Task.async(fn -> parse_media(&1, :pic) end))
-    |> Enum.map(&Task.await/1)
+    |> Task.async_stream(&parse_media(&1, :pic))
+    |> Enum.to_list()
   end
 
   # Use pdf.js
   def get_media_under(path, :pdf) do
     Path.wildcard(path <> "**/*.pdf")
     |> Task.async_stream(&parse_media(&1, :pdf))
-    |> Stream.run()
+    |> Enum.to_list()
   end
 
   ## Render
@@ -49,7 +49,7 @@ defmodule GES233.Blog.Media do
   def get_media_under(path, :dot) do
     Path.wildcard(path <> "**/*.dot")
     |> Task.async_stream(&parse_media(&1, :dot))
-    |> Stream.run()
+    |> Enum.to_list()
   end
 
   # Music sheet snippet(*.ly) -> svg
@@ -57,7 +57,7 @@ defmodule GES233.Blog.Media do
   def get_media_under(path, :lilypond) do
     Path.wildcard(path <> "**/*.ly")
     |> Task.async_stream(&parse_media(&1, :lilypond))
-    |> Stream.run()
+    |> Enum.to_list()
   end
 
   def parse_media(path) do
