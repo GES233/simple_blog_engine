@@ -97,7 +97,11 @@ defmodule GES233.Blog.Watcher do
     # 如果一个文件先被创建又被修改，我们最终只关心它是被创建的
     new_diffs =
       Map.update(state.diffs, path, event_type, fn existing_event ->
-        if existing_event == :create, do: :create, else: event_type
+        cond do
+          existing_event == :create -> :create
+          existing_event == :delete -> :delete
+          true -> event_type
+        end
       end)
 
     # 启动一个新的计时器，在 500ms 后向自己发送 :process_changes 消息
@@ -134,14 +138,24 @@ defmodule GES233.Blog.Watcher do
 
     Logger.debug(fn -> "Classified changes: #{inspect(classified_changes)}" end)
 
-    post_changes = Map.get(classified_changes, :post, [])
-    bib_changes = Map.get(classified_changes, :bib, [])
+    {post_changes, archive_changes} =
+      classified_changes
+      |> Map.get(:post, [])
+      |> Enum.split_with(fn path -> Path.extname(path) == "*.md" end)
+
+    {bib_changes, _} =
+      classified_changes
+      |> Map.get(:bib, [])
+      |> Enum.split_with(fn path -> Path.extname(path) == "*.bib" end)
+
     media_changes = Map.get(classified_changes, :media, [])
     # page_changes = Map.get(classified_changes, :page, [])
     unclassified = Map.get(classified_changes, nil, [])
 
     if unclassified != [],
       do: Logger.info("Ignoring unclassified files: #{inspect(unclassified)}")
+    if archive_changes != [],
+      do: Logger.info("Ignoring unlisted posts: #{inspect(archive_changes)}")
 
     current_context = state.meta
 
@@ -253,8 +267,11 @@ defmodule GES233.Blog.Watcher do
             if bib in updated_bib, do: post_id
           end)
           |> case do
-            list = [_ | _] -> Enum.map(list, &Post.path_to_struct("#{get_posts_root_path()}/#{&1}.md"))
-            post -> [Post.path_to_struct("#{get_posts_root_path()}/#{post}.md")]
+            list = [_ | _] ->
+              Enum.map(list, &Post.path_to_struct("#{get_posts_root_path()}/#{&1}.md"))
+
+            post ->
+              [Post.path_to_struct("#{get_posts_root_path()}/#{post}.md")]
           end
 
         updated_posts ++ updated_posts_from_bib

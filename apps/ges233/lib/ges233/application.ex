@@ -31,7 +31,7 @@ defmodule GES233.Application do
     if Application.get_env(:ges233, :saved_path) |> File.ls!() |> length() > 0 do
       server_spec = {Bandit, scheme: :http, plug: GES233.Blog.SimpleServer, ip: :any, port: 6969}
       {:ok, _server_pid} = Supervisor.start_child(GES233.Supervisor, server_spec)
-      Logger.info("Starting web server.")
+      Logger.info("Web server started.")
     end
 
     {:ok, supervisor_id}

@@ -147,6 +147,7 @@ defmodule GES233.Blog.Post do
   end
 
   # 期望是从 Git 的提交记录找
+  # 对于未提交的情况，按照
   defp overwrite_update_date(meta, root_path) do
     maybe_update_from_git_commit =
       Git.execute_command(
@@ -159,8 +160,8 @@ defmodule GES233.Blog.Post do
           |> DateTime.from_iso8601()
           |> case do
             # Uncommit file.
-            {:error, _} -> DateTime.now!("Asia/Shanghai")
             {:ok, commit_time, _} -> commit_time
+            _ -> DateTime.now!("Asia/Shanghai")
           end
         end
       )
