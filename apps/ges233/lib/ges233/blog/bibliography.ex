@@ -7,7 +7,9 @@ defmodule GES233.Blog.Bibliography do
 
   # Invoked by pandoc-crossref
   def maybe_validate_bibliography_exist({%{extra: extra} = page_has_extra, bib_context}) do
-    if Map.get(extra, "pandoc") do
+    if is_nil(Map.get(extra, "pandoc")) do
+      {page_has_extra, Map.put(bib_context, "bibliography", nil)}
+    else
       %{"pandoc" => pandox_options} = extra
 
       # 最开始选用 File.touch/1 使为了确保文件存在
@@ -28,8 +30,6 @@ defmodule GES233.Blog.Bibliography do
         :error ->
           {page_has_extra, Map.put(bib_context, "bibliography", nil)}
       end
-    else
-      {page_has_extra, Map.put(bib_context, "bibliography", nil)}
     end
   end
 

@@ -31,6 +31,17 @@ defmodule GES233.Blog.Renderer do
   end
 
   def add_article_layout(inner_html, post = %Post{}, _maybe_meta_about_blog) do
+    # Inject
+    assigns = case Map.fetch(post, :extra) do
+      {:ok, extra} -> cond do
+        Map.get(extra, "music", false) and Map.get(extra, "math", false) -> [:render_sheet, :math]
+        Map.get(extra, "music", false) -> [:render_sheet]
+        Map.get(extra, "math", false) -> [:math]
+        true -> []
+      end
+      _ -> []
+    end
+
     inner_html
     |> Phoenix.HTML.raw()
     |> Phoenix.HTML.safe_to_string()
@@ -38,7 +49,7 @@ defmodule GES233.Blog.Renderer do
       &EEx.eval_file("apps/ges233/templates/article.html.heex",
         assigns: [
           post: post,
-          meta: Static.inject_to_assigns(),
+          meta: Static.inject_to_assigns(assigns),
           inner_content: &1,
           post_title: Renderer.Title.in_article(post.title)
         ],

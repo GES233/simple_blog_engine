@@ -11,7 +11,9 @@ defmodule GES233.Blog.Static do
     "highlight" =>
       {"/assets/code-highlighting.css",
        "apps/ges233/assets/vendor/pandoc/highlighting-breezedark.css"},
-    "favicon" => {"/favicon.ico", "apps/ges233/assets/favicon.ico"}
+    "favicon" => {"/favicon.ico", "apps/ges233/assets/favicon.ico"},
+    "abc_notation" =>
+      {"/assets/abcjs-plugin-min.js", "apps/ges233/assets/vendor/abcjs-plugin-min.js"}
   }
 
   @static_with_file_operate %{"pdf_js" => {"/dist/pdf_js", "apps/ges233/assets/vendor/pdf_js"}}
@@ -110,33 +112,41 @@ defmodule GES233.Blog.Static do
     """
 
     sse_script =
-    if Mix.env() == :dev do
-      """
+      if Mix.env() == :dev do
+        """
 
-      <script type="text/javascript">
-        const eventSource = new EventSource("/sse");
+        <script type="text/javascript">
+          const eventSource = new EventSource("/sse");
 
-        eventSource.addEventListener("reload", (e) => {
-          // console.log("Server sent reload event. Reloading page...");
-          window.location.reload();
-          // console.log("Reload complete.");
-        });
+          eventSource.addEventListener("reload", (e) => {
+            // console.log("Server sent reload event. Reloading page...");
+            window.location.reload();
+            // console.log("Reload complete.");
+          });
 
-        eventSource.onerror = (err) => {
-          console.error("EventSource failed:", err);
-          eventSource.close();
-        };
-      </script>
-      """
-    else
-      ""
-    end
-
-    maybe_friends =
-      cond do
-        :friends in opts -> "#{friends}"
-        true -> ""
+          eventSource.onerror = (err) => {
+            console.error("EventSource failed:", err);
+            eventSource.close();
+          };
+        </script>
+        """
+      else
+        ""
       end
+
+    # TODO: Migrate in inject_with_options
+    mathjax = """
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    """
+
+    music = """
+      <script src="#{get_route("abc_notation")}">
+      </script>
+    """
+
+    inject_with_options =
+      if(:friends in opts, do: friends <> "\n", else: <<>>)
+      <> if(:render_sheet in opts, do: music <> "\n", else: <<>>)
 
     """
     #{phx_js}
@@ -144,7 +154,8 @@ defmodule GES233.Blog.Static do
     #{heti_css}
     #{heti_js}
     #{code}
-    #{maybe_friends}#{sse_script}
+    #{mathjax}
+    #{inject_with_options}#{sse_script}
     """
   end
 
