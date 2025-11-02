@@ -29,12 +29,12 @@ defmodule GES233.Deploy do
     GES233.Blog.Writer.SinglePage.copy_all_files_except_git(target_path)
   end
 
-  def commit_git(target_path \\ get_git_path()) do
+  def commit_git(target_path \\ get_git_path(), message) do
     repo = if valid_repo(target_path), do: %Git.Repository{path: target_path} |> IO.inspect()
 
     Git.add(repo, ["."]) |> IO.inspect(label: :add)
 
-    Git.commit(repo, ["-m", "Commit on #{DateTime.utc_now()}+0000"])
+    Git.commit(repo, ["-m", message])
     |> IO.inspect(label: :commit)
     |> case do
       {:ok, _} -> Git.push(repo) |> IO.inspect(label: :push)
@@ -42,11 +42,13 @@ defmodule GES233.Deploy do
     end
   end
 
-  def exec(commit \\ false) do
+  def exec(upload? \\ false, message \\ "Commit on #{DateTime.utc_now()}+0000") when is_binary(message)  do
     path = get_git_path()
 
     :ok = copy_files_to_git(path)
 
-    if commit, do: commit_git(path)
+    if upload?, do: do_commit(path, message)
   end
+
+  defp do_commit(path, maybe_message), do: commit_git(path, maybe_message)
 end

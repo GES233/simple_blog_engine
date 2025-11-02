@@ -9,9 +9,8 @@ defmodule GES233 do
     :ok
   end
 
-  def deploy() do
-    GES233.Deploy.exec(true)
-  end
+  def deploy(), do: GES233.Deploy.exec(true)
+  def deploy(msg), do: GES233.Deploy.exec(true, msg)
 
   @doc """
   Hello world.
