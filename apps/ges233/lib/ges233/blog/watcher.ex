@@ -125,6 +125,7 @@ defmodule GES233.Blog.Watcher do
     changed_paths = Map.keys(state.diffs)
 
     ## 当务之急是对变化进行分类
+    # TODO: 考虑删除的情况
     #
     # - media(-> meta_registry)
     # - bibloigraphy&posts(-> posts)
