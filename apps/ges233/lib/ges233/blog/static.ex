@@ -2,6 +2,7 @@ defmodule GES233.Blog.Static do
   alias GES233.Blog.Writer
 
   @static_index %{
+    "app_css" => {"/assets/app.css", "apps/ges233/assets/app.css"},
     "phx" => {"/assets/phoenix_html.js", "apps/ges233/assets/vendor/phoenix_html.js"},
     "heti_css" => {"/assets/heti.min.css", "apps/ges233/assets/vendor/heti/heti.min.css"},
     "heti_js" => {"/assets/hti-addon.min.js", "apps/ges233/assets/vendor/heti/heti-addon.min.js"},
@@ -142,36 +143,7 @@ defmodule GES233.Blog.Static do
     """
 
     music = """
-      <script src="#{get_route("abc_notation_basic")}">
-      </script>
-      <script>
-        document.addEventListener("DOMContentLoaded", () => {
-          // 查找所有使用 .abc-notation 类的 div
-          const targets = document.querySelectorAll(".abc-notation");
-
-          if (targets.length > 0) {
-            // 遍历所有目标并渲染它们
-            targets.forEach(target => {
-              const abcString = target.textContent; // 获取 div 内的 ABC 文本
-
-              // 清空 div (可选, 以防 <p> 标签干扰)
-              target.innerHTML = '';
-
-              // 渲染乐谱
-              // 注意：abcjs 的 renderAbc API 可以接受一个元素数组或单个元素
-              // 如果您的版本支持，可以简化为：
-              ABCJS.renderAbc(targets);
-              console.log("done");
-              //
-              // 或者单个渲染：
-              ABCJS.renderAbc(target, abcString, {
-                // 在此处添加任何 abcjs 的配置选项
-                // 例如：responsive: "resize"
-              });
-            });
-          }
-      });
-    </script>
+      <script src="#{get_route("abc_notation_plugin")}"></script>
     """
 
     inject_with_options =
@@ -179,6 +151,7 @@ defmodule GES233.Blog.Static do
         if(:render_sheet in opts, do: music <> "\n", else: <<>>)
 
     """
+    <link rel=\"stylesheet\" href=\"#{get_route("app_css")}\">
     #{phx_js}
     #{picocss}
     #{heti_css}
