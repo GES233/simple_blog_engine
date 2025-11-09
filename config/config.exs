@@ -39,4 +39,23 @@ config :pandox,
 
 config :elixir, :time_zone_database, Tz.TimeZoneDatabase
 
-# 
+# 配置 esbuild （需要版本号）
+config :esbuild,
+  version: "0.25.4",
+  ges233: [
+    args:
+      ~w(js/app.js --bundle --target=es2022 --outdir=../priv/generated/assets/js --external:/fonts/* --external:/images/* --alias:@=.),
+    cd: Path.expand("../apps/ges233/assets", __DIR__),
+    env: %{"NODE_PATH" => [Path.expand("../deps", __DIR__), Mix.Project.build_path()]}
+  ]
+
+# 配置 tailwind （需要版本号）
+config :tailwind,
+  version: "4.1.7",
+  ges233: [
+    args: ~w(
+      --input=apps/ges233/assets/css/app.css
+      --output=priv/generated/assets/css/app.css
+    ),
+    cd: Path.expand("..", __DIR__)
+  ]

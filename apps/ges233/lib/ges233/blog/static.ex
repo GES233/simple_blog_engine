@@ -2,11 +2,8 @@ defmodule GES233.Blog.Static do
   alias GES233.Blog.Writer
 
   @static_index %{
-    "app_css" => {"/assets/app.css", "apps/ges233/assets/app.css"},
     "phx" => {"/assets/phoenix_html.js", "apps/ges233/assets/vendor/phoenix_html.js"},
-    "heti_css" => {"/assets/heti.min.css", "apps/ges233/assets/vendor/heti/heti.min.css"},
-    "heti_js" => {"/assets/hti-addon.min.js", "apps/ges233/assets/vendor/heti/heti-addon.min.js"},
-    "picocss" => {"/assets/picocss.min.css", "apps/ges233/assets/vendor/picocss.min.css"},
+    "tailwind" => {"/assets/css/app.css", nil},
     # 如果想要更新主题的话：
     # https://github.com/jgm/pandoc/issues/7860#issuecomment-1938177020
     "highlight" =>
@@ -35,16 +32,7 @@ defmodule GES233.Blog.Static do
 
   def inject_to_assigns(opts \\ []) do
     phx_js = "<script src=\"#{get_route("phx")}\"></script>"
-    picocss = "<link rel =\"stylesheet\" href=\"#{get_route("picocss")}\" >"
-    heti_css = "<link rel=\"stylesheet\" href=\"#{get_route("heti_css")}\">"
-
-    heti_js = """
-    <script src="#{get_route("heti_js")}"></script>
-    <script>
-      const heti = new Heti('.heti');
-      heti.autoSpacing();
-    </script>
-    """
+    tailwind = ~S(<link rel="stylesheet" href="/assets/css/app.css">)
 
     code = "<link rel=\"stylesheet\" href=\"#{get_route("highlight")}\">"
 
@@ -151,11 +139,8 @@ defmodule GES233.Blog.Static do
         if(:render_sheet in opts, do: music <> "\n", else: <<>>)
 
     """
-    <link rel=\"stylesheet\" href=\"#{get_route("app_css")}\">
     #{phx_js}
-    #{picocss}
-    #{heti_css}
-    #{heti_js}
+    #{tailwind}
     #{code}
     #{mathjax}
     #{inject_with_options}#{sse_script}

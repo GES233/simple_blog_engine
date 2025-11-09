@@ -12,48 +12,50 @@
 </head>
 
 <body>
-  <header class="container">
-    <nav>
-      <ul>
-        <li><kbd>GES233</kbd>'s Blog</li>
-      </ul>
-      <ul>
-        <li>
-          <details class="dropdown">
-          <summary role="button">欢迎</summary>
-            <ul dir="rtl">
-              <li><a href="/about">关于</a></li>
-              <li><a href="/friends">友链</a></li>
-            </ul>
-          </details>
-        </li>
-      </ul>
-    </nav>
+  <header class="bg-base-100/80 backdrop-blur-sm sticky top-0 z-10">
+    <div class="navbar bg-base-100 shadow-sm px-4 sm:px-6 lg:px-8">
+      <div class="flex-1">
+        <a  href="/" class="btn btn-ghost text-xl"><kbd>GES233</kbd>'s Blog</a>
+      </div>
+      <ul class="menu menu-horizontal px-1">
+      <li>
+        <details>
+          <summary>欢迎</summary>
+          <ul class="bg-base-100 rounded-t-none p-2">
+            <li><a href="/about">关于</a></li>
+            <li><a href="/friends">友链</a></li>
+          </ul>
+        </details>
+      </li>
+    </ul>
+    </div>
   </header>
 
-  <main class="container">
-    <article class="heti">
+  <main class="w-full bg-base-200 py-12 px-4">
+    <div class="mx-auto max-w-4xl rounded-lg shadow-sm p-8 sm:p-12">
 
       <%= for post <- @posts do %>
+        <div class="card bg-base-100 rounded-box grid my-6">
         <%= GES233.Blog.Renderer.PostComponents.card(post, :index) %>
+        </div>
       <% end %>
 
-    </article>
+    </div>
   </main>
 
-  <footer>
-    <div align="center">
+  <footer class="mt-16 border-t py-8">
+    <div class="text-center my-4">
       <%= if @page == 1 do %>
-        <button class="outline secondary" onClick="window.location.href='/'">1</button>
+        <button class="btn btn-active btn-secondary" onClick="window.location.href='/'">1</button>
       <% else %>
-        <button class="outline" onClick="window.location.href='/'">1</button>
+        <button class="btn btn-outline btn-primary" onClick="window.location.href='/'">1</button>
       <% end %>
       <%= if @total_pages <= 10 do %>
         <%= for p <- 2..@total_pages do %>
           <%= if @page == p do %>
-            <button class="outline secondary" onClick="window.location.href='/page/<%= p %>'"><%= p %></button>
+            <button class="btn btn-active btn-secondary" onClick="window.location.href='/page/<%= p %>'"><%= p %></button>
           <% else %>
-            <button class="outline" onClick="window.location.href='/page/<%= p %>'"><%= p %></button>
+            <button class="btn btn-outline btn-primary" onClick="window.location.href='/page/<%= p %>'"><%= p %></button>
           <% end %>
         <% end %>
         <% else %>
@@ -68,8 +70,13 @@
           < %!-- Only: 1, 2, ..., p-1, p, p+1, -2, -1 %> -->
       <% end %>
     </div>
-    <div class="container">
-      <small>Powered by <a href="https://github.com/GES233/simple_blog_engine">GES233/simple_blog_engine</a></small>
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <p class="text-center text-sm text-base-content">
+        (c) <%= DateTime.utc_now().year %> GES233
+      </p>
+      <p class="text-center text-sm text-base-content">
+        Powered by <a href="https://github.com/GES233/simple_blog_engine"><code>GES233/simple_blog_engine</code></a>
+      </p>
     </div>
   </footer>
 </body>
