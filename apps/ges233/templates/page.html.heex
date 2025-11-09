@@ -13,46 +13,53 @@
 
 <body>
   <header class="container">
-    <nav>
-      <ul>
-        <li><a href="/"><kbd>GES233</kbd>'s Blog</a></li>
-      </ul>
-      <ul>
-        <li>
-          <details class="dropdown">
-          <summary role="button">欢迎</summary>
-            <ul dir="rtl">
-              <li><a href="/about">关于</a></li>
-              <li><a href="/friends">友链</a></li>
-            </ul>
-          </details>
-        </li>
-      </ul>
-    </nav>
+    <div class="navbar bg-base-100 shadow-sm">
+      <div class="flex-1">
+        <a  href="/" class="btn btn-ghost text-xl"><kbd>GES233</kbd>'s Blog</a>
+      </div>
+      <ul class="menu menu-horizontal px-1">
+      <li>
+        <details>
+          <summary>欢迎</summary>
+          <ul class="bg-base-100 rounded-t-none p-2">
+            <li><a href="/about">关于</a></li>
+            <li><a href="/friends">友链</a></li>
+          </ul>
+        </details>
+      </li>
+    </ul>
+    </div>
   </header>
-  <main class="container">
-    <article class="heti">
+  <main class="w-full bg-base-200 py-12 px-4">
+    <div class="mx-auto max-w-4xl bg-base-100 rounded-lg shadow-sm p-8 sm:p-12">
+      <div class="card">
 
-      <main>
-        <%= if !is_nil(@page.toc) do %>
-        <div class="heti-skip">
-          <details class="dropdown">
-            <summary>目录</summary>
-            <%= @page.toc %>
-          </details>
-        </div>
-        <% end %>
-        <div>
+        <main>
+          <%= if !is_nil(@page.toc) do %>
+          <div class="heti-skip">
+            <details class="dropdown">
+              <summary>目录</summary>
+              <%= @page.toc %>
+            </details>
+          </div>
+          <% end %>
+          <div class="card-body prose sm:prose-xl">
 
 <%= @inner_content %>
 
-        </div>
-      </main>
-    </article>
+          </div>
+        </main>
+      </div>
+    </div>
   <main>
-  <footer>
-    <div class="container">
-      <small>Powered by <a href="https://github.com/GES233/simple_blog_engine">GES233/simple_blog_engine</a></small>
+  <footer class="mt-16 border-t py-8">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <p class="text-center text-sm text-base-content">
+        (c) <%= DateTime.utc_now().year %> GES233
+      </p>
+      <p class="text-center text-sm text-base-content">
+        Powered by <a href="https://github.com/GES233/simple_blog_engine"><code>GES233/simple_blog_engine</code></a>
+      </p>
     </div>
   </footer>
 </body>

@@ -190,7 +190,10 @@ defmodule GES233.Blog.Writer.SinglePage do
       Task.async_stream(
         static_index,
         fn {_name, {route, real}} ->
-          copy_with_log.(real, "#{Application.get_env(:ges233, :saved_path)}/#{route}")
+          case real do
+            nil -> :ok
+            _ -> copy_with_log.(real, "#{Application.get_env(:ges233, :saved_path)}/#{route}")
+          end
         end,
         max_concurrency: System.schedulers_online()
       ),

@@ -18,14 +18,6 @@ defmodule GES233 do
       {GES233.Blog.Broadcaster, []}
     ]
 
-    children =
-      if Mix.env() == :dev do
-        Logger.info("Starting file watchers in :dev mode...")
-        children ++ dev_watchers()
-      else
-        children
-      end
-
     opts = [strategy: :one_for_one, name: GES233.Supervisor, max_seconds: 30]
 
     {:ok, supervisor_id} = Supervisor.start_link(children, opts)
@@ -44,23 +36,24 @@ defmodule GES233 do
       Logger.info("Web server started.")
     end
 
+    if Mix.env() == :dev do
+      dev_watchers()
+    end
+
     {:ok, supervisor_id}
   end
 
   defp dev_watchers() do
-    [
+    Logger.info("Starting file watchers for development...")
+
+    watchers = [
       # esbuild: {Esbuild, :install_and_run, [:ges233, ~w(--sourcemap=inline --watch)]},
       tailwind: {Tailwind, :install_and_run, [:ges233, ~w(--watch)]}
     ]
-    |> Enum.map(fn {_name, {module, function, args}} ->
-      # 对于每个 watcher，我们创建一个临时的 Task Supervisor
-      # 这样 watcher 进程的崩溃就不会影响到我们的主应用
-      %{
-        id: :"#{module}_watcher",
-        start: {Task, :start_link, [fn -> apply(module, function, args) end]},
-        restart: :transient
-      }
-    end)
+
+    for {_name, {module, function, args}} <- watchers do
+      Task.start_link(fn -> apply(module, function, args) end)
+    end
   end
 
   # ========

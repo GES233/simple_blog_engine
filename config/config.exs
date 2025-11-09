@@ -54,8 +54,8 @@ config :tailwind,
   version: "4.1.7",
   ges233: [
     args: ~w(
-      --input=assets/css/app.css
+      --input=apps/ges233/assets/css/app.css
       --output=priv/generated/assets/css/app.css
     ),
-    cd: Path.expand("../apps/ges233", __DIR__)
+    cd: Path.expand("..", __DIR__)
   ]

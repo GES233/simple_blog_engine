@@ -57,7 +57,7 @@ defmodule GES233.MixProject do
       ],
       "assets.build": [
         "compile",
-        "tailwind gse233",
+        "tailwind ges233",
         # "esbuild ges233"
       ],
       "assets.deploy": [
