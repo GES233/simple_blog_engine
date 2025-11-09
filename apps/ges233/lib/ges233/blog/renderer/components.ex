@@ -155,9 +155,7 @@ defmodule GES233.Blog.Renderer.PageComponents do
     avatar_part =
       if friend.avatar do
         """
-        <div class="friend-avatar">
-          <img src="#{friend.avatar}" alt="#{friend.name}" loading="lazy">
-        </div>
+        <figure><img src="#{friend.avatar}" alt="#{friend.name}" /></figure>
         """
       else
         ""
@@ -166,26 +164,31 @@ defmodule GES233.Blog.Renderer.PageComponents do
     desp_part =
       if friend.desp do
         """
-        <hgroup>
-          <h3>#{friend.name}</h3>
-          <p>#{friend.desp}</p>
-        </hgroup>
+        <p class="text-base-content/70">#{friend.desp}</p>
         """
       else
-        """
-        <h3>#{friend.name}</h3>
-        """
+        ""
       end
 
     site_link =
       if friend.site do
         if friend.site |> String.contains?("ges233") do
           """
-            <button disabled="disabled" class="btn btn-dash btn-secondary"><a href="#{friend.site}" target="_blank" rel="noopener">就是这儿！</a></button>
+            <button disabled="disabled" class="btn btn-dash btn-secondary">
+              就是这儿！
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+              </svg>
+            </button>
           """
         else
           """
-            <button class="btn btn-outline btn-primary"><a href="#{friend.site}" target="_blank" rel="noopener">让我访问！</a></button>
+            <a href="#{friend.site}" target="_blank" rel="noopener" class="btn btn-primary">
+              让我访问！
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+              </svg>
+            </a>
           """
         end
       else
@@ -193,7 +196,15 @@ defmodule GES233.Blog.Renderer.PageComponents do
       end
 
     """
-    <div class="friend-card">#{avatar_part}<div class="friend-content">#{desp_part}#{site_link}</div></div>
+    <div class="card lg:card-side lg:h-72 bg-base-100 shadow-sm shadow-xl">
+      #{avatar_part}
+      <div class="card-body">
+        <h2 class="card-title">#{friend.name}</h2>
+        #{desp_part}
+        <div class="card-actions justify-end">#{site_link}</div>
+      </div>
+    </div>
     """
+    |> String.replace("    ", "")
   end
 end
