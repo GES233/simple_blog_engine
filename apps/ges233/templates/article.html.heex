@@ -36,9 +36,9 @@
 
 <%= GES233.Blog.Renderer.PostComponents.card(@post, :article) %>
 
-        <main>
+        <div class="card-body">
           <%= if !is_nil(@post.toc), do: @post.toc |> GES233.Blog.Renderer.PostComponents.show_toc %>
-          <div class="card-body prose sm:prose-xl">
+          <div class="card-body prose sm:prose-lg">
 
 <%= @inner_content %>
 
@@ -56,7 +56,7 @@
             <% end %>
             </div>
           </div>
-        </main>
+        </div>
       </div>
     </div>
   <main>

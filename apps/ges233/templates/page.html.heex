@@ -34,21 +34,14 @@
     <div class="mx-auto max-w-4xl bg-base-100 rounded-lg shadow-sm p-8 sm:p-12">
       <div class="card">
 
-        <main>
-          <%= if !is_nil(@page.toc) do %>
-          <div class="heti-skip">
-            <details class="dropdown">
-              <summary>目录</summary>
-              <%= @page.toc %>
-            </details>
-          </div>
-          <% end %>
-          <div class="card-body prose sm:prose-xl">
+        <div class="card-body">
+          <%= if !is_nil(@page.toc), do: @page.toc |> GES233.Blog.Renderer.PostComponents.show_toc %>
+          <div class="card-body prose sm:prose-lg">
 
 <%= @inner_content %>
 
           </div>
-        </main>
+        </div>
       </div>
     </div>
   <main>
