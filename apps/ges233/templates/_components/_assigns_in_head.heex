@@ -1,0 +1,32 @@
+<% # Tailwind %>
+<link rel="stylesheet" href="/assets/css/app.css">
+
+<% # Code highlights %>
+<link rel="stylesheet" href="<%= GES233.Blog.Static.get_route("highlight") %>">
+
+<% # MathJax: TODO use options %>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<% # SSE Client Scripts %>
+<%= if Mix.env() == :dev do %>
+<script type="text/javascript">
+  const eventSource = new EventSource("/sse");
+
+  eventSource.addEventListener("reload", (e) => {
+    window.location.reload();
+  });
+
+  eventSource.onerror = (err) => {
+    console.error("EventSource failed:", err);
+    eventSource.close();
+  };
+</script>
+<% end %>
+
+<%= if @options do %>
+  <%= for _items <- @options do %>
+    <% nil %>
+  <% end %>
+<% end %>
+
+<%= @maybe_extra %>
