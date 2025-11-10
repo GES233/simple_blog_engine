@@ -15,7 +15,7 @@ defmodule GES233 do
 
     children = [
       {GES233.Blog.ContentRepo, []},
-      {GES233.Blog.Broadcaster, []}
+      {GES233.Broadcaster, []}
     ]
 
     opts = [strategy: :one_for_one, name: GES233.Supervisor, max_seconds: 30]
@@ -27,11 +27,11 @@ defmodule GES233 do
     {elapse, initial_context} = :timer.tc(&GES233.Blog.Builder.build_from_root/0, :millisecond)
     Logger.info("Initial build complete, elapsed #{inspect(elapse)} ms.")
 
-    watcher_spec = {GES233.Blog.Watcher, initial_context}
+    watcher_spec = {GES233.Watcher, initial_context}
     {:ok, _watcher_pid} = Supervisor.start_child(GES233.Supervisor, watcher_spec)
 
     if Application.get_env(:ges233, :saved_path) |> File.ls!() |> length() > 0 do
-      server_spec = {Bandit, scheme: :http, plug: GES233.Blog.SimpleServer, ip: :any, port: 6969}
+      server_spec = {Bandit, scheme: :http, plug: GES233.SimpleServer, ip: :any, port: 6969}
       {:ok, _server_pid} = Supervisor.start_child(GES233.Supervisor, server_spec)
       Logger.info("Web server started.")
     end

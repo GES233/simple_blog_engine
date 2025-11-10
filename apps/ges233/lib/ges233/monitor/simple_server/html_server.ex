@@ -1,4 +1,4 @@
-defmodule GES233.Blog.SimpleServer.HTMLServer do
+defmodule GES233.SimpleServer.HTMLServer do
   use Plug.Builder
 
   def init(opts) do

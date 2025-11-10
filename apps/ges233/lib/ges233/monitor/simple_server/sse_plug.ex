@@ -1,6 +1,6 @@
-defmodule GES233.Blog.SimpleServer.SSEPlug do
+defmodule GES233.SimpleServer.SSEPlug do
   use Plug.Builder
-  alias GES233.Blog.Broadcaster
+  alias GES233.Broadcaster
 
   def init(opts), do: opts
 

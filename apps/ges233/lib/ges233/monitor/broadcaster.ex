@@ -1,4 +1,4 @@
-defmodule GES233.Blog.Broadcaster do
+defmodule GES233.Broadcaster do
   use GenServer
   require Logger
 

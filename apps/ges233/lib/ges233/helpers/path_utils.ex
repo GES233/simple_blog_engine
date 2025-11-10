@@ -1,5 +1,5 @@
 
-defmodule GES233.Blog.PathUtils do
+defmodule GES233.Helpers.PathUtils do
   @moduledoc """
   Provides utility functions for handling file paths.
   """

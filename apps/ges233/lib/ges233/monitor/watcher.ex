@@ -1,4 +1,4 @@
-defmodule GES233.Blog.Watcher do
+defmodule GES233.Watcher do
   use GenServer
 
   require Logger
@@ -12,7 +12,7 @@ defmodule GES233.Blog.Watcher do
     ]
 
   import GES233.Blog.Bibliography, only: [get_bibliography_entry: 0]
-  import GES233.Blog.PathUtils
+  import GES233.Helpers.PathUtils
 
   alias GES233.Blog.{Media, Post, Writer, Builder, Broadcaster}
 
