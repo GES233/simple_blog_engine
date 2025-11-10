@@ -17,86 +17,11 @@ defmodule GES233.Blog.Renderer.PostComponents do
   end
 
   def show_toc(toc) do
-    """
-    <details class="dropdown">
-      <summary class="btn btn-xs sm:btn-sm md:btn-md lg:btn-lg xl:btn-xl btn-outline btn-secondary">
-        目录
-      </summary>
-        #{
-          toc
-          |> String.replace(
-            "<ul>",
-            ~S(<ul class="menu dropdown-content bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">),
-            global: false
-          )
-        }
-    </details>
-    """
+    EEx.eval_file("apps/ges233/templates/_components/post_or_page_toc.heex", toc: toc)
   end
 
   def appearance_status(progress) do
-    case progress do
-      :final ->
-        """
-        <div class="badge badge-success badge-outline">
-          <svg class="size-[1rem]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-          </svg>
-          <div title="进度" class="radial-progress text-info" style="--value:100; --size:1rem; --thickness: 2px;" aria-valuenow="100" role="progressbar">
-          </div>
-            100%
-        </div>
-        """
-
-      # 长期更新
-      :longterm ->
-        """
-        <div class="badge badge-outline badge-success">
-          <svg class="size-[1rem]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-          </svg>
-          <div title="进度" class="radial-progress text-info" style="--value:100; --size:1rem; --thickness: 2px;" aria-valuenow="100" role="progressbar">
-          </div>
-          100%
-        </div>
-        """
-
-      [:longterm, progress] ->
-        """
-        <div class="badge badge-info badge-outline">
-          <svg class="size-[1rem]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-          </svg>
-          <div title="进度" class="radial-progress text-info" style="--value:#{progress}; --size:1rem; --thickness: 2px;" aria-valuenow="#{progress}" role="progressbar">
-          </div>
-          #{progress}%
-        </div>
-        """
-
-      [:wip, progress] ->
-        """
-        <div class="badge badge-info badge-outline">
-          <svg class="size-[1rem]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
-          </svg>
-          <div title="进度" class="radial-progress text-info" style="--value:#{progress}; --size:1rem; --thickness: 2px;" aria-valuenow="#{progress}" role="progressbar">
-          </div>
-          #{progress}%
-        </div>
-        """
-
-      [:blocking, progress] ->
-        """
-        <div class="badge badge-outline badge-ghost">
-          <svg class="size-[0.8rem]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
-          </svg>
-          <div title="进度" class="radial-progress text-info" style="--value:#{progress}; --size:1rem; --thickness: 2px;" aria-valuenow="#{progress}" role="progressbar">
-          </div>
-          #{progress}%
-        </div>
-        """
-    end
+    EEx.eval_file("apps/ges233/templates/_components/post_status.heex", progress: progress)
   end
 
   def card(%Post{} = post, :article) do
@@ -152,59 +77,7 @@ defmodule GES233.Blog.Renderer.PageComponents do
   alias GES233.Blog.Page.Friend
 
   def friend(%Friend{} = friend) do
-    avatar_part =
-      if friend.avatar do
-        """
-        <figure><img src="#{friend.avatar}" alt="#{friend.name}" /></figure>
-        """
-      else
-        ""
-      end
-
-    desp_part =
-      if friend.desp do
-        """
-        <p class="text-base-content/70">#{friend.desp}</p>
-        """
-      else
-        ""
-      end
-
-    site_link =
-      if friend.site do
-        if friend.site |> String.contains?("ges233") do
-          """
-            <button disabled="disabled" class="btn btn-dash btn-secondary">
-              就是这儿！
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-              </svg>
-            </button>
-          """
-        else
-          """
-            <a href="#{friend.site}" target="_blank" rel="noopener" class="btn btn-primary">
-              让我访问！
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-              </svg>
-            </a>
-          """
-        end
-      else
-        ""
-      end
-
-    """
-    <div class="card lg:card-side lg:h-72 bg-base-100 shadow-sm shadow-xl">
-      #{avatar_part}
-      <div class="card-body">
-        <h2 class="card-title">#{friend.name}</h2>
-        #{desp_part}
-        <div class="card-actions justify-end">#{site_link}</div>
-      </div>
-    </div>
-    """
+    EEx.eval_file("apps/ges233/templates/_pages/friend.heex", friend: friend)
     |> String.replace("    ", "")
   end
 end

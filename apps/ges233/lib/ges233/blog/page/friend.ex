@@ -3,6 +3,7 @@ defmodule GES233.Blog.Page.Friend do
     :name,
     :avatar,
     :site,
-    :desp
+    :desp,
+    status: :normal
   ]
 end

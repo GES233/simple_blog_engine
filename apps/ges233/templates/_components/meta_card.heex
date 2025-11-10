@@ -1,0 +1,21 @@
+<div>
+  <h2 class="card-title text-2xl"><%= post.title %></h2>
+
+  <div class="flex flex-wrap items-center gap-x-6 gap-y-2 mt-3 text-base-content/80 text-sm">
+    <span class="inline-flex items-center gap-1.5" title="创建日期">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
+        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14Zm.75-10.25a.75.75 0 0 0-1.5 0v2.5h-2.5a.75.75 0 0 0 0 1.5h2.5v2.5a.75.75 0 0 0 1.5 0v-2.5h2.5a.75.75 0 0 0 0-1.5h-2.5v-2.5Z" />
+        </svg>
+      <span><%= NaiveDateTime.to_date(post.create_at) |> Date.to_string() %></span>
+    </span>
+    <span class="inline-flex items-center gap-1.5" title="更新日期">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
+        <path d="M13.488 2.513a1.75 1.75 0 0 0-2.475 0L3.75 9.775a.75.75 0 0 0-.22.53l-.823 2.882a.75.75 0 0 0 .963.963l2.882-.823a.75.75 0 0 0 .53-.22l7.262-7.263a1.75 1.75 0 0 0 0-2.474ZM4.53 10.28l6.738-6.737a.25.25 0 0 1 .353 0l1.148 1.147a.25.25 0 0 1 0 .354L6.03 11.782l-1.77.506.506-1.77Z" />
+      </svg>
+      <span><%= NaiveDateTime.to_date(post.update_at) |> Date.to_string() %></span>
+    </span>
+    <div>
+      <% # Progress %>
+    </div>
+  <% # Tags %>
+</div>

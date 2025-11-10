@@ -1,0 +1,10 @@
+<details class="dropdown">
+  <summary class="btn btn-xs sm:btn-sm md:btn-md lg:btn-lg xl:btn-xl btn-outline btn-secondary">
+    目录
+  </summary>
+  <%= toc |> String.replace(
+    "<ul>",
+    ~S(<ul class="menu dropdown-content bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">),
+    global: false
+  ) %>
+</details>

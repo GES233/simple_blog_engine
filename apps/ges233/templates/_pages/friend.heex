@@ -1,0 +1,30 @@
+<div class="card lg:card-side lg:h-72 bg-base-100 shadow-sm shadow-xl">
+  <%= if friend.avatar do %>
+    <figure><img src="<%= friend.avatar %>" alt="<%= friend.name %>" /></figure>
+  <% end %>
+  <div class="card-body">
+    <h2 class="card-title"><%= friend.name %></h2>
+    <%= if friend.desp do %>
+      <p class="text-base-content/70"><%= friend.desp %></p>
+    <% end %>
+    <div class="card-actions justify-end">
+      <%= cond do %>
+        <% !!(friend.site) and String.contains?(friend.site, "ges233") -> %>
+          <button disabled="disabled" class="btn btn-dash btn-secondary">
+            <div class="status status-success"></div>
+            就是这儿！
+          </button>
+        <% friend.site -> %>
+          <button class="btn btn-outline btn-primary">
+            <%= case friend.status do %>
+            <% :normal -> %>
+              <span class="status status-success"></span>
+            <% _ -> %>
+              <span class="status status-error"></span>
+          <% end %>
+            <a a href="<%= friend.site %>" target="_blank" rel="noopener">让我访问！</a>
+          </button>
+      <% end %>
+    </div>
+  </div>
+</div>
