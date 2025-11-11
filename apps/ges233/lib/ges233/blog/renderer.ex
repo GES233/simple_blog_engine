@@ -7,7 +7,7 @@ defmodule GES233.Blog.Renderer do
     # callback_pre_pandoc = Keyword.get(opts, :pre_pandoc_callback, (& &1))
     # callback_after_pandoc = Keyword.get(opts, :pre_after_callback, (& &1))
 
-    body = link_replace(post, all_posts_and_media)
+    {post, body} = link_replace(post, all_posts_and_media)
 
     {post, %{}}
     # |> then(&callback_pre_pandoc)
@@ -20,27 +20,37 @@ defmodule GES233.Blog.Renderer do
     # |> then(&callback_after_pandoc)
   end
 
-  defp link_replace(%{content: {:ref, id}}, posts_and_mata) do
+  defp link_replace(%{content: {:ref, id}} = post_or_page, posts_and_mata) do
     {:ok, raw} = ContentRepo.get_raw(id)
 
-    GES233.Blog.Link.inner_replace(raw, posts_and_mata)
+    link_replace_inject(post_or_page, raw, posts_and_mata)
   end
 
-  defp link_replace(%{content: pre}, posts_and_mata) when is_binary(pre) do
-    GES233.Blog.Link.inner_replace(pre, posts_and_mata)
+  defp link_replace(%{content: pre} = post_or_page, posts_and_mata) when is_binary(pre) do
+    link_replace_inject(post_or_page, pre, posts_and_mata)
+  end
+
+  # TODO: 改成像 Post / Page 内的 extra 添加对应的变量
+  defp link_replace_inject(post_or_page, content, posts_and_mata) do
+    case GES233.Blog.Link.inner_replace(content, posts_and_mata) do
+      {nil, content} -> {post_or_page, content}
+      {:replaced, content} ->
+        # TODO: 添加注入流程
+        # 1. 找到 extra
+        # 2. 添加 %{pdf: ture}
+        {post_or_page, content}
+    end
   end
 
   def add_article_layout(inner_html, post = %Post{}, _maybe_meta_about_blog) do
     # Inject
-    assigns = case Map.fetch(post, :extra) do
-      {:ok, extra} -> cond do
-        Map.get(extra, "music", false) and Map.get(extra, "math", false) -> [:render_sheet, :math]
-        Map.get(extra, "music", false) -> [:render_sheet]
-        Map.get(extra, "math", false) -> [:math]
-        true -> []
+    assigns =
+      with {:ok, extra} <- Map.fetch(post, :extra),
+      %{} = extra do
+        extra
+      else
+        _ -> %{}
       end
-      _ -> []
-    end
 
     inner_html
     |> Phoenix.HTML.raw()
@@ -76,8 +86,8 @@ defmodule GES233.Blog.Renderer do
 
     opts =
       cond do
-        friends? -> [:friends]
-        true -> []
+        friends? -> %{friends: true}
+        true -> %{}
       end
 
     inner_html

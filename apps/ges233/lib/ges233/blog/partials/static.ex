@@ -14,7 +14,7 @@ defmodule GES233.Blog.Static do
     "abc_notation_plugin" =>
       {"/assets/abcjs-plugin-min.js", "apps/ges233/assets/vendor/abcjs/abcjs-plugin-min.js"},
     "abc_notation_basic" =>
-      {"/assets/abcjs-basic-min.js", "apps/ges233/assets/vendor/abcjs/abcjs-basic-min.js"},
+      {"/assets/abcjs-basic-min.js", "apps/ges233/assets/vendor/abcjs/abcjs-basic-min.js"}
   }
 
   @static_with_file_operate %{"pdf_js" => {"/dist/pdf_js", "apps/ges233/assets/vendor/pdf_js"}}
@@ -31,15 +31,10 @@ defmodule GES233.Blog.Static do
     "<div class=\"aspect-ratio\"><iframe src=\"/dist/pdf_js/web/viewer.html?file=#{inner}\"></iframe></div>"
   end
 
-  def inject_to_assigns(opts \\ []) do
-    music = """
-      <script src="#{get_route("abc_notation_plugin")}"></script>
-    """
-
-    inject_with_options =
-        if(:render_sheet in opts, do: music <> "\n", else: <<>>)
-
-    EEx.eval_file("apps/ges233/templates/_components/_assigns_in_head.heex", assigns: [options: nil, maybe_extra: inject_with_options])
+  def inject_to_assigns(opts \\ %{}) do
+    EEx.eval_file("apps/ges233/templates/_components/_assigns_in_head.heex",
+      assigns: [options: opts, maybe_extra: nil]
+    )
   end
 
   def get_route(item), do: @static_index[item] |> (fn {route, _} -> route end).()

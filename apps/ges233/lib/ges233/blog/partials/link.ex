@@ -34,7 +34,7 @@ defmodule GES233.Blog.Link do
         meta[inner].route_path ||
           """
           ```lilypond
-          #{(meta[inner].inner_content)}
+          #{meta[inner].inner_content}
           ```
           """
 
@@ -49,32 +49,33 @@ defmodule GES233.Blog.Link do
     replaced = Regex.replace(@raw_link_pattern, source, fn match -> func.(match, meta) end)
 
     if String.contains?(replaced, "aspect-ratio") do
-      """
-      <style>
-        /* Reference: https://www.webhek.com/post/responsive-video-iframes-keeping-aspect-ratio-with-only-css/ */
-        /* 这个规则规定了iframe父元素容器的尺寸，我们要求它的宽高比应该是 25:14 */
-        .aspect-ratio {
-          position: relative;
-          /* heti 的容器下允许使用 100% */
-          width: 100%;
-          height: 0;
-          padding-bottom: 56%;
-          /* 高度应该是宽度的56% */
-        }
+      {:replaced,
+       """
+       <style>
+         /* Reference: https://www.webhek.com/post/responsive-video-iframes-keeping-aspect-ratio-with-only-css/ */
+         /* 这个规则规定了iframe父元素容器的尺寸，我们要求它的宽高比应该是 25:14 */
+         .aspect-ratio {
+           position: relative;
+           /* heti 的容器下允许使用 100% */
+           width: 100%;
+           height: 0;
+           padding-bottom: 56%;
+           /* 高度应该是宽度的56% */
+         }
 
-        /* 设定iframe的宽度和高度，让iframe占满整个父元素容器 */
-        .aspect-ratio iframe {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          left: 0;
-          top: 0;
-        }
-      </style>
-      #{replaced}
-      """
+         /* 设定iframe的宽度和高度，让iframe占满整个父元素容器 */
+         .aspect-ratio iframe {
+           position: absolute;
+           width: 100%;
+           height: 100%;
+           left: 0;
+           top: 0;
+         }
+       </style>
+       #{replaced}
+       """}
     else
-      replaced
+      {nil, replaced}
     end
   end
 end

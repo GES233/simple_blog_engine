@@ -12,6 +12,7 @@ Only for individual.
   - Pandoc-crossref
 - Graphviz
 - Lilypond
+- Tailwind Standalone
 
 ## How to use
 
