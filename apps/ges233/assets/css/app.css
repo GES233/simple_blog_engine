@@ -94,31 +94,42 @@
 /* TODO: 针对 @tailwindcss/typography 的配置
   参见 https://stackoverflow.com/questions/79626704/how-to-configure-tailwindcss-typography-plugin-from-tailwindcss-v4
 
-  https://github.com/tailwindlabs/tailwindcss-typography/issues/372#issuecomment-2616848354
-    @utility prose {
-      --tw-prose-body: var(--color-primary);
-      --tw-prose-headings: var(--color-primary);
-      --tw-prose-bold: var(--color-primary);
-      --tw-prose-quote-borders: var(--color-slate-300);
-      --tw-prose-quotes: var(--color-muted-foreground);
-      --tw-prose-code: var(--color-primary);
+  https://github.com/tailwindlabs/tailwindcss-typography/issues/372#issuecomment-2616848354 */
+@utility prose {
+  --tw-prose-body: var(--color-primary);
+  --tw-prose-headings: var(--color-primary);
+  --tw-prose-bold: var(--color-primary);
+  --tw-prose-quote-borders: var(--color-slate-300);
+  --tw-prose-quotes: var(--color-muted-foreground);
+  --tw-prose-code: var(--color-primary);
 
-      code {
-        &::before,
-        &::after {
-          display: none;
-        }
-        text-wrap: nowrap;
-      }
-
-      blockquote {
-        font-weight: 400;
-      }
+  code {
+    &::before,
+    &::after {
+      display: none;
     }
+    text-wrap: nowrap;
+  }
+
+  blockquote {
+    font-weight: 400;
+  }
+
+  p {
+    @apply my-2;
+  }
+
+  /* 标题的间距也需要调整，使其更紧凑 */
+  h2 {
+    @apply mt-8 mb-2;
+  }
   
-  或者是：
+  h3 {
+    @apply mt-6 mb-1;
+  }
 
-    @plugin "@tailwindcss/typography" {
-      className: wysiwyg;
-    }
-*/
+  /* 列表项之间也不需要那么大的空隙 */
+  li {
+    @apply my-[1px];
+  }
+}
