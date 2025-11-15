@@ -165,7 +165,7 @@ defmodule GES233.Blog.Media do
         %__MODULE__{id: id, type: :lilypond, path: path, route_path: "![](/svg/#{id}.svg)"}
 
       {:error, {code, reason}} ->
-        Logger.warning("DOT #{id} build failed with code #{code} and reason #{reason}")
+        Logger.warning("Lilypond #{id} build failed with code #{code} and reason:\n\n#{reason}")
 
         content = File.read(path)
 
