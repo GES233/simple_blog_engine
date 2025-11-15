@@ -8,7 +8,8 @@ defmodule GES233.Watcher do
       get_posts_root_path: 0,
       get_pic_entry: 0,
       get_pdf_entry: 0,
-      get_dot_entry: 0
+      get_dot_entry: 0,
+      get_lilypond_entry: 0
     ]
 
   import GES233.Blog.Bibliography, only: [get_bibliography_entry: 0]
@@ -22,7 +23,8 @@ defmodule GES233.Watcher do
                           {:bib, get_bibliography_entry()},
                           {:media, get_pic_entry()},
                           {:media, get_pdf_entry()},
-                          {:media, get_dot_entry()}
+                          {:media, get_dot_entry()},
+                          {:media, get_lilypond_entry()}
                         ]
                         |> Enum.map(fn {k, path} -> {k, normalize(path)} end)
 

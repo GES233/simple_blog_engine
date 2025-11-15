@@ -85,14 +85,8 @@ defmodule GES233.Blog.Media do
   end
 
   def parse_media(path, :pic) do
-    [series, image] = path |> Path.split() |> Enum.reverse() |> Enum.slice(1..2)
-
-    [id_under_seires, ext] = Path.basename(path) |> String.split(".")
-
-    id = [series, id_under_seires] |> Enum.join("-")
-
-    case image do
-      "img" ->
+    case maybe_series(path, "img") do
+      {id, {series, id_under_seires, ext}} ->
         %__MODULE__{
           id: id,
           type: :pic,
@@ -100,7 +94,7 @@ defmodule GES233.Blog.Media do
           route_path: "/image/#{series}/#{id_under_seires}.#{ext}"
         }
 
-      _ ->
+      {_id, {id_under_seires, ext}} ->
         %__MODULE__{
           id: id_under_seires,
           type: :pic,
@@ -113,23 +107,48 @@ defmodule GES233.Blog.Media do
   def parse_media(path, :dot) do
     id = Path.basename(path, ".dot")
 
-    case Graphviz.execute(path) do
-      {:ok, svg} ->
+    # case Graphviz.execute(path) do
+    #   {:ok, svg} ->
+    #     root = "#{Application.get_env(:ges233, :saved_path)}/svg"
+    #     File.mkdir_p(root)
+
+    #     path = "#{root}/#{id}.svg"
+    #     File.write(path, svg)
+
+    #     %__MODULE__{id: id, type: :dot, path: path, route_path: "![](/svg/#{id}.svg)"}
+
+    #   {:error, {code, reason}} ->
+    #     Logger.warning("DOT #{id} build failed with code #{code} and reason #{reason}")
+
+    #     content = File.read(path)
+
+    #     %__MODULE__{id: id, type: :dot, path: path, inner_content: content}
+    # end
+
+    with {:ok, svg} <- Graphviz.execute(path),
+      {_id, {id_under_seires, _ext}} <- maybe_series(path, "src") do
         root = "#{Application.get_env(:ges233, :saved_path)}/svg"
         File.mkdir_p(root)
 
         path = "#{root}/#{id}.svg"
         File.write(path, svg)
 
-        %__MODULE__{id: id, type: :dot, path: path, route_path: "![](/svg/#{id}.svg)"}
-
+        %__MODULE__{id: id, type: :dot, path: path, route_path: "![](/svg/#{id_under_seires}.svg)"}
+    else
+      {id, {series, id_under_seires, _ext}} ->
+        %__MODULE__{
+          id: id,
+          type: :pic,
+          path: path,
+          route_path: "![](/svg/#{series}/#{id_under_seires}.svg)"
+        }
       {:error, {code, reason}} ->
         Logger.warning("DOT #{id} build failed with code #{code} and reason #{reason}")
 
         content = File.read(path)
 
         %__MODULE__{id: id, type: :dot, path: path, inner_content: content}
-    end
+      end
   end
 
   def parse_media(path, :lilypond) do
@@ -158,5 +177,17 @@ defmodule GES233.Blog.Media do
     id = Path.basename(path, ".pdf")
 
     %__MODULE__{id: id, type: :pdf, path: path, route_path: "/archive/pdf/#{id}.pdf"}
+  end
+
+  defp maybe_series(path, type) do
+    [series, maybe_type] = path |> Path.split() |> Enum.reverse() |> Enum.slice(1..2)
+
+    [id_under_seires, ext] = Path.basename(path) |> String.split(".")
+
+    case maybe_type do
+      ^type -> {[series, id_under_seires] |> Enum.join("-"), {series, id_under_seires, ext}}
+
+      _ -> {id_under_seires, {id_under_seires, ext}}
+    end
   end
 end

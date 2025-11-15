@@ -9,6 +9,7 @@ defmodule GES233.Blog.Post.RegistryBuilder do
   @pic_entry Application.compile_env(:ges233, [:Media, :pic_path])
   @pdf_entry Application.compile_env(:ges233, [:Media, :pdf_path])
   @dot_entry Application.compile_env(:ges233, [:Media, :dot_path])
+  @lilypond_entry Application.compile_env(:ges233, [:Media, :dot_path]) <> "/ly"
 
   @type post_registry :: %{atom() => Post.t()}
 
@@ -18,6 +19,7 @@ defmodule GES233.Blog.Post.RegistryBuilder do
   def get_pic_entry, do: @pic_entry
   def get_pdf_entry, do: @pdf_entry
   def get_dot_entry, do: @dot_entry
+  def get_lilypond_entry, do: @lilypond_entry
 
   def build_posts_registry(posts) do
     posts
@@ -54,6 +56,7 @@ defmodule GES233.Blog.Post.RegistryBuilder do
         build_media_registry(@pic_entry, :pic) ++
         build_media_registry(@pdf_entry, :pdf) ++
         build_media_registry(@dot_entry, :dot)) ++
+        build_media_registry(@lilypond_entry, :lilypond) ++
        [])
     |> Enum.into(%{})
   end

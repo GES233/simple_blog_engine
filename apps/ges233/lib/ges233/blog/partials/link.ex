@@ -34,6 +34,7 @@ defmodule GES233.Blog.Link do
         meta[inner].route_path ||
           """
           ```lilypond
+          %% Compile failed!
           #{meta[inner].inner_content}
           ```
           """
