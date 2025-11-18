@@ -42,7 +42,7 @@
 
 <%= @inner_content %>
 
-            <div style="text-align:center"><%= case @post.progress do %>
+            <div style="text-align:center" class="font-content-serif"><%= case @post.progress do %>
               <% :final -> %>
                 ——完——
               <% :longterm -> %>
@@ -61,7 +61,7 @@
     </div>
   </main>
   <footer class="mt-16 py-8">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 font-content-serif">
       <p class="text-center text-sm text-base-content">
         (c) <%= DateTime.utc_now().year %> GES233
       </p>
