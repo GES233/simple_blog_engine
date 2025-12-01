@@ -46,6 +46,11 @@
   --color-warning-content: oklch(41% 0.112 45.904);
   --color-error: oklch(88.8% 0.151 53.4);
   --color-error-content: oklch(27% 0.105 12.094);
+
+  /* （AI 生成未验证）只是一个更文学的柔和配色参考 */
+  --color-muted: var(--color-neutral);
+  --color-muted-foreground: oklch(70% 0.02 260);
+
   --radius-selector: 0.5rem;
   --radius-field: 0.5rem;
   --radius-box: 1rem;
@@ -61,9 +66,9 @@
   default: true;
   prefersdark: false;
   color-scheme: "light";
-  --color-base-100: oklch(98.0% 0.024 102.2);
+  --color-base-100: oklch(98% 0.024 102.2);
   --color-base-200: oklch(94.5% 0.093 103.2);
-  --color-base-300: oklch(92.5% 0.160 101.5);
+  --color-base-300: oklch(92.5% 0.16 101.5);
   --color-base-content: oklch(42% 0.095 57.708);
   --color-primary: oklch(0.4348 0.0997 118.56);
   --color-primary-content: oklch(0.8312 0.0589 130.21);
@@ -71,16 +76,20 @@
   --color-secondary-content: oklch(52.3% 0.095 131.4);
   --color-accent: oklch(92.5% 0.156 77.7);
   --color-accent-content: oklch(47.3% 0.072 81.8);
-  --color-neutral: oklch(95.4% 0.065 84.0);
+  --color-neutral: oklch(95.4% 0.065 84);
   --color-neutral-content: oklch(0.4244 0.1143 56.47);
-  --color-info: oklch(89.8% 0.100 305.5);
-  --color-info-content: oklch(45.6% 0.100 301.3);
+  --color-info: oklch(89.8% 0.1 305.5);
+  --color-info-content: oklch(45.6% 0.1 301.3);
   --color-success: oklch(78.4% 0.076 124.3);
   --color-success-content: oklch(37% 0.077 168.94);
   --color-warning: oklch(78.6% 0.255 91.9);
-  --color-warning-content: oklch(41.0% 0.112 45.904);
+  --color-warning-content: oklch(41% 0.112 45.904);
   --color-error: oklch(86.1% 0.21 23.1);
   --color-error-content: oklch(38.6% 0.213 15);
+
+  --color-muted: var(--color-neutral);
+  --color-muted-foreground: oklch(45% 0.03 80);
+
   --radius-selector: 0.5rem;
   --radius-field: 0.5rem;
   --radius-box: 1rem;
@@ -91,74 +100,162 @@
   --noise: 0;
 }
 
-@theme {
-  --font-sans: "ChillDIN", sans-serif;
-  --font-content-serif:
-    /* Latin */ Alegreya, Merriweather, Palatino,
-    Garamond, Baskerville, "Libre Baskerville", Georgia,
-    /* CJK */ "Noto Serif CJK SC", /* End */ serif;
+@layer base {
+  :root {
+    --font-sans: sans-serif;
+    --font-serif:
+      /* Latin */ Alegreya, Merriweather, Palatino, Garamond,
+      Baskerville, "Libre Baskerville", Georgia, /* CJK */ "Noto Serif CJK SC",
+      /* End */ serif;
+  }
 }
 
-/* TODO: 针对 @tailwindcss/typography 的配置
-  参见 https://stackoverflow.com/questions/79626704/how-to-configure-tailwindcss-typography-plugin-from-tailwindcss-v4
+@utility text-muted {
+  color: var(--color-muted);
+}
 
-  https://github.com/tailwindlabs/tailwindcss-typography/issues/372#issuecomment-2616848354 */
-@utility prose {
-  --tw-prose-body: var(--color-primary);
-  --tw-prose-headings: var(--color-primary);
-  --tw-prose-bold: var(--color-primary);
-  --tw-prose-quote-borders: var(--color-slate-300);
-  --tw-prose-quotes: var(--color-muted-foreground);
-  --tw-prose-code: var(--color-primary);
+@utility text-muted-foreground {
+  color: var(--color-muted-foreground);
+}
 
-  --tw-prose-body-font-family:
-    /* Latin */ Merriweather, Palatino, Garamond,
-    Baskerville, "Libre Baskerville", Georgia, /* CJK */ "Noto Serif CJK SC",
-    /* End */ serif;
+/* Type-scale */
+@theme {
+  /* Modular scale based on 1.25 (Major Third) */
+  --ts-0: 1.0625rem;
+  --ts-1: 1.25rem;
+  --ts-2: 1.563rem;
+  --ts-3: 1.953rem;
+  --ts-4: 2.441rem;
+  --ts-5: 3.052rem;
 
-  code {
-    &::before,
-    &::after {
-      display: none;
+  /* Line-height tuned for CJK */
+  --lh-tight: 1.28;
+  --lh-normal: 1.7;
+  --lh-relaxed: 1.8;
+}
+
+@layer components {
+  .prose {
+    --tw-prose-body: var(--color-primary);
+    --tw-prose-headings: var(--color-primary);
+    --tw-prose-bold: var(--color-primary);
+    --tw-prose-quote-borders: var(--color-slate-300);
+    --tw-prose-quotes: var(--color-muted-foreground);
+    --tw-prose-code: var(--color-primary);
+
+    /* 正文 serif */
+    font-family: var(--font-serif);
+    max-width: 72ch;
+
+    /* 不需要代码前后的引号 */
+    code {
+      &::before,
+      &::after {
+        display: none;
+      }
     }
-    text-wrap: nowrap;
-  }
 
-  blockquote {
-    /* Remove extra quotes */
-    p {
+    /* 不需要引用前后的引号 */
+    blockquote p {
       &:first-of-type::before,
       &:last-of-type::after {
         display: none;
       }
     }
-    font-weight: 400;
+
+    blockquote {
+      font-weight: 400;
+      color: var(--color-muted-foreground);
+      @apply border-l-4 pl-4 italic my-4;
+    }
+
+    /* 段落节奏 */
+    p {
+      @apply my-2 leading-relaxed;
+    }
+
+    h1 {
+      font-size: var(--ts-4); /* text-3xl */
+      @apply mt-10 mb-4 leading-snug;
+    }
+    h2 {
+      font-size: var(--ts-3); /* text-2xl */
+      @apply mt-8 mb-3 leading-snug;
+    }
+    h3 {
+      font-size: var(--ts-2); /* text-xl */
+      @apply mt-6 mb-2 leading-snug;
+    }
+    h4 {
+      font-size: var(--ts-1); /* text-lg */
+      @apply mt-4 mb-2 leading-snug;
+    }
+
+    ul,
+    ol {
+      @apply my-3;
+    }
+
+    li {
+      @apply my-1;
+    }
+
+    p,
+    li {
+      font-size: var(--ts-0);
+      line-height: var(--lh-normal);
+    }
+
+    /* 图片、图注 */
+    figure {
+      @apply my-6 text-center;
+    }
+
+    figcaption {
+      @apply text-sm text-muted-foreground mt-2;
+    }
+
+    /* 表格 */
+    table {
+      @apply w-full my-6 border-collapse border border-slate-300 text-sm;
+    }
+    th,
+    td {
+      @apply border border-slate-300 px-3 py-2;
+    }
+    th {
+      @apply bg-slate-100 font-semibold;
+    }
+
+    /* 标题改为 sans-serif */
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-family: var(--font-sans);
+      @apply tracking-wide font-semibold;
+    }
+
+    /* 强调也改用 sans-serif */
+    strong {
+      font-family: var(--font-sans);
+      @apply font-semibold;
+    }
+
+    /* 脚注结构 */
+    .footnotes {
+      @apply mt-10 pt-4 border-t text-sm text-muted-foreground;
+    }
+    .footnote-ref {
+      @apply text-sm align-super;
+    }
+
+    /* 限制行宽（typography 基础） */
+    max-width: 72ch;
+    font-size: 1rem;
+    line-height: 1.75;
   }
 
-  p {
-    @apply my-2;
-    @apply font-content-serif;
-  }
-
-  h2 {
-    @apply mt-8 mb-2;
-  }
-
-  h3 {
-    @apply mt-6 mb-1;
-  }
-
-  li {
-    @apply my-[1px];
-    @apply font-content-serif;
-  }
-
-  /* TODO: 加上 ul 与 li 之间的间隙 */
-
-  /* TODO: 字体设置改成衬线体  */
-}
-
-@layer components {
   div .csl-bib-body {
     font-family: Alegreya, Merriweather, Palatino, Garamond, Baskerville,
       "Libre Baskerville", Georgia, "Noto Serif CJK SC", serif;
