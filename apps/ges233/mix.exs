@@ -61,7 +61,7 @@ defmodule GES233.MixProject do
         # "esbuild ges233"
       ],
       "assets.deploy": [
-        "tailwind gse233 --minify",
+        "tailwind ges233 --minify",
         # "esbuild gse233 --minify",
       ]
     ]
