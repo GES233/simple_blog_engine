@@ -1,14 +1,7 @@
-<% # Tailwind %>
-<link rel="stylesheet" href="/assets/css/app.css">
-
-<% # Code highlights %>
-<link rel="stylesheet" href="<%= GES233.Blog.Static.get_route("highlight") %>">
-
-<% # MathJax: TODO use options %>
-<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-
-<% # SSE Client Scripts %>
-<%= if Mix.env() == :dev do %>
+<link rel="stylesheet" href="/assets/css/app.css"><% # Tailwind %>
+<link rel="stylesheet" href="<%= GES233.Blog.Static.get_route("highlight") %>"><% # Code highlights %>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script><% # MathJax: TODO use options %>
+<%= if Mix.env() == :dev do %><% # SSE Client Scripts %>
 <script type="text/javascript">
   const eventSource = new EventSource("/sse");
 
@@ -21,9 +14,7 @@
     eventSource.close();
   };
 </script>
-<% end %>
-
-<%= if @options do %>
+<% end %><%= if @options do %>
   <%= if Map.get(@options, "math") do %>
     <!-- <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script> -->
   <% end %>
@@ -50,8 +41,6 @@
       }
     </style>
   <% end %>
-  <%= if Map.get(@options, "music") do %>
-  <% end %>
+  <%= if Map.get(@options, "music") do %><% end %>
 <% end %>
-
 <%= @maybe_extra %>

@@ -99,7 +99,8 @@ defmodule GES233.Blog.Builder do
       # 将 %Posts{} 正文的链接替换为实际链接 & 调用 Pandoc 渲染为 HTML
       |> Task.async_stream(
         &Post.add_html(&1, meta_registry),
-        max_concurrency: System.schedulers_online()
+        max_concurrency: System.schedulers_online(),
+        timeout: 10000
       )
       |> Enum.map(fn {:ok, post} -> post end)
       # Max: 1569587μs
