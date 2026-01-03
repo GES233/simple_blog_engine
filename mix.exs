@@ -6,7 +6,11 @@ defmodule Blog.MixProject do
       apps_path: "apps",
       version: "0.1.0",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      aliases: [
+        # deploy_all_in_one: ""
+        # $env:MIX_ENV="prod"; mix assets.build; mix g.gen; mix g.deploy
+      ]
     ]
   end
 

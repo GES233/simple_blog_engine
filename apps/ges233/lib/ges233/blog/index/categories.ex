@@ -68,7 +68,7 @@ defmodule GES233.Blog.Categories do
   end
 
   # 递归插入分类路径到树中
-  defp insert_category(node, [current | rest], post_id, depth) do
+  defp insert_category(%Node{} = node, [current | rest], post_id, depth) do
     # 将字符串转为 atom
     # current_atom = String.to_atom(current)
 
@@ -87,9 +87,9 @@ defmodule GES233.Blog.Categories do
             posts: [post_id]
           }
 
-        [existing | _] ->
+        [existing | _] when is_struct(existing, Node) ->
           # 更新已有节点的 posts
-          %Node{existing | posts: [post_id | existing.posts]}
+          %{existing | posts: [post_id | existing.posts]}
       end
 
     # 如果还有剩余路径，继续递归
@@ -104,7 +104,7 @@ defmodule GES233.Blog.Categories do
     %Node{node | child: [updated_child | other_children]}
   end
 
-  defp insert_category(node, [], post_id, _depth) do
+  defp insert_category(%Node{} = node, [], post_id, _depth) do
     # 没有分类路径时，将文章放入当前节点
     %Node{node | posts: [post_id | node.posts]}
   end
