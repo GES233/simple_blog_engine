@@ -145,7 +145,6 @@
 
     /* 正文 serif */
     font-family: var(--font-serif);
-    max-width: 72ch;
 
     /* 不需要代码前后的引号 */
     code {
@@ -171,6 +170,13 @@
 
     /* 段落节奏 */
     p {
+      /* Using explicit to lower the size */
+      margin-top: 0.75em !important; 
+      margin-bottom: 0.75em !important;
+
+      font-size: var(--ts-0);
+      line-height: var(--lh-normal);
+
       @apply my-2 leading-relaxed;
     }
 
@@ -198,12 +204,9 @@
 
     li {
       @apply my-1;
-    }
 
-    p,
-    li {
       font-size: var(--ts-0);
-      line-height: var(--lh-normal);
+      line-height: var(--lh-tight);
     }
 
     /* 图片、图注 */
@@ -251,7 +254,7 @@
     }
 
     /* 限制行宽（typography 基础） */
-    max-width: 72ch;
+    max-width: 72ch; /* Larger for Chinese, if use English, 65ch is better. */
     font-size: 1rem;
     line-height: 1.75;
   }
