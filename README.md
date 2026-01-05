@@ -38,3 +38,9 @@ category:
 ---
 Your content.
 ```
+
+### AIO
+
+```
+$env:MIX_ENV='prod'; mix tailwind default --input=apps/ges233/assets/css/app.css --minify --output=priv/generated/assets/css/app.css; mix g.gen; mix g.deploy
+```
