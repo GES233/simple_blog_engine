@@ -14,7 +14,8 @@ defmodule GES233.Blog.Static do
     "abc_notation_plugin" =>
       {"/assets/abcjs-plugin-min.js", "apps/ges233/assets/vendor/abcjs/abcjs-plugin-min.js"},
     "abc_notation_basic" =>
-      {"/assets/abcjs-basic-min.js", "apps/ges233/assets/vendor/abcjs/abcjs-basic-min.js"}
+      {"/assets/abcjs-basic-min.js", "apps/ges233/assets/vendor/abcjs/abcjs-basic-min.js"},
+    "calendar" => {"/assets/calendar.js", "apps/ges233/assets/vendor/fullcalendar.js"}
   }
 
   @static_with_file_operate %{"pdf_js" => {"/dist/pdf_js", "apps/ges233/assets/vendor/pdf_js"}}

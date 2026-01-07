@@ -45,11 +45,9 @@ defmodule GES233.Blog.Renderer do
   def add_article_layout(inner_html, post = %Post{}, _maybe_meta_about_blog) do
     # Inject
     assigns =
-      with {:ok, extra} <- Map.fetch(post, :extra),
-      %{} = extra do
-        extra
-      else
-        _ -> %{}
+      case Map.fetch(post, :extra) do
+        {:ok, extra} -> Enum.into(extra, %{})
+        :error -> %{}
       end
 
     inner_html
