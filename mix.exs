@@ -8,10 +8,23 @@ defmodule Blog.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       aliases: [
-        # deploy_all_in_one: ""
-        # $env:MIX_ENV="prod"; mix assets.build; mix g.gen; mix g.deploy
+        deploy_all_in_one: &deploy_all_in_one/1
       ]
     ]
+  end
+
+  def deploy_all_in_one(_) do
+    Mix.env(:prod)
+    Mix.Task.run(
+      "tailwind",
+      ~w(
+        default
+        --input=apps/ges233/assets/css/app.css
+        --minify
+        --output=priv/generated/assets/css/app.css)
+    )
+    Mix.Task.run("g.gen")
+    Mix.Task.run("g.deploy")
   end
 
   # Dependencies listed here are available only for this
