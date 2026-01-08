@@ -11,7 +11,7 @@ defmodule Mix.Tasks.G.New do
     tags: []
     categories:
     - []
-    progress: [:wip, 50]
+    progress: [:wip, 0]
     ---
     """)
   end
