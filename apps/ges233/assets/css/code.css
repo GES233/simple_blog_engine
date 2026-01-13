@@ -99,7 +99,7 @@
 
     span.cn /* Constant */ {
       color: #27aeae;
-      @apply text-bold
+      @apply font-semibold
     }
 
     span.co /* Comment */,
@@ -119,7 +119,7 @@
 
     span.ex /* Extension */ {
       color: #0099ff;
-      @apply text-bold
+      @apply font-semibold
     }
 
     span.fu /* Function */
