@@ -1,6 +1,4 @@
 <link rel="stylesheet" href="/assets/css/app.css"><% # Tailwind %>
-<link rel="stylesheet" href="<%= GES233.Blog.Static.get_route("highlight") %>"><% # Code highlights %>
-<!--script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script><% # MathJax: TODO use options %>-->
 <%= if Mix.env() == :dev do %><% # SSE Client Scripts %>
 <script type="text/javascript">
   const eventSource = new EventSource("/sse");

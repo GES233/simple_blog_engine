@@ -5,11 +5,6 @@ defmodule GES233.Blog.Static do
     # 这个貌似是针对表单的
     # "phx" => {"/assets/phoenix_html.js", "apps/ges233/assets/vendor/phoenix_html.js"},
     "tailwind" => {"/assets/css/app.css", nil},
-    # 如果想要更新主题的话：
-    # https://github.com/jgm/pandoc/issues/7860#issuecomment-1938177020
-    "highlight" =>
-      {"/assets/code-highlighting.css",
-       "apps/ges233/assets/vendor/pandoc/highlighting-breezedark.css"},
     "favicon" => {"/favicon.ico", "apps/ges233/assets/favicon.ico"},
     "abc_notation_plugin" =>
       {"/assets/abcjs-plugin-min.js", "apps/ges233/assets/vendor/abcjs/abcjs-plugin-min.js"},

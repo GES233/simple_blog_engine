@@ -1,0 +1,158 @@
+@layer components {
+  /* Code */
+  /* 
+  # 如果想要更新主题的话：
+  # https://github.com/jgm/pandoc/issues/7860#issuecomment-1938177020
+  */
+
+  div.sourceCode {
+    @apply my-4 rounded-md; /* overflow-x-auto */
+    @apply bg-base-200 text-base-content;
+  }
+
+  pre.sourceCode {
+    @apply m-0;
+  }
+
+  pre > code.sourceCode {
+    @apply whitespace-pre relative block;
+  }
+
+  /* 行高设置 */
+  pre > code.sourceCode > span {
+    line-height: 1.25;
+  }
+
+  @media print {
+    pre > code.sourceCode {
+      @apply whitespace-pre-wrap;
+    }
+    pre > code.sourceCode > span {
+      text-indent: -5em;
+      padding-left: 5em;
+    }
+  }
+
+  pre.numberSource code {
+    counter-reset: source-line 0;
+  }
+
+  pre.numberSource code > span {
+    @apply relative;
+    left: -4em;
+    counter-increment: source-line;
+  }
+
+  pre.numberSource code > span > a:first-child::before {
+    content: counter(source-line);
+    @apply relative inline-block text-right align-baseline select-none border-none;
+    left: -1em;
+    padding: 0 4px;
+    width: 4em;
+    /* 颜色 */
+    background-color: #232629; /* 建议改为 @apply bg-gray-900 */
+    color: #7a7c7d; /* 建议改为 @apply text-gray-500 */
+  }
+
+  /* 行号左侧的分隔线容器 */
+  pre.numberSource {
+    @apply ml-12 pl-1 border-l; /* ml-12 约等于 3em */
+    border-color: #7a7c7d; /* 建议改为 @apply border-gray-500 */
+  }
+
+  /* 修复行号链接下划线 */
+  @media screen {
+    pre > code.sourceCode > span > a:first-child::before {
+      @apply no-underline decoration-gray-500;
+    }
+  }
+
+  code.sourceCode {
+    span.er /* Error */
+    {
+      @apply text-error-content font-bold decoration-error underline decoration-wavy;
+    }
+
+    span.al /* Alert */,
+    span.wa /* Warning */
+    { @apply text-warning-content font-bold decoration-warning decoration-wavy; }
+
+    span.an /* Annotation */ {
+      color: #3f8058;
+    }
+
+    span.at /* Attribute */ {
+      @apply text-secondary;
+    }
+
+    span.bu /* BuiltIn */ {
+      color: #7f8c8d;
+    }
+
+    span.cf /* ControlFlow */,
+    span.kw /* Keyword */
+    { @apply text-primary font-bold; }
+
+    span.ch /* Char */ {
+      color: #3daee9;
+    }
+
+    span.cn /* Constant */ {
+      color: #27aeae;
+      @apply text-bold
+    }
+
+    span.co /* Comment */,
+    span.cv /* CommentVar */
+    { @apply text-base-content/50 italic; }
+
+    span.do /* Documentation */
+    { @apply text-neutral-content; }
+
+    span.dt /* DataType */
+    { @apply text-secondary font-semibold; }
+
+    span.bn /* BaseN */,
+    span.dv /* DecVal */,
+    span.fl /* Float */
+    { @apply text-warning; }
+
+    span.ex /* Extension */ {
+      color: #0099ff;
+      @apply text-bold
+    }
+
+    span.fu /* Function */
+    { @apply text-accent-content }
+
+    span.in /* Information */ {
+      color: #c45b00;
+    }
+
+    span.op /* Operator */ {
+      @apply text-base-content/70;
+    }
+    span.ot /* Other */ {
+      color: #27ae60;
+    }
+
+    span.im /* Import */,
+    span.pp /* Preprocessor */
+    { @apply text-warning font-bold; }
+
+    span.re /* RegionMarker */
+    { @apply bg-info/20 text-info; }
+
+    span.sc /* SpecialChar */,
+    span.ss /* SpecialString */
+    { @apply text-warning font-bold; }
+
+    span.st /* String */,
+    span.vs /* VerbatimString */
+    { @apply text-success-content; }
+
+    span.va,/* Variable */
+    span.vb
+    { @apply text-info-content; }
+  }
+}
