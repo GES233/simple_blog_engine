@@ -82,7 +82,7 @@
     }
 
     span.at /* Attribute */ {
-      @apply text-secondary;
+      @apply text-secondary-content;
     }
 
     span.bu /* BuiltIn */ {
@@ -110,7 +110,7 @@
     { @apply text-neutral-content; }
 
     span.dt /* DataType */
-    { @apply text-secondary font-semibold; }
+    { @apply text-secondary-content font-semibold; }
 
     span.bn /* BaseN */,
     span.dv /* DecVal */,

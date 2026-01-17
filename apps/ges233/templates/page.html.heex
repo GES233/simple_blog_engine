@@ -36,7 +36,7 @@
 
         <div class="card-body">
           <%= if !is_nil(@page.toc), do: @page.toc |> GES233.Blog.Renderer.PostComponents.show_toc %>
-          <div class="card-body prose sm:prose-lg">
+          <div class="card-body prose">
 
 <%= @inner_content %>
 
