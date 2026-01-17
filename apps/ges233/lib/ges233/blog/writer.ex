@@ -26,6 +26,9 @@ defmodule GES233.Blog.Writer do
     context
   end
 
+  # TODO:
+  # Add tags, etc.
+
   @spec write_standalone_pages(Context.t()) :: Context.t()
   def write_standalone_pages({_meta_registry, %{"single_pages" => pages}} = context) do
     Task.async_stream(pages, fn page ->

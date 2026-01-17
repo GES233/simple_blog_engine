@@ -38,40 +38,32 @@ defmodule GES233.Blog.Builder do
   end
 
   # Only for test
-  def build_single_post(post_id \\ "World-execute-me-lyrics-analyse", context \\ [])
+  # def build_single_post(post_id \\ "World-execute-me-lyrics-analyse", context \\ [])
 
-  def build_single_post(post_id, []) do
-    [
-      "#{get_posts_root_path()}/#{post_id}.md"
-      |> Post.path_to_struct()
-    ]
-    |> build_from_posts(:whole)
-  end
+  # def build_single_post(post_id, []) do
+  #   [
+  #     "#{get_posts_root_path()}/#{post_id}.md"
+  #     |> Post.path_to_struct()
+  #   ]
+  #   |> build_from_posts(:whole)
+  # end
 
-  def build_single_post(post_id, context) do
-    [
-      "#{get_posts_root_path()}/#{post_id}.md"
-      |> Post.path_to_struct()
-    ]
-    |> build_from_posts({:partial, context})
-  end
+  # def build_single_post(post_id, context) do
+  #   [
+  #     "#{get_posts_root_path()}/#{post_id}.md"
+  #     |> Post.path_to_struct()
+  #   ]
+  #   |> build_from_posts({:partial, context})
+  # end
 
   @spec build_from_posts([Post.t()], :whole | {:partial, Context.t()}) :: Context.t()
   def build_from_posts(posts, :whole) do
     # 2. 装载多媒体、Bib 等内容
-    meta_registry =
-      posts
-      |> RegistryBuilder.get_meta_registry()
-      |> render_posts(posts)
-      |> Writer.copy_users_assets()
-
-    Static.copy_static()
-
-    index_registry = RegistryBuilder.get_index_registry(meta_registry)
-
-    {meta_registry, index_registry}
-    |> Writer.write_index()
-    |> Writer.write_standalone_pages()
+    posts
+    |> RegistryBuilder.get_meta_registry()
+    |> render_posts(posts)
+    |> Writer.copy_users_assets()
+    |> do_build_posts
   end
 
   def build_from_posts([], {:partial, context}) do
@@ -79,16 +71,18 @@ defmodule GES233.Blog.Builder do
   end
 
   def build_from_posts(diff_posts, {:partial, {meta_registry, _}}) do
-    updated_meta =
-      meta_registry
-      |> render_posts(diff_posts)
-      |> Writer.copy_users_assets()
+    meta_registry
+    |> render_posts(diff_posts)
+    |> Writer.copy_users_assets()
+    |> do_build_posts()
+  end
 
+  defp do_build_posts(meta_registry) do
     Static.copy_static()
 
-    index_registry = RegistryBuilder.get_index_registry(updated_meta)
+    index_registry = RegistryBuilder.get_index_registry(meta_registry)
 
-    {updated_meta, index_registry}
+    {meta_registry, index_registry}
     |> Writer.write_index()
     |> Writer.write_standalone_pages()
   end
