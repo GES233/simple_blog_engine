@@ -1,0 +1,188 @@
+@layer components {
+  .prose {
+    --tw-prose-body: var(--color-primary);
+    --tw-prose-headings: var(--color-primary);
+    --tw-prose-bold: var(--color-primary);
+    --tw-prose-quote-borders: var(--color-slate-300);
+    --tw-prose-quotes: var(--color-muted-foreground);
+    --tw-prose-code: var(--color-primary);
+
+    /* 正文 serif */
+    font-family: var(--font-serif);
+
+    /* 不需要代码前后的引号 */
+    code {
+      &::before,
+      &::after {
+        display: none;
+      }
+    }
+
+    /* 不需要引用前后的引号 */
+    blockquote p {
+      &:first-of-type::before,
+      &:last-of-type::after {
+        display: none;
+      }
+    }
+
+    blockquote {
+      font-weight: 400;
+      color: var(--color-muted-foreground);
+      @apply border-l-4 pl-4 italic my-4;
+    }
+
+    /* 段落节奏 */
+    p {
+      /* Using explicit to lower the size */
+      margin-top: 0.75em !important;
+      margin-bottom: 0.75em !important;
+
+      font-size: var(--ts-0);
+      line-height: var(--lh-normal);
+
+      @apply my-2 leading-relaxed;
+    }
+
+    h1 {
+      font-size: var(--ts-4); /* text-3xl */
+      @apply mt-10 mb-4 leading-snug;
+    }
+    h2 {
+      font-size: var(--ts-3); /* text-2xl */
+      @apply mt-8 mb-3 leading-snug;
+    }
+    h3 {
+      font-size: var(--ts-2); /* text-xl */
+      @apply mt-6 mb-2 leading-snug;
+    }
+    h4 {
+      font-size: var(--ts-1); /* text-lg */
+      @apply mt-4 mb-2 leading-snug;
+    }
+
+    ul,
+    ol {
+      @apply my-3;
+    }
+
+    li {
+      @apply my-1;
+
+      font-size: var(--ts-0);
+      line-height: var(--lh-tight);
+    }
+
+    /* 图片、图注 */
+    figure {
+      @apply my-6 text-center;
+    }
+
+    figcaption {
+      @apply text-sm text-muted-foreground mt-2;
+    }
+
+    /* 表格 */
+    table {
+      @apply w-full my-6 border-collapse border border-slate-300 text-sm;
+    }
+    th,
+    td {
+      @apply border border-slate-300 px-3 py-2;
+    }
+    th {
+      @apply bg-slate-100 font-semibold;
+    }
+
+    /* 标题改为 sans-serif */
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-family: var(--font-sans);
+      @apply tracking-wide font-semibold;
+    }
+
+    /* 强调也改用 sans-serif */
+    strong {
+      font-family: var(--font-sans);
+      @apply font-semibold;
+    }
+
+    details {
+      @apply my-6 rounded-lg border border-base-300 bg-base-100 overflow-hidden;
+
+      /* 移除默认的黑色三角形，我们下面自己画 */
+      & > summary {
+        list-style: none;
+        @apply cursor-pointer px-4 py-3 font-semibold bg-base-200/50 transition-colors duration-200 flex items-center justify-between;
+
+        &::-webkit-details-marker {
+          display: none;
+        }
+
+        &:hover {
+          @apply bg-base-200;
+        }
+
+        /* 标题文字样式调整 */
+        h1,
+        h2,
+        h3,
+        h4,
+        p {
+          @apply m-0 inline-block; /* 强制标题和 summary 同行 */
+          font-size: 1rem;
+        }
+
+        /* 自定义箭头图标 (利用 CSS 绘制) */
+        &::after {
+          content: "";
+          @apply w-2 h-2 border-r-2 border-b-2 border-base-content/70 transform -rotate-45 transition-transform duration-200 mb-1;
+        }
+      }
+
+      /* 展开时的样式 */
+      &[open] {
+        & > summary {
+          @apply border-b border-base-300;
+          &::after {
+            @apply rotate-45 mt-1; /* 箭头旋转 */
+          }
+        }
+      }
+
+      /* 内容区域 */
+      .details-content {
+        @apply px-4 py-4;
+
+        /* 避免内容里的第一/最后元素的 margin 撑开容器 */
+        > :first-child {
+          margin-top: 0;
+        }
+        > :last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+
+    /* 脚注结构 */
+    .footnotes {
+      @apply mt-10 pt-4 border-t text-sm text-muted-foreground;
+    }
+    .footnote-ref {
+      @apply text-sm align-super;
+    }
+
+    /* 限制行宽（typography 基础） */
+    max-width: 72ch; /* Larger for Chinese, if use English, 65ch is better. */
+    font-size: 1rem;
+    line-height: 1.75;
+  }
+
+  div .csl-bib-body {
+    font-family:
+      Alegreya, Merriweather, Palatino, Garamond, Baskerville,
+      "Libre Baskerville", Georgia, "Noto Serif CJK SC", serif;
+  }
+}
