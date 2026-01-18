@@ -1,62 +1,122 @@
 -- filters/structure.lua
 local utils = require 'pandoc.utils'
 
--- 辅助：渲染 Block 列表为 HTML
 local function render_html(blocks)
   return pandoc.write(pandoc.Pandoc(blocks), 'html')
 end
 
+-- Define a custom utf8.sub function
+function utf8.sub(s, i, j)
+    -- Get the byte offset for the starting character index
+    local start_byte = utf8.offset(s, i)
+    if not start_byte then return nil end -- Handle invalid start index
+
+    -- Get the byte offset for the character *after* the ending character index
+    -- If j is nil, default to the end of the string (use -1 or length)
+    local end_byte
+    if j then
+        -- We want the byte position of the character *after* j
+        end_byte = utf8.offset(s, j + 1)
+        -- If end_byte is nil, it means the end of the string was reached or index was invalid
+        -- We adjust to get the correct end byte position for string.sub
+        if not end_byte then
+            end_byte = #s + 1 -- Point just past the end of the string
+        end
+        -- string.sub expects the last *included* byte index, so we subtract 1
+        end_byte = end_byte - 1
+    else
+        -- If no 'j' is provided, it means until the end of the string.
+        -- string.sub with just 'i' and no 'j' (or -1 for 'j') will do this.
+        -- We don't need to adjust end_byte here.
+    end
+
+    -- Use the standard string.sub with byte offsets
+    return string.sub(s, start_byte, end_byte)
+end
+
 function Pandoc(doc)
   local meta = doc.meta
-  local body_blocks = {}
-  local bib_blocks = {}
-  local meta = doc.meta
-  local summary_blocks = {}
+  
+  -- 容器
+  local body_blocks = {}    -- 最终的正文
+  local bib_blocks = {}     -- 参考文献
+  local summary_blocks = {} -- 摘要
+  
+  -- 状态标记
   local found_more = false
-  
+  local has_bib = false
+
   -- =================================================
-  -- 1. 提取参考文献 (Bibliography)
+  -- 1. 单次循环处理：正文分离、参考文献提取、摘要提取
   -- =================================================
-  -- --citeproc 运行后，通常会生成一个 id="refs" 的 Div
-  -- 或者 class="references" 的 Div
-  
   for _, block in ipairs(doc.blocks) do
-    if block.t == "Div" and (block.identifier == "refs" or block.classes:includes("references")) then
-      -- 找到了参考文献块
-      -- 我们可以给它加一些 Tailwind 类
+    
+    -- A. 检查是不是 <!--more--> 分隔符
+    if block.t == "RawBlock" and block.format == "html" and block.text:match("<!%-%-more%-%->") then
+      found_more = true
+      -- 注意：分隔符本身既不加入 body，也不加入 summary
+    
+    -- B. 检查是不是参考文献 Div (citeproc 生成的)
+    elseif block.t == "Div" and (block.identifier == "refs" or block.classes:includes("references")) then
       block.classes:insert("csl-bib-body")
       table.insert(bib_blocks, block)
+      has_bib = true
+      
+    -- C. 普通内容块
     else
-      -- 其他内容保留在正文
+      -- 1. 总是加入正文
       table.insert(body_blocks, block)
+
+      -- 2. 处理摘要
+      if not found_more then
+        -- 如果还没遇到分隔符，先暂时认为是摘要的一部分
+        -- 过滤掉标题 (Header)，避免卡片里出现巨大的 H1/H2
+        if block.t ~= "Header" then 
+          table.insert(summary_blocks, block)
+        end
+      end
     end
   end
 
   -- =================================================
-  -- 2. 提取脚注 (Footnotes)
+  -- 2. 摘要兜底逻辑 (关键修复！)
+  -- =================================================
+  -- 如果循环结束了，found_more 还是 false，说明用户没写 <!--more-->
+  -- 此时 summary_blocks 里装的是整篇文章（除去参考文献）
+  -- 我们需要手动截断它，比如只保留第1个段落，或者前3个块
+  
+  if not found_more then
+    if #summary_blocks > 0 then
+      -- 策略 A: 只取第一个非空块 (推荐)
+      local first_block = summary_blocks[1]
+      summary_blocks = { first_block }
+      
+      -- 策略 B: 如果你想完全不显示摘要，解开下面这行
+      -- summary_blocks = {}
+    end
+  end
+
+  -- =================================================
+  -- 3. 处理脚注 (Footnotes) - 针对 body_blocks
   -- =================================================
   local notes = {}
   
-  -- 使用 walk_block 遍历 body_blocks（不包含参考文献了）
-  -- 必须把 Note 替换成 Superscript，否则 Pandoc HTML Writer 还是会在底部生成脚注
-  local new_body = pandoc.walk_block(pandoc.Div(body_blocks), {
+  -- 使用 walk_block 处理刚才分离出来的 body_blocks
+  local new_body_div = pandoc.walk_block(pandoc.Div(body_blocks), {
     Note = function(el)
       local num = #notes + 1
       local ref_id = "fnref" .. num
       local note_id = "fn" .. num
       
-      -- 构建“返回”链接 (↩)
       local back_link = pandoc.Link({pandoc.Str("↩")}, "#" .. ref_id, "", {
         class="footnote-back", 
         role="doc-backlink",
         ["aria-label"] = "Back to content"
       })
       
-      -- 复制脚注内容，并在最后一个 block 末尾追加返回链接
       local note_content = el.content
       if #note_content > 0 then
         local last_block = note_content[#note_content]
-        -- 只有段落或纯文本块适合追加 Inline 元素
         if last_block.t == "Para" or last_block.t == "Plain" then
           table.insert(last_block.content, pandoc.Space())
           table.insert(last_block.content, back_link)
@@ -65,7 +125,6 @@ function Pandoc(doc)
       
       table.insert(notes, {id = note_id, content = note_content})
       
-      -- 在正文中替换为： <sup><a href="#fn1" id="fnref1">[1]</a></sup>
       return pandoc.Superscript({
         pandoc.Link({pandoc.Str(tostring(num))}, "#" .. note_id, "", {
           id = ref_id, 
@@ -76,73 +135,46 @@ function Pandoc(doc)
     end
   })
 
-  -- 我们在遍历 blocks 处理 refs 的同时，顺便处理摘要
-  -- 为了代码清晰，这里写成单独的逻辑，你整合时可以合并循环
-  
-  for _, block in ipairs(doc.blocks) do
-    -- 1. 检查是否是 <!--more-->
-    -- Pandoc 把 HTML 注释解析为 RawBlock('html', '<!--more-->')
-    if block.t == "RawBlock" and block.format == "html" and block.text:match("<!%-%-more%-%->") then
-      found_more = true
-      -- 不把 <!--more--> 加入正文，直接跳过
-    else
-      -- 2. 如果还没遇到 more，且不是参考文献，则加入摘要
-      if not found_more and block.t ~= "Div" then -- 简单过滤一下，这里可以更精细
-         table.insert(summary_blocks, block)
-      end
-      
-      -- 3. 正常的正文处理逻辑 (refs 提取等)
-      -- 这里是你之前的逻辑，决定是否加入 body_blocks
-      -- (略: 你的 refs 提取逻辑)
-    end
-  end
+  -- =================================================
+  -- 4. 写入元数据 (注入 HTML)
+  -- =================================================
 
-  -- 生成摘要 HTML 并注入 Metadata
+  -- 注入摘要
   if #summary_blocks > 0 then
-    -- 如果原本 Metadata 里没有 description，就用我们提取的 summary 填充
-    if not meta['description'] then
-      meta['description'] = pandoc.RawInline('html', render_html(summary_blocks))
-    end
-    -- 或者专门存一个 summary 变量
+    -- 如果是截取的第一段，可能不想让 meta description 太长，这里主要用于页面显示
     meta['summary'] = pandoc.RawInline('html', render_html(summary_blocks))
+    
+    -- 如果还没有 description (用于 SEO meta tag)，可以用纯文本填充
+    if not meta['description'] then
+      -- 简单的取巧办法：用 pandoc.write 转成 plain text
+      local plain_summary = pandoc.write(pandoc.Pandoc(summary_blocks), 'plain')
+      -- 限制长度，防止 SEO 爆炸
+      meta['description'] = utf8.sub(plain_summary, 1, 120) .. "..."
+    end
+  else
+    meta['summary'] = nil
   end
 
-  -- =================================================
-  -- 3. 生成 HTML 并注入 Metadata
-  -- =================================================
-
-  -- 处理参考文献 HTML
-  if #bib_blocks > 0 then
-    -- 使用新变量名 bib_content，避免和 metadata['bibliography'] 路径冲突
+  -- 注入参考文献
+  if has_bib then
     meta['bib_content'] = pandoc.RawInline('html', render_html(bib_blocks))
   else
     meta['bib_content'] = nil
   end
 
-  -- 处理脚注 HTML
+  -- 注入脚注
   if #notes > 0 then
-    -- 构建有序列表
     local list_items = {}
     for _, note in ipairs(notes) do
-      -- 这里为了样式方便，我们给每个 li 里的内容包一个 div
-      -- 并手动赋予 id，以便锚点跳转
-      local item_content = note.content
-      -- 我们需要把 id="fn1" 放在 li 上，或者 li 内部的第一个元素上
-      -- Pandoc AST 的 OrderedList 不支持给 li 加 id，所以我们在内容外包一个 Div
-      local wrapper = pandoc.Div(item_content, pandoc.Attr(note.id))
+      local wrapper = pandoc.Div(note.content, pandoc.Attr(note.id))
       table.insert(list_items, {wrapper})
     end
-    
     local ol = pandoc.OrderedList(list_items)
     local notes_div = pandoc.Div({ol}, pandoc.Attr("", {"footnotes", "prose-sm"}))
-    
     meta['notes_content'] = pandoc.RawInline('html', render_html({notes_div}))
   else
     meta['notes_content'] = nil
   end
 
-  -- 返回新的文档：
-  -- 1. body 已经是去除 Refs 且替换了 Note 的纯净版
-  -- 2. meta 里包含了 bib_content 和 notes_content
-  return pandoc.Pandoc(new_body.content, meta)
+  return pandoc.Pandoc(new_body_div.content, meta)
 end

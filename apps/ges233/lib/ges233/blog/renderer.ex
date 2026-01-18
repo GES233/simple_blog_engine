@@ -49,8 +49,6 @@ defmodule GES233.Blog.Renderer do
         :error -> %{}
       end
 
-    IO.inspect(post)
-
     inner_html =
       inner_html
       |> Phoenix.HTML.raw()

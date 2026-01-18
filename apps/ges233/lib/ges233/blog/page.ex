@@ -47,24 +47,24 @@ defmodule GES233.Blog.Page do
   end
 
   def add_html(%__MODULE__{role: :friends} = page, meta) do
-      page
-      |> Map.merge(%{
-        content:
-          page.content
-          |> EEx.eval_string(
-            assigns: [
-              friends: page.extra[:friends],
-              self: %GES233.Blog.Page.Friend{
-                name: "自留地 - GES233's Blog",
-                site: "https://ges233.github.io",
-                desp: "得以存在便是一个奇迹，能够思考就是一件乐事。",
-                avatar: "https://avatars.githubusercontent.com/u/30802664?v=4"
-              }
-            ]
-          )
-      })
-      |> GES233.Blog.Renderer.convert_markdown(meta: meta)
-      |> then(&do_postlude(page, &1))
+    page
+    |> Map.merge(%{
+      content:
+        page.content
+        |> EEx.eval_string(
+          assigns: [
+            friends: page.extra[:friends],
+            self: %GES233.Blog.Page.Friend{
+              name: "自留地 - GES233's Blog",
+              site: "https://ges233.github.io",
+              desp: "得以存在便是一个奇迹，能够思考就是一件乐事。",
+              avatar: "https://avatars.githubusercontent.com/u/30802664?v=4"
+            }
+          ]
+        )
+    })
+    |> GES233.Blog.Renderer.convert_markdown(meta: meta)
+    |> then(&do_postlude(page, &1))
   end
 
   def add_html(page, meta) do
@@ -73,16 +73,14 @@ defmodule GES233.Blog.Page do
   end
 
   def do_postlude(page_or_post, doc_struct) do
-    inner_body =
-      if GES233.Blog.ContentRepo.enough_large?(doc_struct.body) do
-        GES233.Blog.ContentRepo.cache_html(doc_struct.body, page_or_post.role)
+    # TODO: Add body
+    body = """
+    #{doc_struct.body}
+    #{if(!is_nil(doc_struct.footnotes), do: doc_struct.footnotes, else: "")}
+    #{if(!is_nil(doc_struct.bibliography), do: doc_struct.bibliography, else: "")}
+    """
 
-        {:ref, page_or_post.role}
-      else
-        doc_struct.body
-      end
-
-    %{page_or_post | body: inner_body, toc: doc_struct.toc}
+    %{page_or_post | body: body, toc: doc_struct.toc}
   end
 
   defp parse_page_file(role)

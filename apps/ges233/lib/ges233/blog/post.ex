@@ -123,16 +123,7 @@ defmodule GES233.Blog.Post do
   def add_html(%__MODULE__{} = post, meta) do
     doc_struct = GES233.Blog.Renderer.convert_markdown(post, meta: meta)
 
-    html_body =
-      if GES233.Blog.ContentRepo.enough_large?(doc_struct.body) do
-        GES233.Blog.ContentRepo.cache_html(doc_struct.body, post.id)
-
-        {:ref, post.id}
-      else
-        doc_struct.body
-      end
-
-    %{post | body: html_body, doc: doc_struct, toc: doc_struct.toc}
+    %{post |  doc: doc_struct, toc: doc_struct.toc}
   end
 
   defp overwrite_create_date(meta, content_meta) do

@@ -4,7 +4,6 @@ defmodule GES233.Blog.Builder do
   alias GES233.Blog.{
     Post,
     Static,
-    ContentRepo,
     Context,
     Writer
   }
@@ -68,9 +67,9 @@ defmodule GES233.Blog.Builder do
     |> Writer.write_standalone_pages()
   end
 
-  # TODO:Refrac
+  # 需要重构
   defp render_posts(meta_registry, posts) do
-    bodies_with_id_and_toc =
+    render_posts =
       posts
       # 将 %Posts{} 正文的链接替换为实际链接 & 调用 Pandoc 渲染为 HTML
       |> Task.async_stream(
@@ -79,10 +78,22 @@ defmodule GES233.Blog.Builder do
         timeout: 10000
       )
       |> Enum.map(fn {:ok, post} -> post end)
-      # Max: 1569587μs
-      # 渲染文章网页的外观
+
+    # |> Enum.map(fn post -> IO.inspect(post.doc); post end)
+    # Max: 1569587μs
+    # 渲染文章网页的外观
+
+    bodies_with_id_and_toc =
+      render_posts
       |> Enum.map(fn post ->
-        {post.id, {post.toc, get_body_from_post(post)}}
+        doc = post.doc
+        {post.id,
+         {post.toc,
+          """
+          #{doc.body}
+          #{if(!is_nil(doc.footnotes), do: doc.footnotes, else: "")}
+          #{if(!is_nil(doc.bibliography), do: doc.bibliography, else: "")}
+          """}}
       end)
 
     # 保存在特定目录
@@ -92,15 +103,11 @@ defmodule GES233.Blog.Builder do
     )
     |> Stream.run()
 
-    # 把 <!--more--> 之前的部分拿出来
-
     has_abstract =
-      bodies_with_id_and_toc
-      |> Enum.filter(fn {_id, {_, body}} -> String.contains?(body, "<!--more-->") end)
-      |> Enum.map(fn {id, {_, body}} ->
-        {id,
-         %{meta_registry[id] | body: String.split(body, "<!--more-->", parts: 2) |> Enum.at(0)}}
-      end)
+      render_posts
+      |> Enum.filter(&is_struct(&1.doc, Pandox.Doc))
+      |> Enum.reject(&is_nil(&1.doc.summary))
+      |> Enum.map(fn p -> {p.id, p} end)
       |> Enum.into(%{})
 
     Map.merge(meta_registry, has_abstract)
@@ -112,17 +119,5 @@ defmodule GES233.Blog.Builder do
       body,
       meta_registry
     )
-  end
-
-  defp get_body_from_post(post) do
-    {status, html} = ContentRepo.get_html(post.id)
-
-    case status do
-      :ok ->
-        html
-
-      :error ->
-        post.body
-    end
   end
 end
