@@ -118,10 +118,38 @@ defmodule Pandox do
   end
 
   defp handle_result({_, 0}, output_file) do
-    File.read!(output_file)
+    File.read!(output_file) |> parse_pandoc_output()
   end
 
   defp handle_result({code, msg}, _) do
     raise "Pandoc failed with code #{code}: #{msg}"
+  end
+
+  ## == Postlude ==
+
+  defmodule Doc do
+    defstruct [:body, :toc, :summary, :bibliography, :footnotes, :meta]
+  end
+
+  defp parse_pandoc_output(raw_output) do
+    # 使用正则或字符串分割提取各个部分
+    # 这里写一个通用的提取器
+    extract = fn section_name ->
+      regex = ~r/<!--SECTION_START:#{section_name}-->(.*?)<!--SECTION_END:#{section_name}-->/s
+      case Regex.run(regex, raw_output) do
+        [_, content] -> String.trim(content)
+        nil -> nil
+      end
+    end
+
+    %Doc{
+      body: extract.("BODY"),
+      toc: extract.("TOC"),
+      summary: extract.("SUMMARY"),
+      bibliography: extract.("BIB"),
+      footnotes: extract.("NOTES"),
+      # 如果你需要回传元数据，甚至可以让 Pandoc 输出 JSON
+      meta: extract.("META") # 或者从 Pandoc 输出中解析
+    }
   end
 end

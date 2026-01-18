@@ -37,25 +37,6 @@ defmodule GES233.Blog.Builder do
     |> build_from_posts(:whole)
   end
 
-  # Only for test
-  # def build_single_post(post_id \\ "World-execute-me-lyrics-analyse", context \\ [])
-
-  # def build_single_post(post_id, []) do
-  #   [
-  #     "#{get_posts_root_path()}/#{post_id}.md"
-  #     |> Post.path_to_struct()
-  #   ]
-  #   |> build_from_posts(:whole)
-  # end
-
-  # def build_single_post(post_id, context) do
-  #   [
-  #     "#{get_posts_root_path()}/#{post_id}.md"
-  #     |> Post.path_to_struct()
-  #   ]
-  #   |> build_from_posts({:partial, context})
-  # end
-
   @spec build_from_posts([Post.t()], :whole | {:partial, Context.t()}) :: Context.t()
   def build_from_posts(posts, :whole) do
     # 2. 装载多媒体、Bib 等内容
@@ -87,6 +68,7 @@ defmodule GES233.Blog.Builder do
     |> Writer.write_standalone_pages()
   end
 
+  # TODO:Refrac
   defp render_posts(meta_registry, posts) do
     bodies_with_id_and_toc =
       posts

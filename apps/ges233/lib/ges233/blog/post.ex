@@ -119,25 +119,18 @@ defmodule GES233.Blog.Post do
 
   @spec add_html(GES233.Blog.Post.t(), Context.meta_registry()) :: GES233.Blog.Post.t()
   def add_html(post, meta) do
-    html_body = GES233.Blog.Renderer.convert_markdown(post, meta: meta)
-
-    [toc, html_body] =
-      if String.contains?(html_body, "TABLEOFCONTENTS") do
-        String.split(html_body, "TABLEOFCONTENTS", parts: 2)
-      else
-        [nil, html_body]
-      end
+    doc_struct = GES233.Blog.Renderer.convert_markdown(post, meta: meta)
 
     html_body =
-      if GES233.Blog.ContentRepo.enough_large?(html_body) do
-        GES233.Blog.ContentRepo.cache_html(html_body, post.id)
+      if GES233.Blog.ContentRepo.enough_large?(doc_struct.body) do
+        GES233.Blog.ContentRepo.cache_html(doc_struct.body, post.id)
 
         {:ref, post.id}
       else
-        html_body
+        doc_struct.body
       end
 
-    %{post | body: html_body, toc: toc}
+    %{post | body: html_body, toc: doc_struct.toc}
   end
 
   defp overwrite_create_date(meta, content_meta) do

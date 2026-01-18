@@ -10,14 +10,11 @@ defmodule GES233.Blog.Renderer do
     {post, body} = link_replace(post, all_posts_and_media)
 
     {post, %{}}
-    # |> then(&callback_pre_pandoc)
     |> Bibliography.maybe_validate_bibliography_exist()
     |> Bibliography.ensure_bib_format()
     |> Bibliography.add_title_to_meta()
     |> Bibliography.postlude()
     |> then(&Pandox.render_markdown_to_html(body, &1))
-
-    # |> then(&callback_after_pandoc)
   end
 
   defp link_replace(%{content: {:ref, id}} = post_or_page, posts_and_mata) do

@@ -10,6 +10,9 @@ function Pandoc(doc)
   local meta = doc.meta
   local body_blocks = {}
   local bib_blocks = {}
+  local meta = doc.meta
+  local summary_blocks = {}
+  local found_more = false
   
   -- =================================================
   -- 1. 提取参考文献 (Bibliography)
@@ -72,6 +75,37 @@ function Pandoc(doc)
       })
     end
   })
+
+  -- 我们在遍历 blocks 处理 refs 的同时，顺便处理摘要
+  -- 为了代码清晰，这里写成单独的逻辑，你整合时可以合并循环
+  
+  for _, block in ipairs(doc.blocks) do
+    -- 1. 检查是否是 <!--more-->
+    -- Pandoc 把 HTML 注释解析为 RawBlock('html', '<!--more-->')
+    if block.t == "RawBlock" and block.format == "html" and block.text:match("<!%-%-more%-%->") then
+      found_more = true
+      -- 不把 <!--more--> 加入正文，直接跳过
+    else
+      -- 2. 如果还没遇到 more，且不是参考文献，则加入摘要
+      if not found_more and block.t ~= "Div" then -- 简单过滤一下，这里可以更精细
+         table.insert(summary_blocks, block)
+      end
+      
+      -- 3. 正常的正文处理逻辑 (refs 提取等)
+      -- 这里是你之前的逻辑，决定是否加入 body_blocks
+      -- (略: 你的 refs 提取逻辑)
+    end
+  end
+
+  -- 生成摘要 HTML 并注入 Metadata
+  if #summary_blocks > 0 then
+    -- 如果原本 Metadata 里没有 description，就用我们提取的 summary 填充
+    if not meta['description'] then
+      meta['description'] = pandoc.RawInline('html', render_html(summary_blocks))
+    end
+    -- 或者专门存一个 summary 变量
+    meta['summary'] = pandoc.RawInline('html', render_html(summary_blocks))
+  end
 
   -- =================================================
   -- 3. 生成 HTML 并注入 Metadata
