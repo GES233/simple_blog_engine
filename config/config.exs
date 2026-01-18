@@ -31,6 +31,15 @@ config :pandox,
   crossref_yaml: "apps/pandox/priv/pandoc_cressref.yaml",
   csl:
     "apps/pandox/priv/csl/*.csl"
+    |> Path.absname()
+    |> Path.wildcard()
+    |> Enum.map(fn p ->
+      {p |> Path.basename() |> String.split(".") |> Enum.at(0), p}
+    end)
+    |> Enum.into(%{}),
+  lua_filters:
+    "apps/pandox/priv/lua_filters/*.lua"
+    |> Path.absname()
     |> Path.wildcard()
     |> Enum.map(fn p ->
       {p |> Path.basename() |> String.split(".") |> Enum.at(0), p}

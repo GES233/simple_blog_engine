@@ -72,6 +72,13 @@ defmodule Pandox do
         ""
       end
 
+    lua_root_path = Application.get_env(:pandox, :lua_filters)["structure"]
+    lua_filter = if lua_root_path do
+        ["--lua-filter=\"" <> lua_root_path <> "\""]
+      else
+        []
+      end
+
     # 可以作为一个选项
     maybe_toc_flag =
       case Application.get_env(:pandox, :toc_template) do
@@ -90,7 +97,7 @@ defmodule Pandox do
     # https://stackoverflow.com/questions/62774695/pandoc-where-are-css-files-for-syntax-highlighting-code
     # pandoc --print-default-template=html5
 
-    @pandoc_flags ++ @pandoc_crossref_flags ++ maybe_toc_flag ++ [yaml, csl, input, "-o", output]
+    @pandoc_flags ++ @pandoc_crossref_flags ++ lua_filter ++ maybe_toc_flag ++ [yaml, csl, input, "-o", output]
   end
 
   defp build_front_matter(metadata) do

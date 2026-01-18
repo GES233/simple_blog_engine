@@ -1,5 +1,36 @@
-$if(toc)$
-$toc$
+<!-- templates/layout.html -->
+  <!-- 目录 (由 Pandoc 原生 --toc 生成) -->
+  $if(toc)$
+  <nav id="toc" class="mb-12 p-6 bg-base-200 rounded-box">
+    <h2 class="text-lg font-bold mb-4">目录</h2>
+    $toc$
+  </nav>
+  $endif$
+
 TABLEOFCONTENTS
+
+<article class="prose mx-auto">
+  $body$
+</article>
+
+<!-- 脚注区域 -->
+$if(notes_content)$
+<section class="mt-16 pt-8 border-t border-base-300">
+  <h3 class="text-lg font-bold mb-4">注释</h3>
+  <!-- 使用 details 包裹（如果你想折叠）或者直接显示 -->
+  <div class="footnotes-area text-sm text-muted-foreground">
+    $notes_content$
+  </div>
+</section>
 $endif$
-$body$
+
+<!-- 参考文献区域 -->
+$if(bib_content)$
+<section class="mt-12 pt-8 border-t border-base-300">
+  <h3 class="text-lg font-bold mb-4">参考文献</h3>
+  <!-- 这里的样式对应 app.css 里的定义 -->
+  <div class="bibliography-area text-sm">
+    $bib_content$
+  </div>
+</section>
+$endif$
