@@ -30,7 +30,9 @@ defmodule GES233.Blog.Renderer do
   # TODO: 改成像 Post / Page 内的 extra 添加对应的变量
   defp link_replace_inject(post_or_page, content, posts_and_mata) do
     case GES233.Blog.Link.inner_replace(content, posts_and_mata) do
-      {nil, content} -> {post_or_page, content}
+      {nil, content} ->
+        {post_or_page, content}
+
       {:replaced, content} ->
         # TODO: 添加注入流程
         # 1. 找到 extra
@@ -47,19 +49,21 @@ defmodule GES233.Blog.Renderer do
         :error -> %{}
       end
 
-    inner_html
-    |> Phoenix.HTML.raw()
-    |> Phoenix.HTML.safe_to_string()
-    |> then(
-      &EEx.eval_file("apps/ges233/templates/article.html.heex",
-        assigns: [
-          post: post,
-          meta: Static.inject_to_assigns(assigns),
-          inner_content: &1,
-          post_title: Renderer.Title.in_article(post.title)
-        ],
-        engine: Phoenix.HTML.Engine
-      )
+    IO.inspect(post)
+
+    inner_html =
+      inner_html
+      |> Phoenix.HTML.raw()
+      |> Phoenix.HTML.safe_to_string()
+
+    EEx.eval_file("apps/ges233/templates/article.html.heex",
+      assigns: [
+        post: post,
+        meta: Static.inject_to_assigns(assigns),
+        inner_content: inner_html,
+        post_title: Renderer.Title.in_article(post.title)
+      ],
+      engine: Phoenix.HTML.Engine
     )
   end
 

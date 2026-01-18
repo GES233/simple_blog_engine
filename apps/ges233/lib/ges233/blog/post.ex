@@ -34,6 +34,7 @@ defmodule GES233.Blog.Post do
           content: String.t(),
           body: String.t(),
           toc: String.t() | nil,
+          doc: Pandox.Doc.t(),
           progress: any(),
           extra: %{}
         }
@@ -48,6 +49,7 @@ defmodule GES233.Blog.Post do
     :content,
     :body,
     toc: nil,
+    doc: nil,
     progress: :final,
     extra: %{}
   ]
@@ -118,7 +120,7 @@ defmodule GES233.Blog.Post do
   end
 
   @spec add_html(GES233.Blog.Post.t(), Context.meta_registry()) :: GES233.Blog.Post.t()
-  def add_html(post, meta) do
+  def add_html(%__MODULE__{} = post, meta) do
     doc_struct = GES233.Blog.Renderer.convert_markdown(post, meta: meta)
 
     html_body =
@@ -130,7 +132,7 @@ defmodule GES233.Blog.Post do
         doc_struct.body
       end
 
-    %{post | body: html_body, toc: doc_struct.toc}
+    %{post | body: html_body, doc: doc_struct, toc: doc_struct.toc}
   end
 
   defp overwrite_create_date(meta, content_meta) do

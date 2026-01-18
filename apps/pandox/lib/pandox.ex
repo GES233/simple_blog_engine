@@ -128,6 +128,14 @@ defmodule Pandox do
   ## == Postlude ==
 
   defmodule Doc do
+    @type t :: %__MODULE__{
+      body: binary(),
+      toc: binary() | nil,
+      summary: binary() | nil,
+      bibliography: binary() | nil,
+      footnotes: binary() | nil,
+      meta: term()
+    }
     defstruct [:body, :toc, :summary, :bibliography, :footnotes, :meta]
   end
 
