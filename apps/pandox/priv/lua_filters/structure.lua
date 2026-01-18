@@ -149,7 +149,7 @@ function Pandoc(doc)
       -- 简单的取巧办法：用 pandoc.write 转成 plain text
       local plain_summary = pandoc.write(pandoc.Pandoc(summary_blocks), 'plain')
       -- 限制长度，防止 SEO 爆炸
-      meta['description'] = utf8.sub(plain_summary, 1, 120) .. "..."
+      meta['description'] = utf8.sub(plain_summary, 1, 120)
     end
   else
     meta['summary'] = nil

@@ -27,7 +27,7 @@ config :ges233, :Git,
 config :pandox,
   execute_path: "pandoc",
   render_args: [],
-  toc_template: "apps/pandox/priv/template/structural.html",
+  template: "apps/pandox/priv/template/structural.html",
   crossref_yaml: "apps/pandox/priv/pandoc_cressref.yaml",
   csl:
     "apps/pandox/priv/csl/*.csl"

@@ -37,7 +37,7 @@ defmodule GES233.Blog.Page do
         content:
           raw
           |> get_page_content()
-          |> maybe_archive_large_content(role)
+          # |> maybe_archive_large_content(role)
       })
       |> then(&struct!(__MODULE__, &1))
     else
@@ -157,16 +157,16 @@ defmodule GES233.Blog.Page do
     |> hd()
   end
 
-  @doc """
-  将可能过大的内容本体放入 `GES233.Blog.ContentRepo` 。
-  """
-  def maybe_archive_large_content(content, id) do
-    if GES233.Blog.ContentRepo.enough_large?(content) do
-      GES233.Blog.ContentRepo.cache_raw(content, id)
+  # @doc """
+  # 将可能过大的内容本体放入 `GES233.Blog.ContentRepo` 。
+  # """
+  # def maybe_archive_large_content(content, id) do
+  #   if GES233.Blog.ContentRepo.enough_large?(content) do
+  #     GES233.Blog.ContentRepo.cache_raw(content, id)
 
-      {:ref, id}
-    else
-      content
-    end
-  end
+  #     {:ref, id}
+  #   else
+  #     content
+  #   end
+  # end
 end

@@ -1,6 +1,6 @@
 defmodule GES233.Blog.Writer do
   alias GES233.Blog.Writer.SinglePage, as: WriterSingle
-  alias GES233.Blog.{Post, Page, Renderer, Media, Context, ContentRepo}
+  alias GES233.Blog.{Post, Page, Renderer, Media, Context}
 
   @page_pagination Application.compile_env(:ges233, [:Blog, :page_pagination])
 
@@ -38,7 +38,7 @@ defmodule GES233.Blog.Writer do
         "index.html"
       ]
       |> Path.join()
-      |> WriterSingle.write_single_page(Renderer.add_pages_layout(get_body_from_page(page), page))
+      |> WriterSingle.write_single_page(Renderer.add_pages_layout(page.body, page))
     end)
     |> Stream.run()
 
@@ -65,18 +65,6 @@ defmodule GES233.Blog.Writer do
     |> Stream.run()
 
     meta_registry
-  end
-
-  defp get_body_from_page(page) do
-    {status, html} = ContentRepo.get_html(page.role)
-
-    case status do
-      :ok ->
-        html
-
-      :error ->
-        page.body
-    end
   end
 end
 

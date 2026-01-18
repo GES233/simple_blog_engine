@@ -8,9 +8,9 @@ defmodule Mix.Tasks.G.Gen do
     |> File.exists?()
     |> unless(do: File.mkdir!(Application.get_env(:ges233, :saved_path)))
 
-    opts = [strategy: :one_for_one, name: GES233.Supervisor]
+    # opts = [strategy: :one_for_one, name: GES233.Supervisor]
 
-    {:ok, _supervisor_id} = Supervisor.start_link([{GES233.Blog.ContentRepo, []}], opts)
+    # {:ok, _supervisor_id} = Supervisor.start_link([{GES233.Blog.ContentRepo, []}], opts)
 
     # 执行最开始的一次构建任务
     Logger.info("Performing initial site build...")

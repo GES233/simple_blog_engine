@@ -97,7 +97,7 @@ defmodule GES233.Blog.Post do
         content:
           content
           |> Page.get_page_content()
-          |> Page.maybe_archive_large_content(file_meta[:id])
+          # |> Page.maybe_archive_large_content(file_meta[:id])
       })
       ## 构建 %Post{}
       |> then(&struct!(__MODULE__, &1))

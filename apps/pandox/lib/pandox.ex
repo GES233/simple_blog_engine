@@ -79,25 +79,14 @@ defmodule Pandox do
         []
       end
 
-    # 可以作为一个选项
-    maybe_toc_flag =
-      case Application.get_env(:pandox, :toc_template) do
-        nil ->
-          []
-
-        template_with_toc ->
-          ~w(
+    parse_flag =
+      ~w(
           --toc
           --template
-          #{template_with_toc}
+          #{Application.fetch_env!(:pandox, :template)}
         )
-      end
 
-    # 获得模板
-    # https://stackoverflow.com/questions/62774695/pandoc-where-are-css-files-for-syntax-highlighting-code
-    # pandoc --print-default-template=html5
-
-    @pandoc_flags ++ @pandoc_crossref_flags ++ lua_filter ++ maybe_toc_flag ++ [yaml, csl, input, "-o", output]
+    @pandoc_flags ++ @pandoc_crossref_flags ++ lua_filter ++ parse_flag ++ [yaml, csl, input, "-o", output]
   end
 
   defp build_front_matter(metadata) do
