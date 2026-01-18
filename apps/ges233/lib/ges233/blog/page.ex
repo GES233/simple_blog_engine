@@ -37,7 +37,7 @@ defmodule GES233.Blog.Page do
         content:
           raw
           |> get_page_content()
-          |> maybe_archive_large_content(role)
+          # |> maybe_archive_large_content(role)
       })
       |> then(&struct!(__MODULE__, &1))
     else
@@ -47,55 +47,40 @@ defmodule GES233.Blog.Page do
   end
 
   def add_html(%__MODULE__{role: :friends} = page, meta) do
-    # Injects friends list with style.
-    # Clear friends in meta.
-
-    inner_body =
-      page
-      |> Map.merge(%{
-        content:
-          page.content
-          |> EEx.eval_string(
-            assigns: [
-              friends: page.extra[:friends],
-              self: %GES233.Blog.Page.Friend{
-                name: "自留地 - GES233's Blog",
-                site: "https://ges233.github.io",
-                desp: "得以存在便是一个奇迹，能够思考就是一件乐事。",
-                avatar: "https://avatars.githubusercontent.com/u/30802664?v=4"
-              }
-            ]
-          )
-      })
-      |> GES233.Blog.Renderer.convert_markdown(meta: meta)
-
-    do_postlude(page, inner_body)
+    page
+    |> Map.merge(%{
+      content:
+        page.content
+        |> EEx.eval_string(
+          assigns: [
+            friends: page.extra[:friends],
+            self: %GES233.Blog.Page.Friend{
+              name: "自留地 - GES233's Blog",
+              site: "https://ges233.github.io",
+              desp: "得以存在便是一个奇迹，能够思考就是一件乐事。",
+              avatar: "https://avatars.githubusercontent.com/u/30802664?v=4"
+            }
+          ]
+        )
+    })
+    |> GES233.Blog.Renderer.convert_markdown(meta: meta)
+    |> then(&do_postlude(page, &1))
   end
 
   def add_html(page, meta) do
-    inner_body = GES233.Blog.Renderer.convert_markdown(page, meta: meta)
-
-    do_postlude(page, inner_body)
+    GES233.Blog.Renderer.convert_markdown(page, meta: meta)
+    |> then(&do_postlude(page, &1))
   end
 
-  def do_postlude(page_or_post, inner_body) do
-    [toc, inner_body] =
-      if String.contains?(inner_body, "TABLEOFCONTENTS") do
-        String.split(inner_body, "TABLEOFCONTENTS", parts: 2)
-      else
-        [nil, inner_body]
-      end
+  def do_postlude(page_or_post, doc_struct) do
+    # TODO: Add body
+    body = """
+    #{doc_struct.body}
+    #{if(!is_nil(doc_struct.footnotes), do: doc_struct.footnotes, else: "")}
+    #{if(!is_nil(doc_struct.bibliography), do: doc_struct.bibliography, else: "")}
+    """
 
-    inner_body =
-      if GES233.Blog.ContentRepo.enough_large?(inner_body) do
-        GES233.Blog.ContentRepo.cache_html(inner_body, page_or_post.role)
-
-        {:ref, page_or_post.role}
-      else
-        inner_body
-      end
-
-    %{page_or_post | body: inner_body, toc: toc}
+    %{page_or_post | body: body, toc: doc_struct.toc}
   end
 
   defp parse_page_file(role)
@@ -172,16 +157,16 @@ defmodule GES233.Blog.Page do
     |> hd()
   end
 
-  @doc """
-  将可能过大的内容本体放入 `GES233.Blog.ContentRepo` 。
-  """
-  def maybe_archive_large_content(content, id) do
-    if GES233.Blog.ContentRepo.enough_large?(content) do
-      GES233.Blog.ContentRepo.cache_raw(content, id)
+  # @doc """
+  # 将可能过大的内容本体放入 `GES233.Blog.ContentRepo` 。
+  # """
+  # def maybe_archive_large_content(content, id) do
+  #   if GES233.Blog.ContentRepo.enough_large?(content) do
+  #     GES233.Blog.ContentRepo.cache_raw(content, id)
 
-      {:ref, id}
-    else
-      content
-    end
-  end
+  #     {:ref, id}
+  #   else
+  #     content
+  #   end
+  # end
 end

@@ -10,14 +10,11 @@ defmodule GES233.Blog.Renderer do
     {post, body} = link_replace(post, all_posts_and_media)
 
     {post, %{}}
-    # |> then(&callback_pre_pandoc)
     |> Bibliography.maybe_validate_bibliography_exist()
     |> Bibliography.ensure_bib_format()
     |> Bibliography.add_title_to_meta()
     |> Bibliography.postlude()
     |> then(&Pandox.render_markdown_to_html(body, &1))
-
-    # |> then(&callback_after_pandoc)
   end
 
   defp link_replace(%{content: {:ref, id}} = post_or_page, posts_and_mata) do
@@ -33,7 +30,9 @@ defmodule GES233.Blog.Renderer do
   # TODO: 改成像 Post / Page 内的 extra 添加对应的变量
   defp link_replace_inject(post_or_page, content, posts_and_mata) do
     case GES233.Blog.Link.inner_replace(content, posts_and_mata) do
-      {nil, content} -> {post_or_page, content}
+      {nil, content} ->
+        {post_or_page, content}
+
       {:replaced, content} ->
         # TODO: 添加注入流程
         # 1. 找到 extra
@@ -50,19 +49,19 @@ defmodule GES233.Blog.Renderer do
         :error -> %{}
       end
 
-    inner_html
-    |> Phoenix.HTML.raw()
-    |> Phoenix.HTML.safe_to_string()
-    |> then(
-      &EEx.eval_file("apps/ges233/templates/article.html.heex",
-        assigns: [
-          post: post,
-          meta: Static.inject_to_assigns(assigns),
-          inner_content: &1,
-          post_title: Renderer.Title.in_article(post.title)
-        ],
-        engine: Phoenix.HTML.Engine
-      )
+    inner_html =
+      inner_html
+      |> Phoenix.HTML.raw()
+      |> Phoenix.HTML.safe_to_string()
+
+    EEx.eval_file("apps/ges233/templates/article.html.heex",
+      assigns: [
+        post: post,
+        meta: Static.inject_to_assigns(assigns),
+        inner_content: inner_html,
+        post_title: Renderer.Title.in_article(post.title)
+      ],
+      engine: Phoenix.HTML.Engine
     )
   end
 

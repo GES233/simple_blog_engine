@@ -56,7 +56,7 @@ defmodule GES233.Blog.Renderer.PostComponents do
       <div class="card-body">
         <a href="#{Post.post_id_to_route(post)}"><h3 class="card-title text-lg">#{post.title}</h3></a>
         <div class="prose">
-          #{post.body}
+          #{post.doc.summary}
         </div>
         <div class="card-actions justify-end">
           <div class="badge badge-accent">

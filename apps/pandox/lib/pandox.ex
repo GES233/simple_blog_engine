@@ -72,25 +72,21 @@ defmodule Pandox do
         ""
       end
 
-    # 可以作为一个选项
-    maybe_toc_flag =
-      case Application.get_env(:pandox, :toc_template) do
-        nil ->
-          []
-
-        template_with_toc ->
-          ~w(
-          --toc
-          --template
-          #{template_with_toc}
-        )
+    lua_root_path = Application.get_env(:pandox, :lua_filters)["structure"]
+    lua_filter = if lua_root_path do
+        ["--lua-filter=\"" <> lua_root_path <> "\""]
+      else
+        []
       end
 
-    # 获得模板
-    # https://stackoverflow.com/questions/62774695/pandoc-where-are-css-files-for-syntax-highlighting-code
-    # pandoc --print-default-template=html5
+    parse_flag =
+      ~w(
+          --toc
+          --template
+          #{Application.fetch_env!(:pandox, :template)}
+        )
 
-    @pandoc_flags ++ @pandoc_crossref_flags ++ maybe_toc_flag ++ [yaml, csl, input, "-o", output]
+    @pandoc_flags ++ @pandoc_crossref_flags ++ lua_filter ++ parse_flag ++ [yaml, csl, input, "-o", output]
   end
 
   defp build_front_matter(metadata) do
@@ -111,10 +107,46 @@ defmodule Pandox do
   end
 
   defp handle_result({_, 0}, output_file) do
-    File.read!(output_file)
+    File.read!(output_file) |> parse_pandoc_output()
   end
 
   defp handle_result({code, msg}, _) do
     raise "Pandoc failed with code #{code}: #{msg}"
+  end
+
+  ## == Postlude ==
+
+  defmodule Doc do
+    @type t :: %__MODULE__{
+      body: binary(),
+      toc: binary() | nil,
+      summary: binary() | nil,
+      bibliography: binary() | nil,
+      footnotes: binary() | nil,
+      meta: term()
+    }
+    defstruct [:body, :toc, :summary, :bibliography, :footnotes, :meta]
+  end
+
+  defp parse_pandoc_output(raw_output) do
+    # 使用正则或字符串分割提取各个部分
+    # 这里写一个通用的提取器
+    extract = fn section_name ->
+      regex = ~r/<!--SECTION_START:#{section_name}-->(.*?)<!--SECTION_END:#{section_name}-->/s
+      case Regex.run(regex, raw_output) do
+        [_, content] -> String.trim(content)
+        nil -> nil
+      end
+    end
+
+    %Doc{
+      body: extract.("BODY"),
+      toc: extract.("TOC"),
+      summary: extract.("SUMMARY"),
+      bibliography: extract.("BIB"),
+      footnotes: extract.("NOTES"),
+      # 如果你需要回传元数据，甚至可以让 Pandoc 输出 JSON
+      meta: extract.("META") # 或者从 Pandoc 输出中解析
+    }
   end
 end

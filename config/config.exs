@@ -27,10 +27,19 @@ config :ges233, :Git,
 config :pandox,
   execute_path: "pandoc",
   render_args: [],
-  toc_template: "apps/pandox/priv/template/with_toc.html",
+  template: "apps/pandox/priv/template/structural.html",
   crossref_yaml: "apps/pandox/priv/pandoc_cressref.yaml",
   csl:
     "apps/pandox/priv/csl/*.csl"
+    |> Path.absname()
+    |> Path.wildcard()
+    |> Enum.map(fn p ->
+      {p |> Path.basename() |> String.split(".") |> Enum.at(0), p}
+    end)
+    |> Enum.into(%{}),
+  lua_filters:
+    "apps/pandox/priv/lua_filters/*.lua"
+    |> Path.absname()
     |> Path.wildcard()
     |> Enum.map(fn p ->
       {p |> Path.basename() |> String.split(".") |> Enum.at(0), p}

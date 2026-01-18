@@ -180,9 +180,35 @@
     line-height: 1.75;
   }
 
-  div .csl-bib-body {
+  /* 脚注列表样式 */
+  .footnotes {
+    ol {
+      list-style-position: outside;
+      padding-left: 1.5em;
+    }
+    li {
+      @apply mb-2;
+      /* 锚点定位偏移（防止被 Header 遮挡） */
+      scroll-margin-top: 4rem;
+    }
+  }
+
+  /* 返回箭头样式 */
+  .footnote-back {
+    @apply no-underline text-primary ml-1 opacity-70 hover:opacity-100;
+  }
+
+  /* 参考文献样式 */
+  .csl-bib-body {
+    @apply space-y-2;
     font-family:
       Alegreya, Merriweather, Palatino, Garamond, Baskerville,
       "Libre Baskerville", Georgia, "Noto Serif CJK SC", serif;
   }
+
+  /* 悬挂缩进 */
+  /* .csl-entry {
+    padding-left: 1.5em;
+    text-indent: -1.5em;
+  } */
 }

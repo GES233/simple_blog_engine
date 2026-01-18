@@ -34,6 +34,7 @@ defmodule GES233.Blog.Post do
           content: String.t(),
           body: String.t(),
           toc: String.t() | nil,
+          doc: Pandox.Doc.t(),
           progress: any(),
           extra: %{}
         }
@@ -48,6 +49,7 @@ defmodule GES233.Blog.Post do
     :content,
     :body,
     toc: nil,
+    doc: nil,
     progress: :final,
     extra: %{}
   ]
@@ -95,7 +97,7 @@ defmodule GES233.Blog.Post do
         content:
           content
           |> Page.get_page_content()
-          |> Page.maybe_archive_large_content(file_meta[:id])
+          # |> Page.maybe_archive_large_content(file_meta[:id])
       })
       ## 构建 %Post{}
       |> then(&struct!(__MODULE__, &1))
@@ -118,26 +120,10 @@ defmodule GES233.Blog.Post do
   end
 
   @spec add_html(GES233.Blog.Post.t(), Context.meta_registry()) :: GES233.Blog.Post.t()
-  def add_html(post, meta) do
-    html_body = GES233.Blog.Renderer.convert_markdown(post, meta: meta)
+  def add_html(%__MODULE__{} = post, meta) do
+    doc_struct = GES233.Blog.Renderer.convert_markdown(post, meta: meta)
 
-    [toc, html_body] =
-      if String.contains?(html_body, "TABLEOFCONTENTS") do
-        String.split(html_body, "TABLEOFCONTENTS", parts: 2)
-      else
-        [nil, html_body]
-      end
-
-    html_body =
-      if GES233.Blog.ContentRepo.enough_large?(html_body) do
-        GES233.Blog.ContentRepo.cache_html(html_body, post.id)
-
-        {:ref, post.id}
-      else
-        html_body
-      end
-
-    %{post | body: html_body, toc: toc}
+    %{post |  doc: doc_struct, toc: doc_struct.toc}
   end
 
   defp overwrite_create_date(meta, content_meta) do
